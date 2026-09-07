@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Soft 3D surface gradient -->
+    <gradient
+        android:angle="270"
+        android:startColor="#FFFFFF"
+        android:centerColor="#F8F5EE"
+        android:endColor="#E8E2D8" />
+
+    <!-- Subtle border -->
+    <stroke
+        android:width="1dp"
+        android:color="#D6CEC2" />
+
+    <!-- Rounded corners -->
+    <corners
+        android:radius="28dp" />
+
+</shape>

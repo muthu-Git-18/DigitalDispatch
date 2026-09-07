@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="230dp"
+    android:viewportWidth="360"
+    android:viewportHeight="230">
+
+    <!-- Dark Charcoal / Navy Header -->
+    <path
+        android:fillColor="#2E353A"
+        android:pathData="
+            M0,0
+            L360,0
+            L360,75
+            C340,100 310,105 275,103
+            C225,100 190,105 145,120
+            C100,138 70,150 40,145
+            C18,142 5,128 0,110
+            Z" />
+
+    <!-- Metallic Gold Curve -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#DCB765"
+        android:strokeWidth="2.5"
+        android:pathData="
+            M0,110
+            C5,128 18,142 40,145
+            C70,150 100,138 145,120
+            C190,105 225,100 275,103
+            C310,105 340,100 360,75" />
+
+</vector>

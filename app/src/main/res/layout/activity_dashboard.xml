@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#D9D8D5">
+
+
+    <!-- =========================
+         CURVED BLUE HEADER
+         ========================= -->
+
+    <ImageView
+        android:id="@+id/imgHeader"
+        android:layout_width="0dp"
+        android:layout_height="180dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/dashboard_header_wave1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <!-- =========================
+         ROUND GPIL LOGO
+         ========================= -->
+
+
+    <!-- =========================
+         DASHBOARD TITLE
+         ========================= -->
+
+
+    <!-- ==================================================
+         DASHBOARD CARDS
+         ================================================== -->
+
+    <!-- CARD 1 : KEG REGISTRATION -->
+
+    <!-- DASHBOARD BACKGROUND IMAGE -->
+
+    <FrameLayout
+        android:id="@+id/logoContainer"
+        android:layout_width="82dp"
+        android:layout_height="82dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/dashboard_logo_circle"
+        android:elevation="12dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/imgHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imgHeader"
+        app:layout_constraintVertical_bias="0.163">
+
+        <ImageView
+            android:id="@+id/imgDashboardLogo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logooo" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvDashboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="100dp"
+        android:fontFamily="serif"
+
+        android:text="Dashboard"
+        android:textColor="#FFF8E8"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.04"
+
+        android:shadowColor="#A65A3517"
+        android:shadowDx="2"
+        android:shadowDy="3"
+        android:shadowRadius="2"
+
+        app:layout_constraintBottom_toBottomOf="@id/imgHeader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imgHeader"
+        app:layout_constraintVertical_bias="0.169" />
+    <ImageView
+        android:id="@+id/imgDashboardBackground"
+        android:layout_width="280dp"
+        android:layout_height="500dp"
+        android:alpha="0.13"
+        android:contentDescription="Dashboard Background"
+        android:scaleType="fitXY"
+        android:src="@drawable/dashbg3"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/cardDispatch"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/dashboard_card_background"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/imgHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cardReceipt"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintWidth_percent="0.27">
+
+        <FrameLayout
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/dispatc"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="Dispatch" />
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:gravity="center"
+            android:text="Dispatch"
+            android:shadowColor="#FFFFFF"
+            android:textColor="#4A321F"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+    <!-- CARD 2 : RECEIPT -->
+
+    <LinearLayout
+        android:id="@+id/cardReceipt"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/dashboard_card_background"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp"
+        app:layout_constraintTop_toBottomOf="@id/imgHeader"
+        app:layout_constraintStart_toEndOf="@id/cardDispatch"
+        app:layout_constraintEnd_toStartOf="@id/cardPswdispatch"
+        app:layout_constraintWidth_percent="0.27">
+
+        <!-- Fixed image area -->
+
+        <FrameLayout
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="5dp"
+                android:src="@drawable/receip"
+                android:contentDescription="Receipt" />
+
+        </FrameLayout>
+
+        <!-- Text below fixed image area -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:text="Receipt"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:shadowColor="#FFFFFF"
+            android:textColor="#4A321F"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="1" />
+
+    </LinearLayout>
+
+    <!-- CARD 3 : PSW DISPATCH -->
+
+    <LinearLayout
+        android:id="@+id/cardPswdispatch"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="26dp"
+        android:background="@drawable/dashboard_card_background"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp"
+        app:layout_constraintTop_toBottomOf="@id/imgHeader"
+        app:layout_constraintStart_toEndOf="@id/cardReceipt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.27">
+
+        <!-- Fixed image area -->
+
+        <FrameLayout
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="5dp"
+                android:src="@drawable/pswdispatc"
+                android:contentDescription="PSW Dispatch" />
+
+        </FrameLayout>
+
+        <!-- Text below image -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:text="PSW Dispatch"
+            android:shadowColor="#FFFFFF"
+            android:textColor="#4A321F"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- CARD 4 : RETURN TO FACTORY -->
+
+    <LinearLayout
+        android:id="@+id/cardPswreceipt"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/dashboard_card_background"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp"
+        app:layout_constraintTop_toBottomOf="@id/cardDispatch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cardGtdispatch"
+        app:layout_constraintWidth_percent="0.27">
+
+        <!-- Fixed image area -->
+
+        <FrameLayout
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="5dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pswreceip"
+                android:contentDescription="PSW Receipt" />
+
+        </FrameLayout>
+
+        <!-- Text below image -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:text="PSW Receipt"
+            android:shadowColor="#FFFFFF"
+            android:textColor="#4A321F"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- CARD 5 : KEG SEARCH -->
+
+    <LinearLayout
+        android:id="@+id/cardGtdispatch"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/dashboard_card_background"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp"
+        app:layout_constraintTop_toBottomOf="@id/cardReceipt"
+        app:layout_constraintStart_toEndOf="@id/cardPswreceipt"
+        app:layout_constraintEnd_toStartOf="@id/cardPswdispatch"
+        app:layout_constraintWidth_percent="0.27">
+
+        <!-- Fixed image slot -->
+        <FrameLayout
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center"
+                android:contentDescription="GTD Dispatch"
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="5dp"
+                android:src="@drawable/gtdispatc" />
+
+        </FrameLayout>
+
+        <!-- Text below image -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:text="GTD Dispatch"
+            android:shadowColor="#FFFFFF"
+            android:textColor="#4A321F"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+    <!-- Floating Sync Button -->
+    <FrameLayout
+        android:id="@+id/syncButtonContainer"
+        android:layout_width="62dp"
+        android:layout_height="62dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/sync_button_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/btnSync"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Sync"
+            android:scaleType="fitCenter"
+            android:src="@drawable/sync"
+            />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

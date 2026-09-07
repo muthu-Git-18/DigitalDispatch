@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Premium dark grey surface -->
+    <gradient
+        android:angle="270"
+        android:startColor="#42484C"
+        android:centerColor="#343A3E"
+        android:endColor="#242A2E" />
+
+    <!-- Gold premium border -->
+    <stroke
+        android:width="2dp"
+        android:color="#D4B06A" />
+
+    <!-- Perfect circle -->
+    <corners
+        android:radius="100dp" />
+
+</shape>

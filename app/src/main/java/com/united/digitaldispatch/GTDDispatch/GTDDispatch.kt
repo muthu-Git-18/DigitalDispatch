@@ -1,11 +1,12 @@
-package com.united.digitaldispatch
+package com.united.digitaldispatch.GTDDispatch
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.united.digitaldispatch.R
 
-class MainActivity : AppCompatActivity() {
+class GtdDispatch : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_gtddispatch)
     }
 }

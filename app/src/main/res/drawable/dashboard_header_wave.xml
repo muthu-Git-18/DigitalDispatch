@@ -1,0 +1,35 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="230dp"
+    android:viewportWidth="360"
+    android:viewportHeight="230">
+
+    <!-- Blue Header -->
+
+    <path
+        android:fillColor="#11294F"
+        android:pathData="
+        M0,0
+        L360,0
+        L360,75
+        C340,100 310,105 275,103
+        C225,100 190,105 145,120
+        C100,138 70,150 40,145
+        C18,142 5,128 0,110
+        Z" />
+
+
+    <!-- Gold Curve Border -->
+
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#D4B06A"
+        android:strokeWidth="2"
+        android:pathData="
+        M0,110
+        C5,128 18,142 40,145
+        C70,150 100,138 145,120
+        C190,105 225,100 275,103
+        C310,105 340,100 360,75" />
+
+</vector>

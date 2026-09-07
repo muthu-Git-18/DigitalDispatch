@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Charcoal 3D gradient -->
+    <gradient
+        android:angle="270"
+        android:startColor="#4A5358"
+        android:centerColor="#30383D"
+        android:endColor="#1F2529" />
+
+    <!-- Antique gold border -->
+    <stroke
+        android:width="0dp"
+        android:color="#D4B06A" />
+
+    <!-- Rounded / curved bottom -->
+    <corners
+        android:topLeftRadius="28dp"
+        android:topRightRadius="28dp"
+        android:bottomLeftRadius="45dp"
+        android:bottomRightRadius="45dp" />
+
+</shape>

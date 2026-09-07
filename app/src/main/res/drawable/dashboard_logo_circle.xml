@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Brown outer ring -->
+
+    <item>
+
+        <shape android:shape="oval">
+
+            <solid android:color="#6A4525" />
+
+        </shape>
+
+    </item>
+
+
+    <!-- Gold ring -->
+
+    <item
+        android:left="3dp"
+        android:top="3dp"
+        android:right="3dp"
+        android:bottom="3dp">
+
+        <shape android:shape="oval">
+
+            <solid android:color="#D1AD6A" />
+
+        </shape>
+
+    </item>
+
+
+    <!-- Cream inner surface -->
+
+    <item
+        android:left="7dp"
+        android:top="7dp"
+        android:right="7dp"
+        android:bottom="7dp">
+
+        <shape android:shape="oval">
+
+            <gradient
+                android:angle="270"
+                android:startColor="#FFFFFF"
+                android:endColor="#E6DDCE" />
+
+        </shape>
+
+    </item>
+
+</layer-list>
