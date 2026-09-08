@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="#D9D8D5">
+    android:background="@color/main_bg">
 
 
     <!-- =========================
@@ -142,7 +142,7 @@
             android:gravity="center"
             android:text="Dispatch"
             android:shadowColor="#FFFFFF"
-            android:textColor="#4A321F"
+            android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -195,7 +195,7 @@
             android:textSize="11sp"
             android:textStyle="bold"
             android:shadowColor="#FFFFFF"
-            android:textColor="#4A321F"
+            android:textColor="@color/brown_font"
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="1" />
@@ -248,7 +248,7 @@
             android:gravity="center"
             android:text="PSW Dispatch"
             android:shadowColor="#FFFFFF"
-            android:textColor="#4A321F"
+            android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -300,7 +300,7 @@
             android:gravity="center"
             android:text="PSW Receipt"
             android:shadowColor="#FFFFFF"
-            android:textColor="#4A321F"
+            android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -350,7 +350,7 @@
             android:gravity="center"
             android:text="GTD Dispatch"
             android:shadowColor="#FFFFFF"
-            android:textColor="#4A321F"
+            android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
 

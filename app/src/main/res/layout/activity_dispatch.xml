@@ -95,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
                 android:text="Dispatch"
-                android:textColor="#FFF8E8"
+                android:textColor="@color/head_white"
                 android:textSize="21sp"
                 android:textStyle="bold"
                 android:shadowColor="#80000000"

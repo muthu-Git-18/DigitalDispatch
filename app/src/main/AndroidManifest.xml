@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
         <activity
-            android:name=".Dispatch.DispatchHeaderCreationScreen"
+            android:name=".Dispatch.CreateHeaderDispatch"
             android:exported="false" />
         <!-- Splash Screen -->
         <activity
@@ -31,7 +31,7 @@
             android:name=".Login.Dashboard"
             android:exported="false" /> <!-- Dispatch -->
         <activity
-            android:name=".Dispatch.DispatchHeaderSelectionScreen"
+            android:name=".Dispatch.Dispatch"
             android:exported="false" /> <!-- GTD Dispatch -->
         <activity
             android:name=".GTDDispatch.GtdDispatch"
@@ -43,7 +43,7 @@
             android:name=".PSWReceipt.PswReceipt"
             android:exported="false" /> <!-- Receipt -->
         <activity
-            android:name=".Receipt.ReceiptHeaderSelection"
+            android:name=".Receipt.Receipt"
             android:exported="false" /> <!-- Main Activity -->
         <activity
             android:name=".MainActivity"

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Light grey premium surface -->
+    <gradient
+        android:angle="270"
+        android:startColor="#F4F3F0"
+        android:centerColor="#E5E3DF"
+        android:endColor="#D2D0CC" />
+
+    <!-- Gold border -->
+    <stroke
+        android:width="2dp"
+        android:color="#B88A3B" />
+
+    <!-- Small inner padding -->
+    <padding
+        android:left="6dp"
+        android:top="6dp"
+        android:right="6dp"
+        android:bottom="6dp" />
+
+</shape>
