@@ -93,7 +93,7 @@
                 android:id="@+id/txt_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Receipt"
+                android:text="Dispatch"
                 android:textColor="#FFF8E8"
                 android:textSize="19sp"
                 android:textStyle="bold" />
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
-                android:text="(Ref ID Selection)"
+                android:text="(Header Info)"
                 android:textColor="#DCB765"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -444,41 +444,6 @@
                 <TextView
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:text="Transport Name"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edtTransportName"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:hint="Enter"
-                    android:inputType="text"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textColorHint="#888888"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-
-            <!-- =================================================
-                 TRANSPORTER NAME
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
                     android:text="Transporter Name"
                     android:textColor="#2E353A"
                     android:textSize="12sp"
@@ -497,7 +462,7 @@
 
 
             <!-- =================================================
-                 FREIGHT TYPE
+                 TRANSPORTER NAME
                  ================================================= -->
 
             <LinearLayout
@@ -506,29 +471,30 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/rbFreightPerKg"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#DCB765"
-                    android:text="Freight Per Kg"
+                    android:text="Type of Truck"
                     android:textColor="#2E353A"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-                <RadioButton
-                    android:id="@+id/rbFreightPerTruck"
+                <Spinner
+                    android:id="@+id/spTypeofTruck"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="38dp"
                     android:layout_weight="1"
-                    android:buttonTint="#DCB765"
-                    android:text="Freight Per Truck"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:background="@drawable/input_background"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="6dp" />
 
             </LinearLayout>
+
+
+            <!-- =================================================
+                 FREIGHT TYPE
+                 ================================================= -->
+
 
 
             <!-- =================================================
@@ -635,20 +601,30 @@
          FLOATING BACK BUTTON
          ========================================================= -->
 
-    <ImageView
-        android:id="@+id/btnBack"
+    <FrameLayout
+        android:id="@+id/syncButtonContainer"
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="62dp"
-        android:background="@drawable/back_button_background"
+        android:background="@drawable/sync_button_background"
         android:clickable="true"
-        android:contentDescription="Back"
-        android:elevation="14dp"
         android:focusable="true"
+        android:elevation="12dp"
         android:padding="12dp"
-        android:src="@drawable/arrow_back"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/btnSync"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Sync"
+            android:scaleType="fitCenter"
+            android:src="@drawable/arrow_back"
+            android:tint="#DCB765"
+            />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
