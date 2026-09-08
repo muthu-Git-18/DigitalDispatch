@@ -4,12 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.united.digitaldispatch.Dispatch.DispatchHeaderSelectionScreen
+import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
 import com.united.digitaldispatch.PSWReceipt.PswReceipt
 import com.united.digitaldispatch.R
-import com.united.digitaldispatch.Receipt.ReceiptHeaderSelection
+import com.united.digitaldispatch.Receipt.Receipt
 
 class Dashboard : AppCompatActivity() {
 
@@ -51,7 +51,7 @@ class Dashboard : AppCompatActivity() {
 
             val intent = Intent(
                 this@Dashboard,
-                DispatchHeaderSelectionScreen::class.java
+                Dispatch::class.java
             )
 
             startActivity(intent)
@@ -66,7 +66,7 @@ class Dashboard : AppCompatActivity() {
 
             val intent = Intent(
                 this@Dashboard,
-                ReceiptHeaderSelection::class.java
+                Receipt::class.java
             )
 
             startActivity(intent)

@@ -5,7 +5,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.united.digitaldispatch.R
 
-class DispatchHeaderSelectionScreen : AppCompatActivity() {
+class Dispatch : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

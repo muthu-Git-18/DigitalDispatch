@@ -12,9 +12,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
         <activity
-            android:name=".Dispatch.CreateHeaderDispatch"
+            android:name=".Receipt.ReceiptDetails"
             android:exported="false" />
-        <!-- Splash Screen -->
+        <activity
+            android:name=".Receipt.ReceiptSummary"
+            android:exported="false" />
+        <activity
+            android:name=".Receipt.ReceiptView"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.CreateHeaderDispatch"
+            android:exported="false" /> <!-- Splash Screen -->
         <activity
             android:name=".Login.SplashScreen"
             android:exported="true">
