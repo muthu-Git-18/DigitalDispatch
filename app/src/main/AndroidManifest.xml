@@ -11,9 +11,59 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
+
+        <!-- Splash Screen -->
+        <activity
+            android:name=".Login.SplashScreen"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <!-- Login -->
+        <activity
+            android:name=".Login.LoginActivity"
+            android:exported="false" />
+
+        <!-- Dashboard -->
+        <activity
+            android:name=".Login.Dashboard"
+            android:exported="false" />
+
+        <!-- Dispatch -->
+        <activity
+            android:name=".Dispatch.Dispatch"
+            android:exported="false" />
+
+        <!-- GTD Dispatch -->
+        <activity
+            android:name=".GTDDispatch.GtdDispatch"
+            android:exported="false" />
+
+        <!-- PSW Dispatch -->
+        <activity
+            android:name=".PSWDispatch.PswDispatch"
+            android:exported="false" />
+
+        <!-- PSW Receipt -->
+        <activity
+            android:name=".PSWReceipt.PswReceipt"
+            android:exported="false" />
+
+        <!-- Receipt -->
+        <activity
+            android:name=".Receipt.Receipt"
+            android:exported="false" />
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>

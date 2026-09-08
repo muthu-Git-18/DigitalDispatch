@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/login_background1">
+
+
+    <!-- =========================================================
+         LOGIN CARD
+         ========================================================= -->
+
+    <LinearLayout
+        android:id="@+id/loginCard"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/login_card_background"
+        android:elevation="16dp"
+        android:orientation="vertical"
+        android:paddingBottom="18dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!-- =====================================================
+             TOP HEADER AREA
+             ===================================================== -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="101dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="12dp">
+
+        </LinearLayout>
+
+
+        <!-- =====================================================
+             OVERLAY LOGO
+             ===================================================== -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_marginTop="-88dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+
+            <!-- Background GPIL Logo -->
+
+            <ImageView
+                android:id="@+id/imgBgLogo"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:alpha="0.92"
+                android:contentDescription="Background Logo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logooo" />
+
+        </FrameLayout>
+
+
+        <!-- =====================================================
+             LOGIN TITLE
+             ===================================================== -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <ImageView
+                android:id="@+id/imgLoginTitle"
+                android:layout_width="300dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:contentDescription="Login"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logoo" />
+
+        </FrameLayout>
+
+
+        <!-- =====================================================
+             SUBTITLE
+             ===================================================== -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:layout_gravity="center_horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <ImageView
+                android:id="@+id/imgLogoBelow"
+                android:layout_width="220dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:contentDescription="A Legacy of Quality and Trust"
+                android:scaleType="fitCenter"
+                android:src="@drawable/loginblw" />
+
+        </FrameLayout>
+
+
+        <!-- =====================================================
+             FORM
+             ===================================================== -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="28dp"
+            android:orientation="vertical">
+
+
+            <!-- =================================================
+                 EMPLOYEE / PARTNER ID
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/input_background"
+                android:elevation="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="10dp">
+
+
+                <!-- 3D Person Icon -->
+
+                <FrameLayout
+                    android:layout_width="24dp"
+                    android:layout_height="24dp">
+
+                    <!-- Depth -->
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_person"
+                        android:tint="#5A3B22"
+                        android:translationX="1dp"
+                        android:translationY="1dp" />
+
+                    <!-- Front -->
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_person"
+                        android:tint="#A47C3C" />
+
+                </FrameLayout>
+
+
+                <!-- Employee -->
+
+                <EditText
+                    android:id="@+id/etEmployee"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Employee / Partner ID or Email"
+                    android:inputType="text"
+                    android:padding="0dp"
+                    android:shadowColor="#80FFFFFF"
+                    android:shadowDx="0"
+                    android:shadowDy="-1"
+                    android:shadowRadius="1"
+                    android:textColor="#3A3026"
+                    android:textColorHint="#8B7256"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 PASSWORD
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_background"
+                android:elevation="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="10dp">
+
+
+                <!-- 3D Lock Icon -->
+
+                <FrameLayout
+                    android:layout_width="24dp"
+                    android:layout_height="24dp">
+
+                    <!-- Depth -->
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_lock"
+                        android:tint="#5A3B22"
+                        android:translationX="1dp"
+                        android:translationY="1dp" />
+
+                    <!-- Front -->
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_lock"
+                        android:tint="#A47C3C" />
+
+                </FrameLayout>
+
+
+                <!-- Password -->
+
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:padding="0dp"
+                    android:shadowColor="#80FFFFFF"
+                    android:shadowDx="0"
+                    android:shadowDy="-1"
+                    android:shadowRadius="1"
+                    android:textColor="#3A3026"
+                    android:textColorHint="#8B7256"
+                    android:textSize="14sp" />
+
+
+                <!-- 3D Eye -->
+
+                <FrameLayout
+                    android:layout_width="26dp"
+                    android:layout_height="26dp">
+
+                    <!-- Depth -->
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_eye"
+                        android:tint="#5A3B22"
+                        android:translationX="1dp"
+                        android:translationY="1dp" />
+
+                    <!-- Front -->
+
+                    <ImageView
+                        android:id="@+id/imgShowPassword"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_eye"
+                        android:tint="#A47C3C" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 DROPDOWN ONE
+                 ================================================= -->
+
+            <LinearLayout
+                android:id="@+id/dropdownOne"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_background"
+                android:elevation="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp">
+
+
+                <TextView
+                    android:id="@+id/tvDropdownOne"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:shadowColor="#80FFFFFF"
+                    android:shadowDx="0"
+                    android:shadowDy="-1"
+                    android:shadowRadius="1"
+                    android:textColor="#5A4630"
+                    android:textSize="14sp" />
+
+
+                <!-- Arrow -->
+
+                <FrameLayout
+                    android:layout_width="22dp"
+                    android:layout_height="22dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_arrow_down"
+                        android:tint="#5A3B22"
+                        android:translationX="1dp"
+                        android:translationY="1dp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_arrow_down"
+                        android:tint="#A47C3C" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 DROPDOWN TWO
+                 ================================================= -->
+
+            <LinearLayout
+                android:id="@+id/dropdownTwo"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_background"
+                android:elevation="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp">
+
+
+                <TextView
+                    android:id="@+id/tvDropdownTwo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:shadowColor="#80FFFFFF"
+                    android:shadowDx="0"
+                    android:shadowDy="-1"
+                    android:shadowRadius="1"
+                    android:textColor="#5A4630"
+                    android:textSize="14sp" />
+
+
+                <!-- Arrow -->
+
+                <FrameLayout
+                    android:layout_width="22dp"
+                    android:layout_height="22dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_arrow_down"
+                        android:tint="#5A3B22"
+                        android:translationX="1dp"
+                        android:translationY="1dp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_arrow_down"
+                        android:tint="#A47C3C" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 SECURE LOGIN
+                 ================================================= -->
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/login_button_background1"
+                android:backgroundTint="@null"
+                android:elevation="7dp"
+                android:shadowColor="#5A3B22"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="1"
+                android:text="Secure Login"
+                android:textAllCaps="false"
+                android:textColor="#FFF4D6"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+
+        <!-- =====================================================
+             COPYRIGHT
+             ===================================================== -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <ImageView
+                android:id="@+id/imgCopyright"
+                android:layout_width="220dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:contentDescription="Copyright"
+                android:scaleType="fitCenter"
+                android:src="@drawable/copyright" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
