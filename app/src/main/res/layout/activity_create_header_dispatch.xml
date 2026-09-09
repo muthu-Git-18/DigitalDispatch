@@ -15,12 +15,12 @@
 
     <ImageView
         android:id="@+id/imgBackground"
-        android:layout_width="300dp"
-        android:layout_height="520dp"
-        android:alpha="0.07"
+        android:layout_width="280dp"
+        android:layout_height="500dp"
+        android:alpha="0.13"
         android:contentDescription="Background"
-        android:scaleType="fitXY"
         android:src="@drawable/dashbg3"
+        android:scaleType="fitXY"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,47 +28,41 @@
 
 
     <!-- =========================================================
-         HEADER
+         NORMAL CHARCOAL HEADER
          ========================================================= -->
 
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="86dp"
-        android:background="@color/main_grey"
+        android:layout_height="90dp"
+        android:background="#2E353A"
         android:elevation="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-        <!-- Gold bottom line -->
-
+        <!-- Gold bottom border -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_alignParentBottom="true"
             android:background="#DCB765" />
 
-
-        <!-- =====================================================
-             LOGO
-             ===================================================== -->
-
+        <!-- LOGO -->
         <FrameLayout
             android:id="@+id/logoContainer"
             android:layout_width="62dp"
             android:layout_height="62dp"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="12dp"
             android:background="@drawable/dashboard_logo_circle1"
             android:elevation="10dp"
             android:padding="5dp">
 
             <ImageView
                 android:id="@+id/logo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:layout_gravity="center"
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
@@ -76,16 +70,12 @@
 
         </FrameLayout>
 
-
-        <!-- =====================================================
-             TITLE
-             ===================================================== -->
-
+        <!-- TITLE + SUBTITLE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="12dp"
             android:layout_toEndOf="@id/logoContainer"
             android:orientation="vertical">
 
@@ -93,34 +83,35 @@
                 android:id="@+id/txt_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Receipt"
+                android:fontFamily="serif"
+                android:text="Dispatch"
                 android:textColor="#FFF8E8"
-                android:textSize="19sp"
-                android:textStyle="bold" />
+                android:textSize="21sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="2" />
 
             <TextView
                 android:id="@+id/sub_tittle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:text="(Ref ID Selection)"
+                android:layout_marginTop="2dp"
+                android:text="(Header Info)"
                 android:textColor="#DCB765"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
-
-        <!-- =====================================================
-             ORG + DATE
-             ===================================================== -->
-
+        <!-- ORG + DATE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="14dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -132,9 +123,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : "
+                    android:text="ORG : P72"
                     android:textColor="#DCB765"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -142,7 +133,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#FFF8E8"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -151,15 +142,15 @@
                 android:id="@+id/dateLLt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : "
+                    android:text="Date : 08-09-2026"
                     android:textColor="#DCB765"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -167,7 +158,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#FFF8E8"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -178,15 +169,13 @@
 
 
     <!-- =========================================================
-         BODY
+         BODY (scrollable, card-styled)
          ========================================================= -->
 
     <ScrollView
         android:id="@+id/bodyScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         android:fillViewport="true"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
@@ -194,34 +183,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
         <LinearLayout
             android:id="@+id/body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="4dp"
-            android:paddingBottom="6dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp">
 
 
-            <!-- =================================================
-                 WEIGHMENT
-                 ================================================= -->
+            <!-- =====================================================
+                 CARD 1 : WEIGHMENT
+                 ===================================================== -->
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="8dp"
+                android:orientation="horizontal"
+                android:padding="12dp">
 
                 <RadioButton
                     android:id="@+id/rb20Weighment"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:buttonTint="#DCB765"
+                    android:buttonTint="#A47C3C"
                     android:text="20% Weighment"
-                    android:textColor="#2E353A"
+                    android:textColor="@color/brown_font"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -230,345 +222,331 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:buttonTint="#DCB765"
+                    android:buttonTint="#A47C3C"
                     android:text="100% Weighment"
-                    android:textColor="#2E353A"
+                    android:textColor="@color/brown_font"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
 
 
-            <!-- =================================================
-                 SENDER ORG
-                 ================================================= -->
+            <!-- =====================================================
+                 CARD 2 : SENDER / RECEIVER ORG
+                 ===================================================== -->
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <TextView
-                    android:layout_width="120dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sender.Org :"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/txtSenderOrg"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sender.Org :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtSenderOrg"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="#2E353A"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Rec.Org :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/spRecOrg"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="8dp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
 
-            <!-- =================================================
-                 RECEIVER ORG
-                 ================================================= -->
+            <!-- =====================================================
+                 CARD 3 : VEHICLE / DRIVER DETAILS
+                 ===================================================== -->
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <TextView
-                    android:layout_width="120dp"
+                <!-- Truck No -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Rec.Org :"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/spRecOrg"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="6dp" />
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Truck No"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtTruckNo"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- RC No -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="RC No"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtRcNo"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- Driver Name -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Driver Name"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtDriverName"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="textPersonName"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- Driver License -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Driver License"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtDriverLicense"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
 
-            <!-- =================================================
-                 TRUCK NO
-                 ================================================= -->
+            <!-- =====================================================
+                 CARD 4 : TRANSPORT DETAILS
+                 ===================================================== -->
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="8dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <TextView
-                    android:layout_width="120dp"
+                <!-- Transporter Name -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Truck No"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/edtTruckNo"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:inputType="text"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Transporter"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
-            </LinearLayout>
+                    <Spinner
+                        android:id="@+id/spTransporterName"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="8dp" />
 
+                </LinearLayout>
 
-            <!-- =================================================
-                 RC NO
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
+                <!-- Type of Truck -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="RC No"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/edtRcNo"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:inputType="text"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Type of Truck"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
-            </LinearLayout>
+                    <Spinner
+                        android:id="@+id/spTypeofTruck"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="8dp" />
 
+                </LinearLayout>
 
-            <!-- =================================================
-                 DRIVER NAME
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
+                <!-- Freight Charges -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Driver Name"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/edtDriverName"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:inputType="textPersonName"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:text="Freight Charges"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/edtFreightCharges"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="/Kg"
+                        android:textColor="#A47C3C"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
-            <!-- =================================================
-                 DRIVER LICENSE
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="Driver License"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edtDriverLicense"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:inputType="text"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-
-            <!-- =================================================
-                 TRANSPORT NAME
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="Transport Name"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edtTransportName"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:hint="Enter"
-                    android:inputType="text"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textColorHint="#888888"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-
-            <!-- =================================================
-                 TRANSPORTER NAME
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="Transporter Name"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <Spinner
-                    android:id="@+id/spTransporterName"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="6dp" />
-
-            </LinearLayout>
-
-
-            <!-- =================================================
-                 FREIGHT TYPE
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbFreightPerKg"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#DCB765"
-                    android:text="Freight Per Kg"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <RadioButton
-                    android:id="@+id/rbFreightPerTruck"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#DCB765"
-                    android:text="Freight Per Truck"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-
-            <!-- =================================================
-                 FREIGHT CHARGES
-                 ================================================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="Freight Charges"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edtFreightCharges"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background"
-                    android:inputType="numberDecimal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:text="/Kg"
-                    android:textColor="#A87818"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -578,77 +556,87 @@
 
 
     <!-- =========================================================
-         FOOTER
+         FOOTER (same fixed-height pattern as other screens)
          ========================================================= -->
 
     <LinearLayout
         android:id="@+id/footer"
         android:layout_width="0dp"
-        android:layout_height="58dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_height="82dp"
+        android:background="#2E353A"
+        android:elevation="12dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-        <!-- SAVE -->
+        <!-- Save -->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSave"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="SAVE"
-            android:textColor="#222222"
-            android:textSize="14sp"
-            android:textStyle="normal"
-            android:textAllCaps="false"
-            android:background="@drawable/save_button_background"
+            android:background="@drawable/dashboard_proceed_button1"
             android:backgroundTint="@null"
-            app:backgroundTint="@null" />
+            android:elevation="6dp"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-
-        <!-- CLEAR -->
+        <!-- Clear -->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnClear"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:text="CLEAR"
-            android:textColor="#222222"
-            android:textSize="14sp"
-            android:textStyle="normal"
-            android:textAllCaps="false"
-            android:background="@drawable/clear_button_background"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/dashboard_create_button"
             android:backgroundTint="@null"
-            app:backgroundTint="@null" />
+            android:elevation="6dp"
+            android:text="Clear"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- Back -->
+
+        <FrameLayout
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="6dp">
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/dashboard_back_depth1"
+                android:translationX="2dp"
+                android:translationY="2dp" />
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/dashboard_back_button1"
+                android:contentDescription="Back"
+                android:padding="11dp"
+                android:src="@drawable/arrow_back"
+                android:tint="#5A3517" />
+
+        </FrameLayout>
+
     </LinearLayout>
-
-
-    <!-- =========================================================
-         FLOATING BACK BUTTON
-         ========================================================= -->
-
-    <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="62dp"
-        android:background="@drawable/back_button_background"
-        android:clickable="true"
-        android:contentDescription="Back"
-        android:elevation="14dp"
-        android:focusable="true"
-        android:padding="12dp"
-        android:src="@drawable/arrow_back"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
