@@ -15,12 +15,16 @@ class Dispatch : AppCompatActivity() {
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnCreateHeader = findViewById<AppCompatButton>(R.id.btn_createHeader)
+        val btnProceed = findViewById<AppCompatButton>(R.id.btn_proceed)
 
         btnBack.setOnClickListener {
             finish()
         }
 
-
+        btnProceed.setOnClickListener {
+            val intent = Intent(this@Dispatch, DispatchDetails::class.java)
+            startActivity(intent)
+        }
 
         btnCreateHeader.setOnClickListener {
             val intent = Intent(this@Dispatch, CreateHeaderDispatch::class.java)

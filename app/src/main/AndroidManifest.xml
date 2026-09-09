@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
         <activity
+            android:name=".Dispatch.DispatchSummary"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.DispatchView"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.DispatchDetails"
+            android:exported="false" />
+        <activity
             android:name=".Receipt.ReceiptDetails"
             android:exported="false" />
         <activity
