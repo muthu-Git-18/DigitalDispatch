@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
         <activity
+            android:name=".PSWReceipt.PSWReceiptView"
+            android:exported="false" />
+        <activity
+            android:name=".PSWReceipt.PSWReceiptSummary"
+            android:exported="false" />
+        <activity
+            android:name=".PSWReceipt.PSWReceiptDetails"
+            android:exported="false" />
+        <activity
             android:name=".Receipt.ReceiptDetails"
             android:exported="false" />
         <activity

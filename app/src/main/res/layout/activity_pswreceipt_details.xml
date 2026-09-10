@@ -27,8 +27,6 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 
-
-
     <!-- =========================================================
          NORMAL CHARCOAL HEADER
          ========================================================= -->
@@ -86,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="Receipt"
+                android:text="PSW Receipt"
                 android:textColor="#FFF8E8"
                 android:textSize="21sp"
                 android:textStyle="bold"
@@ -282,7 +280,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Bale Number"
+                android:text="Case Number"
                 android:textColor="@color/brown_font"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -319,29 +317,58 @@
             </FrameLayout>
 
             <LinearLayout
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="170dp"
                     android:layout_height="wrap_content"
+
                     android:text="Grade :"
                     android:textColor="@color/brown_font"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txt_grade"
+                    android:id="@+id/grade"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#2E353A"
-                    android:text="AK47"
+                    android:text="122"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+
+                    android:text="Sub_Inv Code"
+                    android:textColor="@color/brown_font"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/sub_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#2E353A"
+                    android:text="122"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
 
 
         </LinearLayout>
@@ -425,7 +452,6 @@
 
             </FrameLayout>
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -443,6 +469,34 @@
 
                 <TextView
                     android:id="@+id/txt_receivedBales"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 / 126"
+                    android:textColor="#A47C3C"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Weighted Bales :"
+                    android:textColor="@color/brown_font"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txt_weightedBales"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0 / 126"
