@@ -1,4 +1,4 @@
-package com.united.digitaldispatch.Dispatch
+package com.united.digitaldispatch.GTDispatch
 
 import android.os.Bundle
 import android.widget.ImageView
@@ -8,10 +8,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.united.digitaldispatch.R
 
-class DispatchSummary : AppCompatActivity() {
+class GTDispatchSummary : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dispatch_summary)
+        setContentView(R.layout.activity_gtdispatch_summary)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back);
 

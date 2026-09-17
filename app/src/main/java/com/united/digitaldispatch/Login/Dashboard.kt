@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.united.digitaldispatch.Dispatch.Dispatch
-import com.united.digitaldispatch.GTDDispatch.GtdDispatch
+import com.united.digitaldispatch.GTDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
 import com.united.digitaldispatch.PSWReceipt.PswReceipt
 import com.united.digitaldispatch.R

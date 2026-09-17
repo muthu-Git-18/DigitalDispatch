@@ -12,26 +12,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DigitalDispatch">
         <activity
-            android:name=".Dispatch.DispatchSummary"
+            android:name=".GTDispatch.GTDispatchView"
             android:exported="false" />
         <activity
-            android:name=".Dispatch.DispatchView"
+            android:name=".GTDispatch.GTDispatchSummary"
             android:exported="false" />
         <activity
-            android:name=".Dispatch.DispatchDetails"
+            android:name=".GTDispatch.GTDispatchDetails"
             android:exported="false" />
         <activity
-            android:name=".Receipt.ReceiptDetails"
+            android:name=".GTDispatch.CreateHeaderGTDispatch"
             android:exported="false" />
         <activity
-            android:name=".Receipt.ReceiptSummary"
+            android:name=".GTDispatch.GTDDispatch"
             android:exported="false" />
-        <activity
-            android:name=".Receipt.ReceiptView"
-            android:exported="false" />
-        <activity
-            android:name=".Dispatch.CreateHeaderDispatch"
-            android:exported="false" /> <!-- Splash Screen -->
+        <!--
+         =====================================================
+             SPLASH SCREEN
+             =====================================================
+        -->
         <activity
             android:name=".Login.SplashScreen"
             android:exported="true">
@@ -40,30 +39,112 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Login -->
+        </activity>
+        <!--
+ =====================================================
+             LOGIN
+             =====================================================
+        -->
         <activity
             android:name=".Login.LoginActivity"
-            android:exported="false" /> <!-- Dashboard -->
+            android:exported="false" />
+        <!--
+ =====================================================
+             DASHBOARD
+             =====================================================
+        -->
         <activity
             android:name=".Login.Dashboard"
-            android:exported="false" /> <!-- Dispatch -->
-        <activity
-            android:name=".Dispatch.Dispatch"
-            android:exported="false" /> <!-- GTD Dispatch -->
-        <activity
-            android:name=".GTDDispatch.GtdDispatch"
-            android:exported="false" /> <!-- PSW Dispatch -->
-        <activity
-            android:name=".PSWDispatch.PswDispatch"
-            android:exported="false" /> <!-- PSW Receipt -->
-        <activity
-            android:name=".PSWReceipt.PswReceipt"
-            android:exported="false" /> <!-- Receipt -->
-        <activity
-            android:name=".Receipt.Receipt"
-            android:exported="false" /> <!-- Main Activity -->
+            android:exported="false" />
+        <!--
+ =====================================================
+             MAIN ACTIVITY
+             =====================================================
+        -->
         <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <!--
+ =====================================================
+             DISPATCH
+             =====================================================
+        -->
+        <activity
+            android:name=".Dispatch.Dispatch"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.DispatchDetails"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.DispatchView"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.DispatchSummary"
+            android:exported="false" />
+        <activity
+            android:name=".Dispatch.CreateHeaderDispatch"
+            android:exported="false" />
+        <!--
+ =====================================================
+             RECEIPT
+             =====================================================
+        -->
+        <activity
+            android:name=".Receipt.Receipt"
+            android:exported="false" />
+        <activity
+            android:name=".Receipt.ReceiptDetails"
+            android:exported="false" />
+        <activity
+            android:name=".Receipt.ReceiptView"
+            android:exported="false" />
+        <activity
+            android:name=".Receipt.ReceiptSummary"
+            android:exported="false" />
+        <!--
+ =====================================================
+             PSW DISPATCH
+             =====================================================
+        -->
+        <activity
+            android:name=".PSWDispatch.PswDispatch"
+            android:exported="false" />
+        <activity
+            android:name=".PSWDispatch.PSWDispatchDetails"
+            android:exported="false" />
+        <activity
+            android:name=".PSWDispatch.PSWDispatchView"
+            android:exported="false" />
+        <activity
+            android:name=".PSWDispatch.PSWDispatchSummary"
+            android:exported="false" />
+        <activity
+            android:name=".PSWDispatch.CreateHeaderPSWDispatch"
+            android:exported="false" />
+        <!--
+ =====================================================
+             PSW RECEIPT
+             =====================================================
+        -->
+        <activity
+            android:name=".PSWReceipt.PswReceipt"
+            android:exported="false" />
+        <activity
+            android:name=".PSWReceipt.PSWReceiptDetails"
+            android:exported="false" />
+        <activity
+            android:name=".PSWReceipt.PSWReceiptView"
+            android:exported="false" />
+        <activity
+            android:name=".PSWReceipt.PSWReceiptSummary"
+            android:exported="false" />
+        <!--
+ =====================================================
+             GTD DISPATCH
+             =====================================================
+        -->
+        <activity
+            android:name=".GTDispatch.GtdDispatch"
             android:exported="false" />
     </application>
 

@@ -1,4 +1,4 @@
-package com.united.digitaldispatch.Dispatch
+package com.united.digitaldispatch.PSWDispatch
 
 import android.os.Bundle
 import android.widget.ImageView
@@ -8,10 +8,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.united.digitaldispatch.R
 
-class DispatchSummary : AppCompatActivity() {
+class CreateHeaderPSWDispatch : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dispatch_summary)
+        setContentView(R.layout.activity_create_header_pswdispatch)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back);
 

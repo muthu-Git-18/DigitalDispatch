@@ -1,4 +1,4 @@
-package com.united.digitaldispatch.Dispatch
+package com.united.digitaldispatch.GTDispatch
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,12 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.united.digitaldispatch.Dispatch.DispatchSummary
+import com.united.digitaldispatch.Dispatch.DispatchView
 import com.united.digitaldispatch.R
 
-class DispatchDetails : AppCompatActivity() {
+class GTDispatchDetails : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dispatch_details)
+        setContentView(R.layout.activity_gtdispatch_details)
 
         val btnGradewise = findViewById<AppCompatButton>(R.id.btn_gradewise)
         val btnView = findViewById<AppCompatButton>(R.id.btn_view)
@@ -24,13 +26,13 @@ class DispatchDetails : AppCompatActivity() {
         }
 
         btnGradewise.setOnClickListener {
-            val intent = Intent(this@DispatchDetails, DispatchSummary::class.java)
+            val intent = Intent(this@GTDispatchDetails, GTDispatchSummary::class.java)
             startActivity(intent)
         }
 
 
         btnView.setOnClickListener {
-            val intent = Intent(this@DispatchDetails, DispatchView::class.java)
+            val intent = Intent(this@GTDispatchDetails, GTDispatchView::class.java)
             startActivity(intent)
         }
     }
