@@ -2,7 +2,10 @@ package com.united.digitaldispatch.Login
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDispatch.GtdDispatch
@@ -10,111 +13,72 @@ import com.united.digitaldispatch.PSWDispatch.PswDispatch
 import com.united.digitaldispatch.PSWReceipt.PswReceipt
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.Receipt.Receipt
+import com.united.digitaldispatch.data.local.DashboardScreen
+import com.united.digitaldispatch.data.local.ModuleScreens
+import com.united.digitaldispatch.utils.SessionManager
 
+/**
+ * Shows only the cards that belong to the module the user logged into
+ * (see [ModuleScreens] for the TAP/PPD/GLT/WH -> screens mapping you gave
+ * us). If session data is somehow missing, we bounce back to Login rather
+ * than showing every module's screens.
+ */
 class Dashboard : AppCompatActivity() {
+
+    private lateinit var session: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
-        // Dispatch
-        val dispatch = findViewById<LinearLayout>(
-            R.id.cardDispatch
-        )
+        session = SessionManager(applicationContext)
+        val moduleType = session.getModuleType()
 
-        // Receipt
-        val receipt = findViewById<LinearLayout>(
-            R.id.cardReceipt
-        )
-
-        // PSW Dispatch
-        val pswdispatch = findViewById<LinearLayout>(
-            R.id.cardPswdispatch
-        )
-
-        // PSW Receipt
-        val pswreceipt = findViewById<LinearLayout>(
-            R.id.cardPswreceipt
-        )
-
-        // GTD Dispatch
-        val gtdispatch = findViewById<LinearLayout>(
-            R.id.cardGtdispatch
-        )
-
-
-        // -----------------------------
-        // Dispatch
-        // -----------------------------
-
-        dispatch.setOnClickListener {
-
-            val intent = Intent(
-                this@Dashboard,
-                Dispatch::class.java
-            )
-
-            startActivity(intent)
+        if (moduleType == null || !session.isLoggedIn()) {
+            Toast.makeText(this, "Session expired, please log in again", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
         }
 
+        findViewById<TextView>(R.id.tvDashboard).text = "$moduleType Dashboard"
 
-        // -----------------------------
-        // Receipt
-        // -----------------------------
+        val allowedScreens = ModuleScreens.allowedScreens(moduleType)
 
-        receipt.setOnClickListener {
+        val cardDispatch = findViewById<LinearLayout>(R.id.cardDispatch)
+        val cardReceipt = findViewById<LinearLayout>(R.id.cardReceipt)
+        val cardPswDispatch = findViewById<LinearLayout>(R.id.cardPswdispatch)
+        val cardPswReceipt = findViewById<LinearLayout>(R.id.cardPswreceipt)
+        val cardGtdDispatch = findViewById<LinearLayout>(R.id.cardGtdispatch)
 
-            val intent = Intent(
-                this@Dashboard,
-                Receipt::class.java
-            )
-
-            startActivity(intent)
+        applyVisibility(cardDispatch, DashboardScreen.DISPATCH, allowedScreens) {
+            startActivity(Intent(this, Dispatch::class.java))
         }
-
-
-        // -----------------------------
-        // PSW Dispatch
-        // -----------------------------
-
-        pswdispatch.setOnClickListener {
-
-            val intent = Intent(
-                this@Dashboard,
-                PswDispatch::class.java
-            )
-
-            startActivity(intent)
+        applyVisibility(cardReceipt, DashboardScreen.RECEIPT, allowedScreens) {
+            startActivity(Intent(this, Receipt::class.java))
         }
-
-
-        // -----------------------------
-        // PSW Receipt
-        // -----------------------------
-
-        pswreceipt.setOnClickListener {
-
-            val intent = Intent(
-                this@Dashboard,
-                PswReceipt::class.java
-            )
-
-            startActivity(intent)
+        applyVisibility(cardPswDispatch, DashboardScreen.PSW_DISPATCH, allowedScreens) {
+            startActivity(Intent(this, PswDispatch::class.java))
         }
+        applyVisibility(cardPswReceipt, DashboardScreen.PSW_RECEIPT, allowedScreens) {
+            startActivity(Intent(this, PswReceipt::class.java))
+        }
+        applyVisibility(cardGtdDispatch, DashboardScreen.GTD_DISPATCH, allowedScreens) {
+            startActivity(Intent(this, GtdDispatch::class.java))
+        }
+    }
 
-
-        // -----------------------------
-        // GTD Dispatch
-        // -----------------------------
-
-        gtdispatch.setOnClickListener {
-
-            val intent = Intent(
-                this@Dashboard,
-                GtdDispatch::class.java
-            )
-
-            startActivity(intent)
+    private fun applyVisibility(
+        card: LinearLayout,
+        screen: DashboardScreen,
+        allowedScreens: Set<DashboardScreen>,
+        onClick: () -> Unit
+    ) {
+        if (screen in allowedScreens) {
+            card.visibility = View.VISIBLE
+            card.setOnClickListener { onClick() }
+        } else {
+            card.visibility = View.GONE
         }
     }
 }
