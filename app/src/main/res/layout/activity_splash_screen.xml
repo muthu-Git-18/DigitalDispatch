@@ -5,7 +5,6 @@
     android:layout_height="match_parent">
 
     <!-- Background -->
-
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="match_parent"
@@ -13,15 +12,40 @@
         android:scaleType="centerCrop"
         android:src="@drawable/splashbackground1" />
 
-
-    <!-- GPIL Logo -->
-
-    <ImageView
-        android:id="@+id/imgLogo"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+    <!-- Content -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:contentDescription="GPIL Logo"
-        android:src="@drawable/splashlogo1" />
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- GPIL Logo -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:contentDescription="GPIL Logo"
+            android:src="@drawable/splashlogo1" />
+
+        <!-- Loading indicator -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="20dp"
+            android:indeterminate="true" />
+
+        <!-- Loading message -->
+        <TextView
+            android:id="@+id/txtLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Syncing Master Data..."
+            android:textSize="14sp"
+            android:textStyle="normal" />
+
+    </LinearLayout>
 
 </FrameLayout>

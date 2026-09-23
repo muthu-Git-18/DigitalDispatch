@@ -14,7 +14,6 @@ import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.ModuleType
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
-import com.united.digitaldispatch.utils.DebugSeeder
 import com.united.digitaldispatch.utils.PasswordUtils
 import com.united.digitaldispatch.utils.SessionManager
 import java.util.concurrent.Executors
@@ -64,10 +63,7 @@ class LoginActivity : AppCompatActivity() {
             onLoginClicked()
         }
 
-        ioExecutor.execute {
-            // TEMPORARY until the sync API is ready -- see DebugSeeder for details.
-            DebugSeeder.seedIfEmpty(db)
-        }
+
     }
 
     private fun bindViews() {
@@ -168,7 +164,7 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        attemptLogin(employeeId, password)
+       // attemptLogin(employeeId, password)
     }
 
     /**
@@ -180,7 +176,7 @@ class LoginActivity : AppCompatActivity() {
      * call the login endpoint instead of userDao().findByEmployeeCodeAndOrg,
      * then optionally fall back to this same local check for offline use.
      */
-    private fun attemptLogin(employeeId: String, password: String) {
+   /* private fun attemptLogin(employeeId: String, password: String) {
         val organization = selectedOrganization ?: return
         val module = selectedModule ?: return
 
@@ -217,7 +213,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }*/
 
     private sealed class LoginResult {
         object NotFound : LoginResult()

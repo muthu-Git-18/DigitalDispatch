@@ -5,19 +5,25 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.united.digitaldispatch.data.local.dao.OrganizationDao
+import com.united.digitaldispatch.data.local.dao.TransporterDao
 import com.united.digitaldispatch.data.local.dao.UserDao
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
+import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 
 @Database(
-    entities = [OrganizationEntity::class, UserMasterEntity::class],
-    version = 1,
+    entities = [OrganizationEntity::class,
+                UserMasterEntity::class,
+                TransporterEntity::class
+               ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun organizationDao(): OrganizationDao
     abstract fun userDao(): UserDao
+    abstract fun transporterDao(): TransporterDao
 
     companion object {
         @Volatile

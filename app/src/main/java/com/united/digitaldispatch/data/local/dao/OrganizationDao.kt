@@ -24,4 +24,5 @@ interface OrganizationDao {
 
     @Query("SELECT COUNT(*) FROM organization_table")
     fun count(): Int
+
 }

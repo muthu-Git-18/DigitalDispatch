@@ -12,13 +12,12 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(users: List<UserMasterEntity>)
 
-    /**
-     * Deliberately split from [findByEmployeeCodeAndOrg] + password check so the
-     * login flow can tell "employee ID not found" apart from "wrong password" —
-     * matches the old apps' behaviour (WH/PPD LoginActivity).
-     */
-    @Query("SELECT * FROM user_master_table WHERE employeeCode = :employeeCode AND organizationCode = :organizationCode LIMIT 1")
-    fun findByEmployeeCodeAndOrg(employeeCode: String, organizationCode: String): UserMasterEntity?
+    @Query("""
+        SELECT * FROM user_master_table
+        WHERE empCode = :empCode
+        LIMIT 1
+    """)
+    fun findByEmployeeCode(empCode: String): UserMasterEntity?
 
     @Query("SELECT COUNT(*) FROM user_master_table")
     fun count(): Int
