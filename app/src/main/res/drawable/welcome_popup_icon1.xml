@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Dispatch + Receipt themed welcome icon: a delivery truck (dispatch)
+    with a receipt/document (receipt) tucked beside it - no branding,
+    same gold/brown palette as ic_hourglass and the dashboard cards.
+    Put this file at: res/drawable/welcome_popup_icon.xml (or a new
+    name if you want to keep the box+arrow version too - either works
+    as a drop-in src for the popup ImageView).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="130dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- ===== truck ===== -->
+
+    <!-- cargo box body -->
+    <path
+        android:fillColor="#8A5A2B"
+        android:strokeColor="#6B4423"
+        android:strokeWidth="1"
+        android:pathData="M8,42 L52,42 L52,78 L8,78 Z" />
+
+    <!-- cargo box top highlight -->
+    <path
+        android:fillColor="#A5723F"
+        android:pathData="M8,42 L52,42 L52,48 L8,48 Z" />
+
+    <!-- cab -->
+    <path
+        android:fillColor="#D9A441"
+        android:strokeColor="#6B4423"
+        android:strokeWidth="1"
+        android:pathData="M52,55 L72,55 L82,66 L82,78 L52,78 Z" />
+
+    <!-- cab window -->
+    <path
+        android:fillColor="#FBF1DC"
+        android:pathData="M56,59 L70,59 L77,66 L56,66 Z" />
+
+    <!-- chassis strip -->
+    <path
+        android:fillColor="#3A2A1A"
+        android:pathData="M8,78 L82,78 L82,82 L8,82 Z" />
+
+    <!-- wheels -->
+    <path
+        android:fillColor="#313538"
+        android:pathData="M22,82 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    <path
+        android:fillColor="#D9A441"
+        android:pathData="M22,82 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+
+    <path
+        android:fillColor="#313538"
+        android:pathData="M68,82 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    <path
+        android:fillColor="#D9A441"
+        android:pathData="M68,82 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+
+    <!-- ===== receipt / document, tucked at top-right, overlapping the cargo box ===== -->
+
+    <path
+        android:fillColor="#FBF1DC"
+        android:strokeColor="#8A5A2B"
+        android:strokeWidth="1.2"
+        android:pathData="M40,10 L74,10 L74,50 L67,44 L60,50 L53,44 L46,50 L40,44 Z" />
+
+    <!-- receipt text lines -->
+    <path
+        android:fillColor="#8A5A2B"
+        android:pathData="M45,18 L69,18 L69,21 L45,21 Z" />
+    <path
+        android:fillColor="#8A5A2B"
+        android:pathData="M45,25 L69,25 L69,28 L45,28 Z" />
+    <path
+        android:fillColor="#8A5A2B"
+        android:pathData="M45,32 L62,32 L62,35 L45,35 Z" />
+
+    <!-- checkmark badge -->
+    <path
+        android:fillColor="#D9A441"
+        android:pathData="M64,36 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+    <path
+        android:fillColor="#FBF1DC"
+        android:pathData="M61,36 L63.5,38.5 L68,33.5 L66.5,32 L63.5,35 L62.5,34 Z" />
+
+</vector>

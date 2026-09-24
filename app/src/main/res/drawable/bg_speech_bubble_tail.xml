@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Small square used as the speech-bubble's "tail".
+    In the layout it is rotated 45deg and placed so only one
+    corner peeks out below the bubble, pointing at the arrow tip.
+    Put this file at: res/drawable/bg_speech_bubble_tail.xml
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#FFFFFF" />
+
+    <stroke
+        android:width="1.5dp"
+        android:color="#4A90D9" />
+
+</shape>

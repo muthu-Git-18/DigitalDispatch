@@ -1,4 +1,3 @@
-
 package com.united.digitaldispatch.Login
 
 import android.animation.ObjectAnimator
@@ -7,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -20,12 +18,13 @@ import com.united.digitaldispatch.Apiservice.viewmodel.MasterDataSyncState
 import com.united.digitaldispatch.Apiservice.viewmodel.MasterDataViewModel
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
+import com.united.digitaldispatch.utils.DotWaveLoadingView
 import kotlinx.coroutines.launch
 
 class SplashScreen : AppCompatActivity() {
 
     private lateinit var imgLogo: ImageView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var dotWaveLoading: DotWaveLoadingView
     private lateinit var txtLoading: TextView
 
     private val viewModel: MasterDataViewModel by viewModels {
@@ -51,10 +50,12 @@ class SplashScreen : AppCompatActivity() {
         setContentView(R.layout.activity_splash_screen)
 
         imgLogo = findViewById(R.id.imgLogo)
-        progressBar = findViewById(R.id.progressBar)
+        dotWaveLoading = findViewById(R.id.dotWaveLoading)
         txtLoading = findViewById(R.id.txtLoading)
 
         startLogoAnimation()
+        // dotWaveLoading animates itself automatically once attached to the
+        // window -- no start()/stop() calls needed, unlike the hourglass.
 
         observeMasterData()
 
@@ -71,18 +72,18 @@ class SplashScreen : AppCompatActivity() {
                 when (state) {
 
                     is MasterDataSyncState.Idle -> {
-                        progressBar.visibility = View.VISIBLE
+                        dotWaveLoading.visibility = View.VISIBLE
                         txtLoading.text = "Preparing..."
                     }
 
                     is MasterDataSyncState.Loading -> {
-                        progressBar.visibility = View.VISIBLE
+                        dotWaveLoading.visibility = View.VISIBLE
                         txtLoading.text = "Syncing master data..."
                     }
 
                     is MasterDataSyncState.Success -> {
 
-                        progressBar.visibility = View.GONE
+                        dotWaveLoading.visibility = View.GONE
                         txtLoading.text = "Sync completed"
 
                         openLoginScreen()
@@ -90,7 +91,7 @@ class SplashScreen : AppCompatActivity() {
 
                     is MasterDataSyncState.Error -> {
 
-                        progressBar.visibility = View.GONE
+                        //dotWaveLoading.visibility = View.GONE
                         txtLoading.text = "Unable to sync master data"
 
                         // For now, don't open LoginActivity
@@ -136,4 +137,3 @@ class SplashScreen : AppCompatActivity() {
         animator.start()
     }
 }
-

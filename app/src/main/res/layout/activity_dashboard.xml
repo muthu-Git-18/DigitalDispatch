@@ -369,4 +369,100 @@
 
     </FrameLayout>
 
+    <!-- ==================================================
+         WELCOME / SYNCING POPUP (bottom-left, one-time)
+         Starts GONE. Dashboard.kt fades it in on open,
+         swaps the message, then fades it back out.
+         Drop your uploaded arrow/leaf image into
+         res/drawable as "welcome_popup_icon".
+
+         Structure:
+           popupContainer (fixed size, doesn't clip)
+             |- imgPopup      -> anchored bottom-start
+             |- bubbleWrapper -> anchored top-end, holds the
+                                  bubble AND its tail together
+                                  so the tail always points at
+                                  the bubble regardless of where
+                                  the wrapper sits
+                  |- bubbleTail  -> peeks out the bottom-start
+                                     corner of the bubble, aimed
+                                     down at the arrow tip
+                  |- bubbleCard  -> the speech bubble itself
+         ================================================== -->
+
+    <FrameLayout
+        android:id="@+id/popupContainer"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:elevation="20dp"
+        android:clipChildren="false"
+        android:visibility="gone"
+        android:clipToPadding="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <!-- The arrow / leaf image, anchored bottom-left of the container -->
+        <ImageView
+            android:id="@+id/imgPopup"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_gravity="bottom|start"
+            android:scaleType="fitCenter"
+            android:src="@drawable/dispatchreceiptwelcome"
+            android:contentDescription="Welcome" />
+
+        <!-- Bubble + tail, kept together so they always line up.
+             Sits in the clear space ABOVE the image, not on top
+             of the arrow, so the arrow stays fully visible. -->
+        <FrameLayout
+            android:id="@+id/bubbleWrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:clipChildren="false"
+            android:layout_marginTop="10dp"
+            android:clipToPadding="false"
+            android:layout_marginEnd="4dp">
+
+            <!-- Tail: rotated square, one corner pokes out below the
+                 bubble's bottom-start edge, aimed at the arrow tip -->
+            <View
+                android:id="@+id/bubbleTail"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="bottom|start"
+                android:layout_marginStart="25dp"
+                android:layout_marginBottom="-6dp"
+                android:rotation="45"
+                android:background="@drawable/bg_speech_bubble_tail" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/bubbleCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <TextView
+                    android:id="@+id/tvPopupText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_speech_bubble"
+                    android:maxWidth="250dp"
+                    android:gravity="center"
+                    android:fontFamily="serif"
+                    android:textColor="@color/brown_font"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:text="Hello TeamLiftss....." />
+
+            </androidx.cardview.widget.CardView>
+
+        </FrameLayout>
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

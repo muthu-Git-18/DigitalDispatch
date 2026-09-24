@@ -11,12 +11,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import com.united.digitaldispatch.R
-import com.united.digitaldispatch.data.local.AppDatabase
-import com.united.digitaldispatch.data.local.ModuleType
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
-import com.united.digitaldispatch.utils.PasswordUtils
 import com.united.digitaldispatch.utils.SessionManager
 import java.util.concurrent.Executors
+import com.united.digitaldispatch.data.local.AppDatabase
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+
 
 /**
  * Unified login: employee id + password + module (TAP/PPD/GLT/WH) +
@@ -91,20 +92,40 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupModuleDropdown() {
         findViewById<android.view.View>(R.id.dropdownOne).setOnClickListener {
-            val modules = ModuleType.ALL.toTypedArray()
-            AlertDialog.Builder(this)
-                .setTitle("Select Module")
-                .setItems(modules) { _, which ->
-                    selectedModule = modules[which]
-                    tvDropdownOne.text = selectedModule
 
-                    // Changing the module invalidates whatever organization
-                    // was picked before, same as the old spinner cascade.
-                    selectedOrganization = null
-                    tvDropdownTwo.text = "Select Organization"
-                    loadOrganizationsForSelectedModule()
+            ioExecutor.execute {
+
+                val modules = db.organizationDao().getAvailableModules()
+
+                runOnUiThread {
+
+                    if (modules.isEmpty()) {
+                        Toast.makeText(
+                            this,
+                            "No modules synced yet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@runOnUiThread
+                    }
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Select Module")
+                        .setItems(modules.toTypedArray()) { _, which ->
+
+                            selectedModule = modules[which]
+
+                            tvDropdownOne.text = selectedModule
+
+                            // Reset organization when module changes
+                            selectedOrganization = null
+                            organizationsForModule = emptyList()
+                            tvDropdownTwo.text = "Select Organization"
+
+                            loadOrganizationsForSelectedModule()
+                        }
+                        .show()
                 }
-                .show()
+            }
         }
     }
 
@@ -135,7 +156,7 @@ class LoginActivity : AppCompatActivity() {
     private fun loadOrganizationsForSelectedModule() {
         val module = selectedModule ?: return
         ioExecutor.execute {
-            val orgs = db.organizationDao().getOrganizationsForModule(module)
+            val orgs = db.organizationDao().getOrganizationsForModule(module).distinctBy { it.organizationCode }
             runOnUiThread {
                 organizationsForModule = orgs
                 if (orgs.isEmpty()) {
@@ -164,7 +185,7 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-       // attemptLogin(employeeId, password)
+        attemptLogin(employeeId, password)
     }
 
     /**
@@ -176,29 +197,59 @@ class LoginActivity : AppCompatActivity() {
      * call the login endpoint instead of userDao().findByEmployeeCodeAndOrg,
      * then optionally fall back to this same local check for offline use.
      */
-   /* private fun attemptLogin(employeeId: String, password: String) {
+    private fun attemptLogin(employeeId: String, password: String) {
+
         val organization = selectedOrganization ?: return
         val module = selectedModule ?: return
 
         ioExecutor.execute {
-            val user = db.userDao().findByEmployeeCodeAndOrg(employeeId, organization.organizationCode)
+
+            val user = db.userDao().findByEmployeeCode(employeeId)
+
             val result: LoginResult = when {
-                user == null -> LoginResult.NotFound
-                user.passwordHash != PasswordUtils.hash(password) -> LoginResult.WrongPassword
-                else -> LoginResult.Success(user.userName, user.userRights)
+
+                user == null -> {
+                    LoginResult.NotFound
+                }
+
+                user.password != encryptPassword(password) -> {
+                    LoginResult.WrongPassword
+                }
+
+                else -> {
+                    LoginResult.Success(
+                        user.userName,
+                        user.userRights
+                    )
+                }
             }
 
             runOnUiThread {
+
                 when (result) {
+
                     is LoginResult.NotFound -> {
-                        Toast.makeText(this, "Employee ID not found for this organization", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Employee ID not found",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
                         etEmployee.setText("")
                     }
+
                     is LoginResult.WrongPassword -> {
-                        Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Incorrect password",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
                         etPassword.setText("")
                     }
+
                     is LoginResult.Success -> {
+
                         session.saveSession(
                             employeeCode = employeeId,
                             userName = result.userName,
@@ -206,14 +257,32 @@ class LoginActivity : AppCompatActivity() {
                             moduleType = module,
                             userRights = result.userRights
                         )
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, Dashboard::class.java))
+
+                        Toast.makeText(
+                            this,
+                            "Login successful",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        startActivity(
+                            Intent(this, Dashboard::class.java)
+                        )
+
                         finish()
                     }
                 }
             }
         }
-    }*/
+    }
+
+    fun encryptPassword(password: String): String {
+        val sha256 = MessageDigest.getInstance("SHA-256")
+        val passwordBytes = password.toByteArray(StandardCharsets.UTF_8)
+        val hashBytes = sha256.digest(passwordBytes)
+        val hashString = hashBytes.joinToString("") { "%02x".format(it) }
+
+        return hashString.substring(0, 20)
+    }
 
     private sealed class LoginResult {
         object NotFound : LoginResult()

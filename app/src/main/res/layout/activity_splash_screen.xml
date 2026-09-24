@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -28,13 +29,14 @@
             android:contentDescription="GPIL Logo"
             android:src="@drawable/splashlogo1" />
 
-        <!-- Loading indicator -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="20dp"
-            android:indeterminate="true" />
+        <!-- Loading indicator: dot-wave, animates itself while attached -->
+        <com.united.digitaldispatch.utils.DotWaveLoadingView
+            android:id="@+id/dotWaveLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:dotColor="#e6cd00"
+            app:dotCount="3" />
 
         <!-- Loading message -->
         <TextView
@@ -42,9 +44,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Syncing Master Data..."
-            android:textSize="14sp"
-            android:textStyle="normal" />
+            android:text="Master Data Loading..."
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:alpha="0.85" />
 
     </LinearLayout>
 

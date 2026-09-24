@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Custom content view for the "Items And Stock Loading" dialog.
+    Put this file at: res/layout/dialog_loading.xml
+
+    Shown via AlertDialog.Builder(...).setView(...) from Dashboard.kt,
+    non-cancelable, while the two startup API calls are in flight.
+    Dashboard.kt also makes the dialog WINDOW transparent and gives it
+    an explicit centered width  without that, this card's rounded
+    corners get hidden behind the dialog window's own square default
+    background.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/bg_loading_dialog"
+    android:elevation="16dp">
+
+    <FrameLayout
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:background="@drawable/bg_hourglass_circle">
+
+        <ImageView
+            android:id="@+id/imgHourglass"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_hourglass"
+            android:contentDescription="Loading" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvLoadingDialogText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:fontFamily="serif"
+        android:gravity="center"
+        android:text="Items And Stock\nLoading....."
+        android:textColor="@color/brown_font"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="serif"
+        android:gravity="center"
+        android:text="Please wait a moment"
+        android:textColor="#A8935F"
+        android:textSize="12sp" />
+
+</LinearLayout>
