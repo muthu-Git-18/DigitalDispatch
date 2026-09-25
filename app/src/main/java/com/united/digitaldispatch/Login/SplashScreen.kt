@@ -102,6 +102,8 @@ class SplashScreen : AppCompatActivity() {
         }
     }
 
+
+
     private fun openLoginScreen() {
 
         val intent = Intent(

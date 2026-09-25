@@ -16,18 +16,26 @@ import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.united.digitaldispatch.Apiservice.network.ApiClient
+import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
 import com.united.digitaldispatch.PSWReceipt.PswReceipt
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.Receipt.Receipt
+import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.DashboardScreen
 import com.united.digitaldispatch.data.local.ModuleScreens
 import com.united.digitaldispatch.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Shows only the cards that belong to the module the user logged into
@@ -41,34 +49,57 @@ import com.united.digitaldispatch.utils.SessionManager
  * than showing every module's screens.
  *
  * Startup sequence on this screen:
- *   1. A one-time "Hello TeamLiftss..... / Items And Stocks Are
- *      Updating....Please Wait.." popup appears bottom-left.
+ *   1. A one-time "Hello <name>!!..... / Items And Stocks Are
+ *      Updating....Please Wait.." popup appears bottom-left, and the
+ *      Stock API starts syncing in the background at the same time.
  *   2. After the second message, the popup (lorry + bubble) drives off
  *      to the right and disappears, like the truck pulling away.
  *   3. Right after it's gone, a non-cancelable "Items And Stock Loading"
- *      dialog appears with a flipping hourglass.
- *   4. Card taps (Dispatch/Receipt/etc.) do nothing but show a "please
- *      wait" toast until BOTH startup API calls have reported success.
- *   5. Once both have reported in, the dialog dismisses and the cards
- *      become usable.
- *
- * The two startup API calls are NOT wired in yet -- fetchDispatchAndStockData()
- * is commented out below. Call onApiCallCompleted() once from each of your
- * real API's own success callbacks to unlock the screen; until you do that,
- * the loading dialog will stay up indefinitely, by design.
+ *      dialog appears with a flipping hourglass AND a progress bar that
+ *      tracks the Stock sync's real download progress (percent is based
+ *      on records-downloaded / totalRecords from the API itself).
+ *   4. If the sync already finished during step 1-2 (common, since it
+ *      starts early and most syncs are a single page), the dialog is
+ *      skipped entirely instead of popping up and never dismissing.
+ *   5. Card taps do nothing but show a "please wait" toast until the
+ *      Stock API has reported success.
+ *   6. Once it reports in, a toast shows the total records synced, the
+ *      dialog (if shown) dismisses, and the cards become usable.
  */
 class Dashboard : AppCompatActivity() {
 
     private lateinit var session: SessionManager
+    private lateinit var repository: MasterDataRepository
+
     private val popupHandler = Handler(Looper.getMainLooper())
 
     private var loadingDialog: AlertDialog? = null
     private var hourglassAnimator: ObjectAnimator? = null
+    private var loadingProgressBar: ProgressBar? = null
+    private var tvLoadingPercent: TextView? = null
 
-    /** Flips to true only once BOTH startup API calls have completed. */
+    /** Latest known sync progress, kept even while no dialog is showing yet. */
+    private var lastProgressPercent = 0
+    private var lastProgressCurrent = 0
+    private var lastProgressTotal = 0
+
+    /** Flips to true only once the startup Stock API has completed. */
     private var isDataLoaded = false
     private var apiCallsCompleted = 0
-    private val totalApiCallsNeeded = 2
+    private val totalApiCallsNeeded = 1
+
+    private lateinit var tvDashboardName : TextView
+
+    private lateinit var moduleType : String
+
+    private lateinit var userName : String
+
+    private var isSyncing = false
+    private lateinit var syncButtonContainer: FrameLayout
+    private lateinit var btnSync: ImageView
+    private var syncIconAnimator: ObjectAnimator? = null
+
+
 
     /** Holds references to one card's outer container + the 3 inner views that get resized. */
     private data class CardViews(
@@ -81,23 +112,72 @@ class Dashboard : AppCompatActivity() {
     )
 
     /** cardSizeDp, iconSizeDp, labelSizeSp -- tuned per visible-card-count. */
-    private data class SizeTier(val cardSizeDp: Int, val iconSizeDp: Int, val labelSizeSp: Float)
+    private data class SizeTier(
+        val cardSizeDp: Int,
+        val iconSizeDp: Int,
+        val labelSizeSp: Float
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_dashboard)
 
         session = SessionManager(applicationContext)
-        val moduleType = session.getModuleType()
 
-        if (moduleType == null || !session.isLoggedIn()) {
-            Toast.makeText(this, "Session expired, please log in again", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, LoginActivity::class.java))
+        inits()
+
+        setContentData()
+
+    }
+
+    private fun inits(){
+
+        tvDashboardName = findViewById(R.id.tvDashboard)
+        syncButtonContainer = findViewById(R.id.syncButtonContainer)
+        btnSync = findViewById(R.id.btnSync)
+
+        syncButtonContainer.isEnabled = false
+        syncButtonContainer.alpha = 0.5f
+
+        syncButtonContainer.setOnClickListener {
+            onSyncButtonClicked()
+        }
+    }
+
+
+    private fun setContentData(){
+        repository = MasterDataRepository(
+            ApiClient.instance,
+            AppDatabase.getInstance(applicationContext)
+        )
+
+        val module = session.getModuleType()
+
+        if (module.isNullOrBlank() || !session.isLoggedIn()) {
+
+            Toast.makeText(
+                this,
+                "Session expired, please log in again",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            startActivity(
+                Intent(
+                    this,
+                    LoginActivity::class.java
+                )
+            )
+
             finish()
             return
         }
 
-        findViewById<TextView>(R.id.tvDashboard).text = "$moduleType Dashboard"
+        moduleType = module
+        userName = session.getUserName().orEmpty()
+
+        tvDashboardName.text = "$moduleType Dashboard"
+
 
         val allowedScreens = ModuleScreens.allowedScreens(moduleType)
 
@@ -108,52 +188,108 @@ class Dashboard : AppCompatActivity() {
                 icon = findViewById(R.id.imgDispatchIcon),
                 label = findViewById(R.id.tvDispatchLabel),
                 screen = DashboardScreen.DISPATCH
-            ) { startActivity(Intent(this, Dispatch::class.java)) },
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        Dispatch::class.java
+                    )
+                )
+            },
+
             CardViews(
                 container = findViewById(R.id.cardReceipt),
                 iconFrame = findViewById(R.id.frameReceiptIcon),
                 icon = findViewById(R.id.imgReceiptIcon),
                 label = findViewById(R.id.tvReceiptLabel),
                 screen = DashboardScreen.RECEIPT
-            ) { startActivity(Intent(this, Receipt::class.java)) },
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        Receipt::class.java
+                    )
+                )
+            },
+
             CardViews(
                 container = findViewById(R.id.cardPswdispatch),
                 iconFrame = findViewById(R.id.framePswdispatchIcon),
                 icon = findViewById(R.id.imgPswdispatchIcon),
                 label = findViewById(R.id.tvPswdispatchLabel),
                 screen = DashboardScreen.PSW_DISPATCH
-            ) { startActivity(Intent(this, PswDispatch::class.java)) },
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        PswDispatch::class.java
+                    )
+                )
+            },
+
             CardViews(
                 container = findViewById(R.id.cardPswreceipt),
                 iconFrame = findViewById(R.id.framePswreceiptIcon),
                 icon = findViewById(R.id.imgPswreceiptIcon),
                 label = findViewById(R.id.tvPswreceiptLabel),
                 screen = DashboardScreen.PSW_RECEIPT
-            ) { startActivity(Intent(this, PswReceipt::class.java)) },
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        PswReceipt::class.java
+                    )
+                )
+            },
+
             CardViews(
                 container = findViewById(R.id.cardGtdispatch),
                 iconFrame = findViewById(R.id.frameGtdispatchIcon),
                 icon = findViewById(R.id.imgGtdispatchIcon),
                 label = findViewById(R.id.tvGtdispatchLabel),
                 screen = DashboardScreen.GTD_DISPATCH
-            ) { startActivity(Intent(this, GtdDispatch::class.java)) }
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        GtdDispatch::class.java
+                    )
+                )
+            }
         )
 
-        val visibleCards = allCards.filter { it.screen in allowedScreens }
-        val hiddenCards = allCards.filter { it.screen !in allowedScreens }
+        val visibleCards = allCards.filter {
+            it.screen in allowedScreens
+        }
 
-        hiddenCards.forEach { it.container.visibility = View.GONE }
+        val hiddenCards = allCards.filter {
+            it.screen !in allowedScreens
+        }
+
+        hiddenCards.forEach {
+            it.container.visibility = View.GONE
+        }
 
         val tier = sizeTierFor(visibleCards.size)
-        visibleCards.forEach { card ->
-            card.container.visibility = View.VISIBLE
-            resizeCard(card, tier)
 
-            // Blocked until isDataLoaded flips true (see onApiCallCompleted()).
+        visibleCards.forEach { card ->
+
+            card.container.visibility = View.VISIBLE
+
+            resizeCard(
+                card,
+                tier
+            )
+
+            // Blocked until isDataLoaded flips true.
             card.container.setOnClickListener {
+
                 if (isDataLoaded) {
+
                     card.onClick()
+
                 } else {
+
                     Toast.makeText(
                         this,
                         "Please wait, items and stock are still loading...",
@@ -164,6 +300,154 @@ class Dashboard : AppCompatActivity() {
         }
 
         showWelcomePopup()
+
+    }
+
+    /**
+     * Kicks off the Stock API in the background. Progress updates arrive
+     * via onProgress on whatever thread syncStock() is currently running
+     * on (Dispatchers.IO here), so they're hopped back to the main thread
+     * with runOnUiThread before touching any views.
+     *
+     * On success: records the final count, updates the progress UI to a
+     * clean 100%, shows a "synced successfully" toast with the total
+     * record count, and calls onApiCallCompleted() to unlock the screen.
+     */
+    private fun fetchStockData() {
+
+        val orgnType = session.getModuleType()
+        val orgnCode = session.getOrganizationCode()
+
+        if (orgnType.isNullOrBlank() || orgnCode.isNullOrBlank()) {
+
+            Toast.makeText(
+                this,
+                "Session organization details are missing",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        lifecycleScope.launch {
+
+            val result = withContext(Dispatchers.IO) {
+
+                repository.syncStock(
+                    orgnType = orgnType,
+                    orgnCode = orgnCode
+                ) { percent, current, total ->
+
+                    runOnUiThread {
+                        updateLoadingProgress(percent, current, total)
+                    }
+                }
+            }
+
+            if (result.isSuccess) {
+
+                val totalSynced = result.getOrDefault(0)
+
+                android.util.Log.d(
+                    "Dashboard",
+                    "Stock sync completed successfully: $totalSynced records"
+                )
+
+                updateLoadingProgress(100, totalSynced, totalSynced)
+
+                Toast.makeText(
+                    this@Dashboard,
+                    "Stock Updated Successfully: $totalSynced records",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                onApiCallCompleted()
+
+            } else {
+
+                android.util.Log.e(
+                    "Dashboard",
+                    "Stock sync failed",
+                    result.exceptionOrNull()
+                )
+
+                Toast.makeText(
+                    this@Dashboard,
+                    "Stock sync failed",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                // NOTE: onApiCallCompleted() is intentionally NOT called
+                // here, so the screen stays locked and the dialog (if
+                // shown) stays up on failure rather than silently letting
+                // the user in with stale/missing stock data. Right now
+                // that means it stays locked indefinitely on failure --
+                // worth adding a dismiss + retry action here later.
+            }
+        }
+    }
+
+
+    /**
+     * Manual re-sync via the floating sync button. Unlike the first-launch
+     * flow in showWelcomePopup(), this skips the welcome popup entirely and
+     * goes straight to the blocking loading dialog + Stock API call, while
+     * the sync icon itself spins for as long as that dialog stays up.
+     */
+    private fun onSyncButtonClicked() {
+
+        if (!isDataLoaded || isSyncing) {
+
+            Toast.makeText(
+                this,
+                "Please wait, sync is already in progress...",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        isSyncing = true
+        isDataLoaded = false
+        apiCallsCompleted = 0
+
+        // Reset tracked progress so the dialog opens at 0%, not the
+        // previous sync's leftover 100%.
+        lastProgressPercent = 0
+        lastProgressCurrent = 0
+        lastProgressTotal = 0
+
+        syncButtonContainer.isEnabled = false
+        syncButtonContainer.alpha = 0.5f
+
+        startSyncIconRotation()
+        showLoadingDialogAndFetchData()
+        fetchStockData()
+    }
+
+    private fun startSyncIconRotation() {
+
+        syncIconAnimator?.cancel()
+
+        syncIconAnimator = ObjectAnimator.ofFloat(
+            btnSync,
+            "rotation",
+            0f,
+            360f
+        ).apply {
+
+            duration = 1000
+            repeatCount = ObjectAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            start()
+        }
+    }
+
+    private fun stopSyncIconRotation() {
+
+        syncIconAnimator?.cancel()
+        syncIconAnimator = null
+        btnSync.rotation = 0f
     }
 
     /**
@@ -173,29 +457,65 @@ class Dashboard : AppCompatActivity() {
      * sensible fallbacks in case the mapping changes later.
      */
     private fun sizeTierFor(visibleCount: Int): SizeTier = when (visibleCount) {
-        1 -> SizeTier(cardSizeDp = 210, iconSizeDp = 120, labelSizeSp = 18f)
-        2 -> SizeTier(cardSizeDp = 160, iconSizeDp = 95, labelSizeSp = 14f)
-        3 -> SizeTier(cardSizeDp = 130, iconSizeDp = 80, labelSizeSp = 12f)
-        else -> SizeTier(cardSizeDp = 115, iconSizeDp = 75, labelSizeSp = 11f)
+
+        1 -> SizeTier(
+            cardSizeDp = 210,
+            iconSizeDp = 120,
+            labelSizeSp = 18f
+        )
+
+        2 -> SizeTier(
+            cardSizeDp = 160,
+            iconSizeDp = 95,
+            labelSizeSp = 14f
+        )
+
+        3 -> SizeTier(
+            cardSizeDp = 130,
+            iconSizeDp = 80,
+            labelSizeSp = 12f
+        )
+
+        else -> SizeTier(
+            cardSizeDp = 115,
+            iconSizeDp = 75,
+            labelSizeSp = 11f
+        )
     }
 
-    private fun resizeCard(card: CardViews, tier: SizeTier) {
+    private fun resizeCard(
+        card: CardViews,
+        tier: SizeTier
+    ) {
+
         val cardPx = dp(tier.cardSizeDp)
         val iconPx = dp(tier.iconSizeDp)
 
-        card.container.layoutParams = card.container.layoutParams.apply {
-            width = cardPx
-            height = cardPx
-        }
-        card.iconFrame.layoutParams = card.iconFrame.layoutParams.apply {
-            width = iconPx
-            height = iconPx
-        }
-        card.icon.layoutParams = card.icon.layoutParams.apply {
-            width = iconPx
-            height = iconPx
-        }
-        card.label.setTextSize(TypedValue.COMPLEX_UNIT_SP, tier.labelSizeSp)
+        card.container.layoutParams =
+            card.container.layoutParams.apply {
+
+                width = cardPx
+                height = cardPx
+            }
+
+        card.iconFrame.layoutParams =
+            card.iconFrame.layoutParams.apply {
+
+                width = iconPx
+                height = iconPx
+            }
+
+        card.icon.layoutParams =
+            card.icon.layoutParams.apply {
+
+                width = iconPx
+                height = iconPx
+            }
+
+        card.label.setTextSize(
+            TypedValue.COMPLEX_UNIT_SP,
+            tier.labelSizeSp
+        )
     }
 
     private fun dp(value: Int): Int =
@@ -204,28 +524,41 @@ class Dashboard : AppCompatActivity() {
     /**
      * One-time popup in the bottom-left corner:
      *   1. Image + speech bubble fade/scale in
-     *   2. Bubble shows "Hello TeamLiftss....." for 4s
-     *   3. Cross-fades to "Items And Stocks Are Updating....Please Wait.." for 3s
-     *   4. The whole popup (lorry + bubble) DRIVES OFF to the right and
-     *      fades out -- not a shrink-in-place, an actual exit to the side.
+     *   2. Bubble shows "Hello <name>!!....." for 4s
+     *   3. Cross-fades to "Items And Stocks Are Updating....Please Wait.."
+     *   4. The whole popup drives off to the right and fades out.
      *   5. Immediately after it's off-screen, the blocking loading dialog
-     *      appears (see showLoadingDialogAndFetchData()).
+     *      appears (unless the sync already finished -- see
+     *      showLoadingDialogAndFetchData()).
      */
     private fun showWelcomePopup() {
-        val popupContainer = findViewById<View>(R.id.popupContainer)
-        val tvPopupText = findViewById<TextView>(R.id.tvPopupText)
 
-        val firstMessage = "Hello TeamLiftss!!....."
-        val secondMessage = "Items And Stocks Are\nUpdating....Please Wait.."
+        // Start Stock API in background immediately
+        fetchStockData()
+
+        val popupContainer =
+            findViewById<View>(R.id.popupContainer)
+
+        val tvPopupText =
+            findViewById<TextView>(R.id.tvPopupText)
+
+        val firstMessage =
+            "Hello $userName!!....."
+
+        val secondMessage =
+            "Items And Stocks Are\nUpdating....Please Wait.."
+
         val firstMessageDurationMs = 4000L
         val secondMessageDurationMs = 3000L
 
         // --- 1. Fade + scale in ---
+
         popupContainer.visibility = View.VISIBLE
         popupContainer.alpha = 0f
         popupContainer.scaleX = 0.7f
         popupContainer.scaleY = 0.7f
         popupContainer.translationX = 0f
+
         tvPopupText.text = firstMessage
         tvPopupText.alpha = 1f
 
@@ -237,24 +570,35 @@ class Dashboard : AppCompatActivity() {
             .start()
 
         // --- 2. Cross-fade to the second message ---
+
         popupHandler.postDelayed({
+
             tvPopupText.animate()
                 .alpha(0f)
                 .setDuration(700)
                 .withEndAction {
+
                     tvPopupText.text = secondMessage
+
                     tvPopupText.animate()
                         .alpha(1f)
                         .setDuration(700)
                         .start()
                 }
                 .start()
+
         }, firstMessageDurationMs)
 
-        // --- 3. Drive the whole popup off to the right, then hand off to the dialog ---
-        val totalBeforeExit = firstMessageDurationMs + secondMessageDurationMs
-        val driveOffDistance = resources.displayMetrics.widthPixels.toFloat()
+        // --- 3. Drive the whole popup off to the right ---
+
+        val totalBeforeExit =
+            firstMessageDurationMs + secondMessageDurationMs
+
+        val driveOffDistance =
+            resources.displayMetrics.widthPixels.toFloat()
+
         popupHandler.postDelayed({
+
             popupContainer.animate()
                 .translationX(driveOffDistance)
                 .alpha(0f)
@@ -263,139 +607,178 @@ class Dashboard : AppCompatActivity() {
                 .setDuration(900)
                 .setInterpolator(AccelerateInterpolator())
                 .withEndAction {
+
                     popupContainer.visibility = View.GONE
+
                     showLoadingDialogAndFetchData()
                 }
                 .start()
+
         }, totalBeforeExit)
     }
 
     /**
-     * Shows the non-cancelable "Items And Stock Loading" dialog with the
-     * flipping hourglass, and kicks off the two startup data calls. The
-     * dialog (and the card-tap block in onCreate) stay up until both calls
-     * report back via onApiCallCompleted().
+     * Shows the non-cancelable loading dialog with the flipping hourglass
+     * and a progress bar reflecting the Stock sync's real download
+     * progress. If the sync already finished by the time this runs (it
+     * starts back in showWelcomePopup(), so on a fast/small sync it can
+     * easily beat the popup's ~7s animation), the dialog is skipped
+     * entirely instead of popping up with nothing left to ever dismiss it.
      */
     private fun showLoadingDialogAndFetchData() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
-        val imgHourglass = dialogView.findViewById<ImageView>(R.id.imgHourglass)
 
-        loadingDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
+        if (isDataLoaded) {
+            return
+        }
+
+        val dialogView =
+            layoutInflater.inflate(
+                R.layout.dialog_loading,
+                null
+            )
+
+        val imgHourglass =
+            dialogView.findViewById<ImageView>(
+                R.id.imgHourglass
+            )
+
+        loadingProgressBar = dialogView.findViewById(R.id.progressLoading)
+        tvLoadingPercent = dialogView.findViewById(R.id.tvLoadingPercent)
+
+        // Reflect whatever progress already happened in the background
+        // while the welcome popup was playing, instead of restarting at 0%.
+        loadingProgressBar?.progress = lastProgressPercent
+        tvLoadingPercent?.text = "$lastProgressPercent%"
+
+        loadingDialog =
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
         loadingDialog?.setCanceledOnTouchOutside(false)
-        // The dialog window itself has its own default (square, opaque)
-        // background behind whatever view you give it -- without this line
-        // you see THAT square edge poking out around our rounded card.
-        loadingDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        loadingDialog?.window?.setBackgroundDrawableResource(
+            android.R.color.transparent
+        )
+
         loadingDialog?.show()
-        // Without an explicit width the window stretches edge-to-edge;
-        // this centers it with breathing room on both sides instead.
+
         loadingDialog?.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.82).toInt(),
             WindowManager.LayoutParams.WRAP_CONTENT
         )
 
         startHourglassFlip(imgHourglass)
-        //fetchDispatchAndStockData()
+
+
     }
 
     /**
-     * PLACEHOLDER for your two real startup API calls.
-     *
-     * TODO: replace the two postDelayed{} blocks below with your actual
-     * network calls (Retrofit/coroutines/etc. -- whatever this project
-     * uses elsewhere). Call onApiCallCompleted() exactly once from EACH
-     * API's own success callback:
-     *
-     *   dispatchApi.getStock { result ->
-     *       // handle result...
-     *       onApiCallCompleted()
-     *   }
-     *
-     *   stockApi.getItems { result ->
-     *       // handle result...
-     *       onApiCallCompleted()
-     *   }
-     *
-     * Do not call onApiCallCompleted() more than once per API, and don't
-     * call it on failure unless you want the screen to unlock anyway --
-     * for a failed call you'll more likely want to dismiss the dialog,
-     * show an error, and offer a retry instead.
+     * Updates the progress bar/percentage in the loading dialog if it's
+     * currently showing, and always remembers the latest values so a
+     * dialog created LATER (see showLoadingDialogAndFetchData()) can pick
+     * up wherever the sync actually is instead of starting over at 0%.
      */
-    /*  private fun fetchDispatchAndStockData() {
-          // Simulated "API #1" -- remove once the real call is wired in.
-          popupHandler.postDelayed({
-              onApiCallCompleted()
-          }, 2500)
+    private fun updateLoadingProgress(percent: Int, current: Int, total: Int) {
 
-          // Simulated "API #2" -- remove once the real call is wired in.
-          popupHandler.postDelayed({
-              onApiCallCompleted()
-          }, 3500)
-      }*/
+        lastProgressPercent = percent
+        lastProgressCurrent = current
+        lastProgressTotal = total
+
+        loadingProgressBar?.progress = percent
+        tvLoadingPercent?.text = "$percent%"
+    }
 
     /**
-     * Call this once per startup API call, from that API's own success
-     * callback. Once both have reported in, the loading dialog is
-     * dismissed and the dashboard cards unlock.
+     * Called once when the Stock API completes successfully.
+     * Once the required API count is reached, the loading dialog
+     * is dismissed and the dashboard cards become usable.
      */
     private fun onApiCallCompleted() {
+
         apiCallsCompleted++
+
         if (apiCallsCompleted >= totalApiCallsNeeded) {
-            hourglassAnimator?.cancel()
-            loadingDialog?.dismiss()
+
             isDataLoaded = true
+            isSyncing = false
+
+            hourglassAnimator?.cancel()
+            stopSyncIconRotation()
+
+            syncButtonContainer.isEnabled = true
+            syncButtonContainer.alpha = 1f
+
+            loadingDialog?.dismiss()
         }
     }
 
     /** Continuously flips the hourglass image 180 degrees, pauses, flips back, repeats. */
     private fun startHourglassFlip(imageView: ImageView) {
-        val kf0 = Keyframe.ofFloat(0f, 0f)
-        val kf1 = Keyframe.ofFloat(0.3f, 180f)   // flip down
-        val kf2 = Keyframe.ofFloat(0.55f, 180f)  // hold
-        val kf3 = Keyframe.ofFloat(0.85f, 360f)  // flip back
-        val kf4 = Keyframe.ofFloat(1f, 360f)     // hold
-        val rotationHolder = PropertyValuesHolder.ofKeyframe("rotation", kf0, kf1, kf2, kf3, kf4)
 
-        hourglassAnimator = ObjectAnimator.ofPropertyValuesHolder(imageView, rotationHolder).apply {
-            duration = 3000
-            repeatCount = ObjectAnimator.INFINITE
-            interpolator = LinearInterpolator()
-            start()
-        }
+        val kf0 = Keyframe.ofFloat(
+            0f,
+            0f
+        )
+
+        val kf1 = Keyframe.ofFloat(
+            0.3f,
+            180f
+        )
+
+        val kf2 = Keyframe.ofFloat(
+            0.55f,
+            180f
+        )
+
+        val kf3 = Keyframe.ofFloat(
+            0.85f,
+            360f
+        )
+
+        val kf4 = Keyframe.ofFloat(
+            1f,
+            360f
+        )
+
+        val rotationHolder =
+            PropertyValuesHolder.ofKeyframe(
+                "rotation",
+                kf0,
+                kf1,
+                kf2,
+                kf3,
+                kf4
+            )
+
+        hourglassAnimator =
+            ObjectAnimator.ofPropertyValuesHolder(
+                imageView,
+                rotationHolder
+            ).apply {
+
+                duration = 3000
+
+                repeatCount =
+                    ObjectAnimator.INFINITE
+
+                interpolator =
+                    LinearInterpolator()
+
+                start()
+            }
     }
 
     override fun onDestroy() {
+
         super.onDestroy()
-        // Cancel any pending popup/API-simulation callbacks and stop the
-        // animation / dismiss the dialog so nothing touches views or leaks
-        // a window after the Activity is gone.
+
         popupHandler.removeCallbacksAndMessages(null)
+
         hourglassAnimator?.cancel()
+        syncIconAnimator?.cancel()
+
         loadingDialog?.dismiss()
     }
-
-    /*
-     * ------------------------------------------------------------------
-     * OPTIONAL: show the welcome popup only on the very first app launch
-     * ever, instead of every time the dashboard opens. Replace the
-     * showWelcomePopup() call in onCreate() with
-     * maybeShowWelcomePopupOnce() below. The loading dialog / API gate
-     * is unaffected either way -- it always runs, since it's gating real
-     * data, not just a greeting.
-     * ------------------------------------------------------------------
-     *
-     * private fun maybeShowWelcomePopupOnce() {
-     *     val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-     *     val alreadyShown = prefs.getBoolean("welcome_popup_shown", false)
-     *     if (!alreadyShown) {
-     *         showWelcomePopup()
-     *         prefs.edit().putBoolean("welcome_popup_shown", true).apply()
-     *     } else {
-     *         showLoadingDialogAndFetchData()
-     *     }
-     * }
-     */
 }

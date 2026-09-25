@@ -6,7 +6,7 @@
     Shown via AlertDialog.Builder(...).setView(...) from Dashboard.kt,
     non-cancelable, while the two startup API calls are in flight.
     Dashboard.kt also makes the dialog WINDOW transparent and gives it
-    an explicit centered width  without that, this card's rounded
+    an explicit centered width - without that, this card's rounded
     corners get hidden behind the dialog window's own square default
     background.
 -->
@@ -55,5 +55,27 @@
         android:text="Please wait a moment"
         android:textColor="#A8935F"
         android:textSize="12sp" />
+
+    <ProgressBar
+        android:id="@+id/progressLoading"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="100"
+        android:progress="0"
+        android:progressBackgroundTint="#EDE3D0"
+        android:progressTint="#D9A441" />
+
+    <TextView
+        android:id="@+id/tvLoadingPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="serif"
+        android:text="0%"
+        android:textColor="@color/brown_font"
+        android:textSize="12sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

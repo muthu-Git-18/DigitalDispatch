@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Reusable searchable-spinner dialog content.
+    Put this file at: res/layout/dialog_searchable_spinner.xml
+
+    Shown via SearchableSpinnerDialog.kt from anywhere in the app -
+    not tied to login. The window itself is made transparent + given
+    an explicit width in code (same fix as the loading dialog), so
+    this card's rounded corners show correctly instead of the default
+    square dialog-window edge poking out around it.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_spinner_dialog"
+    android:elevation="16dp">
+
+    <TextView
+        android:id="@+id/tvSpinnerTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:text="Select"
+        android:textColor="@color/brown_font"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <!-- Search box -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/input_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="Search"
+            android:src="@drawable/ic_search"
+            app:tint="#A47C3C" />
+
+        <EditText
+            android:id="@+id/etSpinnerSearch"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="Search..."
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:textColor="#2E2418"
+            android:textColorHint="#B5A483"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Shown only when the search text matches nothing -->
+    <TextView
+        android:id="@+id/tvSpinnerEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="No matches found"
+        android:textColor="#B5A483"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSpinnerOptions"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:layout_marginTop="8dp"
+        android:overScrollMode="ifContentScrolls" />
+
+</LinearLayout>

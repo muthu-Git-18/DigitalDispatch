@@ -6,10 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.united.digitaldispatch.data.local.dao.ItemMasterDao
 import com.united.digitaldispatch.data.local.dao.OrganizationDao
+import com.united.digitaldispatch.data.local.dao.StockDao
 import com.united.digitaldispatch.data.local.dao.TransporterDao
 import com.united.digitaldispatch.data.local.dao.UserDao
 import com.united.digitaldispatch.data.local.entity.ItemMasterEntity
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
+import com.united.digitaldispatch.data.local.entity.StockEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 
@@ -17,9 +19,10 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
     entities = [OrganizationEntity::class,
                 UserMasterEntity::class,
                 TransporterEntity::class,
-                ItemMasterEntity::class
+                ItemMasterEntity::class,
+                StockEntity::class
                ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,6 +32,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun transporterDao(): TransporterDao
 
     abstract fun itemMasterDao(): ItemMasterDao
+
+    abstract fun stockDao(): StockDao
 
     companion object {
         @Volatile

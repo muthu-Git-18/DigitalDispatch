@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
+import com.united.digitaldispatch.utils.SearchableSpinnerDialog
 import com.united.digitaldispatch.utils.SessionManager
 import java.util.concurrent.Executors
 import com.united.digitaldispatch.data.local.AppDatabase
@@ -24,6 +25,13 @@ import java.security.MessageDigest
  * organization. Validation rules mirror the old WH/PPD LoginActivity
  * (see [LoginValidator]) -- the difference here is that ONE screen now
  * handles all four modules instead of each module being its own app.
+ *
+ * Module and Organization are picked via [SearchableSpinnerDialog] --
+ * a reusable searchable dropdown (search box + live-filtered list)
+ * used the same way .setItems() used to be: it hands back the ORIGINAL
+ * index of whichever label was tapped, so the existing index-based
+ * lookups below (modules[which], organizationsForModule[which]) didn't
+ * need to change.
  *
  * The API isn't ready yet, so credential checking runs entirely against
  * the local Room tables (see [AppDatabase]), seeded for now by
@@ -108,22 +116,23 @@ class LoginActivity : AppCompatActivity() {
                         return@runOnUiThread
                     }
 
-                    AlertDialog.Builder(this)
-                        .setTitle("Select Module")
-                        .setItems(modules.toTypedArray()) { _, which ->
+                    SearchableSpinnerDialog(
+                        this,
+                        "Select Module",
+                        modules
+                    ) { which ->
 
-                            selectedModule = modules[which]
+                        selectedModule = modules[which]
 
-                            tvDropdownOne.text = selectedModule
+                        tvDropdownOne.text = selectedModule
 
-                            // Reset organization when module changes
-                            selectedOrganization = null
-                            organizationsForModule = emptyList()
-                            tvDropdownTwo.text = "Select Organization"
+                        // Reset organization when module changes
+                        selectedOrganization = null
+                        organizationsForModule = emptyList()
+                        tvDropdownTwo.text = "Select Organization"
 
-                            loadOrganizationsForSelectedModule()
-                        }
-                        .show()
+                        loadOrganizationsForSelectedModule()
+                    }.show()
                 }
             }
         }
@@ -142,14 +151,16 @@ class LoginActivity : AppCompatActivity() {
             }
             val names = organizationsForModule
                 .map { "${it.organizationCode} - ${it.organizationName ?: ""}" }
-                .toTypedArray()
-            AlertDialog.Builder(this)
-                .setTitle("Select Organization")
-                .setItems(names) { _, which ->
-                    selectedOrganization = organizationsForModule[which]
-                    tvDropdownTwo.text = names[which]
-                }
-                .show()
+
+            SearchableSpinnerDialog(
+                this,
+                "Select Organization",
+                names
+            ) { which ->
+
+                selectedOrganization = organizationsForModule[which]
+                tvDropdownTwo.text = names[which]
+            }.show()
         }
     }
 

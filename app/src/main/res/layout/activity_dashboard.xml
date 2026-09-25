@@ -409,7 +409,7 @@
             android:layout_height="220dp"
             android:layout_gravity="bottom|start"
             android:scaleType="fitCenter"
-            android:src="@drawable/dispatchreceiptwelcome"
+            android:src="@drawable/og_welcome_img"
             android:contentDescription="Welcome" />
 
         <!-- Bubble + tail, kept together so they always line up.
