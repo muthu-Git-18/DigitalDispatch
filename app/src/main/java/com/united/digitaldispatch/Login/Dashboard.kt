@@ -90,6 +90,8 @@ class Dashboard : AppCompatActivity() {
 
     private lateinit var tvDashboardName : TextView
 
+    private lateinit var orgCode : String
+
     private lateinit var moduleType : String
 
     private lateinit var userName : String
@@ -174,6 +176,7 @@ class Dashboard : AppCompatActivity() {
         }
 
         moduleType = module
+        orgCode= session.getOrganizationCode().toString()
         userName = session.getUserName().orEmpty()
 
         tvDashboardName.text = "$moduleType Dashboard"
@@ -312,7 +315,51 @@ class Dashboard : AppCompatActivity() {
      * On success: records the final count, updates the progress UI to a
      * clean 100%, shows a "synced successfully" toast with the total
      * record count, and calls onApiCallCompleted() to unlock the screen.
+     *
      */
+
+    private fun fetchTruckMasterData() {
+
+        if (orgCode.isNullOrBlank()) {
+            Toast.makeText(
+                this,
+                "Organization code is missing",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        lifecycleScope.launch {
+
+            val result = withContext(Dispatchers.IO) {
+                repository.syncTruckMaster(orgCode)
+            }
+
+            if (result.isSuccess) {
+
+                android.util.Log.d(
+                    "Dashboard",
+                    "Truck master sync completed successfully"
+                )
+
+                fetchStockData()
+
+            } else {
+
+                android.util.Log.e(
+                    "Dashboard",
+                    "Truck master sync failed",
+                    result.exceptionOrNull()
+                )
+
+                Toast.makeText(
+                    this@Dashboard,
+                    "Truck master sync failed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
     private fun fetchStockData() {
 
         val orgnType = session.getModuleType()
@@ -534,7 +581,7 @@ class Dashboard : AppCompatActivity() {
     private fun showWelcomePopup() {
 
         // Start Stock API in background immediately
-        fetchStockData()
+        fetchTruckMasterData()
 
         val popupContainer =
             findViewById<View>(R.id.popupContainer)

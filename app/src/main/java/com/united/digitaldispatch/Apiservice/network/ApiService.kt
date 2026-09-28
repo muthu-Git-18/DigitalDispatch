@@ -1,10 +1,15 @@
 package com.united.digitaldispatch.Apiservice.network
 
+import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
+import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Login.models.ItemMasterResponse
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.Login.models.StockResponse
+import com.united.digitaldispatch.Login.models.TruckMasterResponse
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ApiService {
@@ -26,4 +31,14 @@ interface ApiService {
         @Query("pageSize") pageSize: Int
     ): Response<StockResponse>
 
+
+    @GET("Master/truck-master")
+    suspend fun getTruckMaster(
+        @Query("fromOrgn") fromOrgn: String
+    ): Response<TruckMasterResponse>
+
+    @POST("Dispatch/create-dispatch-header")
+    suspend fun createDispatchHeader(
+        @Body request: CreateDispatchHeaderRequest
+    ): Response<CreateDispatchHeaderResponse>
 }

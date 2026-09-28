@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
+import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 
 @Dao
 interface TransporterDao {
@@ -15,4 +16,26 @@ interface TransporterDao {
 
     @Query("SELECT COUNT(*) FROM transporter_table")
     fun count(): Int
+
+
+    //TRUCK MASTER
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertTruckMaster(trucks: List<TruckMasterEntity>)
+
+    @Query("DELETE FROM truck_master_table")
+    fun deleteTruckMaster()
+
+    @Query("SELECT * FROM truck_master_table")
+    fun getTruckMaster(): List<TruckMasterEntity>
+
+    @Query("""
+    SELECT * FROM truck_master_table
+    WHERE fromOrgn = :fromOrgn
+    AND toOrgn = :toOrgn
+""")
+    fun getTruckMasterByOrganizations(
+        fromOrgn: String,
+        toOrgn: String
+    ): List<TruckMasterEntity>
 }

@@ -1,12 +1,15 @@
 package com.united.digitaldispatch.Apiservice.repository
 
 import com.united.digitaldispatch.Apiservice.network.ApiService
+import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
+import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.ItemMasterEntity
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.StockEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
+import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -125,6 +128,59 @@ class MasterDataRepository(
         }
     }
 
+
+    suspend fun syncTruckMaster(
+        fromOrgn: String
+    ): Result<Unit> {
+        return try {
+
+            val response = apiService.getTruckMaster(fromOrgn)
+
+            if (!response.isSuccessful) {
+                throw Exception(
+                    "Truck master API failed: ${response.code()}"
+                )
+            }
+
+            val body = response.body()
+                ?: throw Exception("Truck master response is empty")
+
+            val trucks = body.data.orEmpty().map { truck ->
+                TruckMasterEntity(
+                    fromOrgn = truck.fromOrgn,
+                    toOrgn = truck.toOrgn,
+                    truckType = truck.truckType,
+                    freightValue = truck.freightValue
+                )
+            }
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    database.transporterDao().deleteTruckMaster()
+
+                    database.transporterDao().insertTruckMaster(trucks)
+                }
+            }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "Truck master sync completed: ${trucks.size} records"
+            )
+
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e(
+                "MasterDataRepository",
+                "Truck master sync failed",
+                e
+            )
+
+            Result.failure(e)
+        }
+    }
 
     suspend fun syncItemMaster(): Result<Unit> {
 
@@ -360,5 +416,53 @@ class MasterDataRepository(
         }
     }
 
+
+    suspend fun createDispatchHeader(
+        request: CreateDispatchHeaderRequest
+    ): Result<CreateDispatchHeaderResponse> {
+
+        return try {
+
+            val response = apiService.createDispatchHeader(request)
+
+            if (!response.isSuccessful) {
+                throw Exception(
+                    "Create dispatch API failed: ${response.code()}"
+                )
+            }
+
+            val body = response.body()
+                ?: throw Exception(
+                    "Create dispatch API returned empty response"
+                )
+
+            Result.success(body)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e(
+                "MasterDataRepository",
+                "Create dispatch header failed",
+                e
+            )
+
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTruckTypes(
+        fromOrgn: String,
+        toOrgn: String
+    ): List<TruckMasterEntity> {
+
+        return withContext(Dispatchers.IO) {
+            database
+                .transporterDao()
+                .getTruckMasterByOrganizations(
+                    fromOrgn = fromOrgn,
+                    toOrgn = toOrgn
+                )
+        }
+    }
 
 }

@@ -13,6 +13,7 @@ import com.united.digitaldispatch.data.local.entity.ItemMasterEntity
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.StockEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
+import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 
 @Database(
@@ -20,7 +21,8 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
                 UserMasterEntity::class,
                 TransporterEntity::class,
                 ItemMasterEntity::class,
-                StockEntity::class
+                StockEntity::class,
+                TruckMasterEntity::class
                ],
     version = 4,
     exportSchema = false

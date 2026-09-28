@@ -19,6 +19,9 @@ interface OrganizationDao {
     @Query("SELECT * FROM organization_table WHERE organizationType = :moduleType ORDER BY organizationName")
     fun getOrganizationsForModule(moduleType: String): List<OrganizationEntity>
 
+    @Query("SELECT * FROM organization_table ORDER BY organizationName")
+    fun getAllOrganizations(): List<OrganizationEntity>
+
     @Query("SELECT * FROM organization_table WHERE organizationCode = :code LIMIT 1")
     fun getByCode(code: String): OrganizationEntity?
 

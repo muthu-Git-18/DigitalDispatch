@@ -8,7 +8,6 @@
     android:fitsSystemWindows="true"
     android:background="#D9D8D5">
 
-
     <!-- =========================================================
          BACKGROUND WATERMARK
          ========================================================= -->
@@ -26,9 +25,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
     <!-- =========================================================
-         NORMAL CHARCOAL HEADER
+         HEADER
          ========================================================= -->
 
     <RelativeLayout
@@ -41,14 +39,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Gold bottom border -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_alignParentBottom="true"
             android:background="#DCB765" />
 
-        <!-- LOGO -->
         <FrameLayout
             android:id="@+id/logoContainer"
             android:layout_width="62dp"
@@ -70,7 +66,6 @@
 
         </FrameLayout>
 
-        <!-- TITLE + SUBTITLE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -105,7 +100,6 @@
 
         </LinearLayout>
 
-        <!-- ORG + DATE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -123,7 +117,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -148,7 +142,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 08-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -167,9 +161,8 @@
 
     </RelativeLayout>
 
-
     <!-- =========================================================
-         BODY (scrollable, card-styled)
+         BODY
          ========================================================= -->
 
     <ScrollView
@@ -192,7 +185,6 @@
             android:paddingEnd="20dp"
             android:paddingTop="14dp"
             android:paddingBottom="14dp">
-
 
             <!-- =====================================================
                  CARD 1 : WEIGHMENT
@@ -230,7 +222,6 @@
 
             </LinearLayout>
 
-
             <!-- =====================================================
                  CARD 2 : SENDER / RECEIVER ORG
                  ===================================================== -->
@@ -243,6 +234,8 @@
                 android:elevation="8dp"
                 android:orientation="vertical"
                 android:padding="12dp">
+
+                <!-- Sender Organization -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -269,6 +262,8 @@
 
                 </LinearLayout>
 
+                <!-- Receiver Organization -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -284,19 +279,38 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/spRecOrg"
+                    <LinearLayout
+                        android:id="@+id/dropdownReceiverOrg"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
                         android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingStart="10dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingEnd="8dp">
+
+                        <TextView
+                            android:id="@+id/tvReceiverOrg"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select Receiver Organization"
+                            android:textColor="#5A4630"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Expand"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="#A47C3C" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
-
 
             <!-- =====================================================
                  CARD 3 : VEHICLE / DRIVER DETAILS
@@ -312,6 +326,7 @@
                 android:padding="12dp">
 
                 <!-- Truck No -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -343,6 +358,7 @@
                 </LinearLayout>
 
                 <!-- RC No -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -375,6 +391,7 @@
                 </LinearLayout>
 
                 <!-- Driver Name -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -407,6 +424,7 @@
                 </LinearLayout>
 
                 <!-- Driver License -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -440,7 +458,6 @@
 
             </LinearLayout>
 
-
             <!-- =====================================================
                  CARD 4 : TRANSPORT DETAILS
                  ===================================================== -->
@@ -454,7 +471,8 @@
                 android:orientation="vertical"
                 android:padding="12dp">
 
-                <!-- Transporter Name -->
+                <!-- Transporter -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -481,6 +499,7 @@
                 </LinearLayout>
 
                 <!-- Type of Truck -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -496,18 +515,39 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/spTypeofTruck"
+                    <LinearLayout
+                        android:id="@+id/dropdownTruckType"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
                         android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingStart="10dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingEnd="8dp">
+
+                        <TextView
+                            android:id="@+id/tvTruckType"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select Type of Truck"
+                            android:textColor="#5A4630"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Expand"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="#A47C3C" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
                 <!-- Freight Charges -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -554,9 +594,8 @@
 
     </ScrollView>
 
-
     <!-- =========================================================
-         FOOTER (same fixed-height pattern as other screens)
+         FOOTER
          ========================================================= -->
 
     <LinearLayout
@@ -574,8 +613,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Save -->
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSave"
             android:layout_width="0dp"
@@ -590,8 +627,6 @@
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
-
-        <!-- Clear -->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnClear"
@@ -608,8 +643,6 @@
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
-
-        <!-- Back -->
 
         <FrameLayout
             android:layout_width="52dp"
