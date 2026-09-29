@@ -266,9 +266,9 @@ class LoginActivity : AppCompatActivity() {
                             userName = result.userName,
                             organizationCode = organization.organizationCode,
                             moduleType = module,
-                            userRights = result.userRights
+                            userRights = result.userRights,
+                            userId = employeeId
                         )
-
                         Toast.makeText(
                             this,
                             "Login successful",

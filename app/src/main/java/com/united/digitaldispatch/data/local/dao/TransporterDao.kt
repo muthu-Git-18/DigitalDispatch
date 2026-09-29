@@ -17,6 +17,8 @@ interface TransporterDao {
     @Query("SELECT COUNT(*) FROM transporter_table")
     fun count(): Int
 
+    @Query("SELECT * FROM transporter_table ORDER BY transporterName")
+    fun getTransporters(): List<TransporterEntity>
 
     //TRUCK MASTER
 
@@ -36,6 +38,15 @@ interface TransporterDao {
 """)
     fun getTruckMasterByOrganizations(
         fromOrgn: String,
-        toOrgn: String
+        toOrgn: String?
     ): List<TruckMasterEntity>
+
+
+    @Query("""
+    SELECT DISTINCT toOrgn
+    FROM truck_master_table
+    WHERE toOrgn IS NOT NULL
+    ORDER BY toOrgn
+""")
+    fun getDistinctToOrganizations(): List<String>
 }

@@ -18,7 +18,7 @@ data class CreateDispatchHeaderRequest(
     val attribute2: String,
     val attribute3: String,
     val isWmsShipment: String,
-    val attribute4: String,
+    val attribute4: String?,
     val weighmentType: String
 )
 

@@ -9,6 +9,7 @@ class SessionManager(context: Context) {
 
     companion object {
         private const val KEY_LOGGED_IN = "logged_in"
+        private const val KEY_USER_ID = "user_id"
         private const val KEY_EMPLOYEE_CODE = "employee_code"
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_ORGANIZATION_CODE = "organization_code"
@@ -21,10 +22,12 @@ class SessionManager(context: Context) {
         userName: String?,
         organizationCode: String,
         moduleType: String,
-        userRights: String?
+        userRights: String?,
+        userId: String? = null
     ) {
         preferences.edit()
             .putBoolean(KEY_LOGGED_IN, true)
+            .putString(KEY_USER_ID, userId)
             .putString(KEY_EMPLOYEE_CODE, employeeCode)
             .putString(KEY_USER_NAME, userName)
             .putString(KEY_ORGANIZATION_CODE, organizationCode)
@@ -35,6 +38,10 @@ class SessionManager(context: Context) {
 
     fun isLoggedIn(): Boolean {
         return preferences.getBoolean(KEY_LOGGED_IN, false)
+    }
+
+    fun getUserId(): String? {
+        return preferences.getString(KEY_USER_ID, null)
     }
 
     fun getEmployeeCode(): String? {

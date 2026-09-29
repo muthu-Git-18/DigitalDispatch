@@ -54,6 +54,10 @@ class DispatchViewModel(
         }
     }
 
+    fun resetCreateDispatchState() {
+        _createDispatchState.value = CreateDispatchState.Idle
+    }
+
 
     // -----------------------------
     // TRUCK MASTER
@@ -70,7 +74,7 @@ class DispatchViewModel(
 
     fun loadTruckTypes(
         fromOrgn: String,
-        toOrgn: String
+        toOrgn: String?
     ) {
 
         viewModelScope.launch {
@@ -94,6 +98,39 @@ class DispatchViewModel(
                 _truckMasterState.value =
                     TruckMasterState.Error(
                         e.message ?: "Failed to load truck types"
+                    )
+            }
+        }
+    }
+
+    // -----------------------------
+    // RECEIVER ORGANIZATIONS
+    // -----------------------------
+
+    private val _receiverOrganizationsState =
+        MutableStateFlow<ReceiverOrganizationsState>(
+            ReceiverOrganizationsState.Idle
+        )
+
+    val receiverOrganizationsState: StateFlow<ReceiverOrganizationsState> =
+        _receiverOrganizationsState
+
+    fun loadReceiverOrganizations() {
+        viewModelScope.launch {
+            _receiverOrganizationsState.value =
+                ReceiverOrganizationsState.Loading
+
+            try {
+                val organizations =
+                    repository.getTruckMasterOrganizations()
+
+                _receiverOrganizationsState.value =
+                    ReceiverOrganizationsState.Success(organizations)
+
+            } catch (e: Exception) {
+                _receiverOrganizationsState.value =
+                    ReceiverOrganizationsState.Error(
+                        e.message ?: "Failed to load receiver organizations"
                     )
             }
         }
@@ -138,4 +175,17 @@ sealed class TruckMasterState {
     data class Error(
         val message: String
     ) : TruckMasterState()
+}
+
+sealed class ReceiverOrganizationsState {
+    object Idle : ReceiverOrganizationsState()
+    object Loading : ReceiverOrganizationsState()
+
+    data class Success(
+        val organizations: List<String>
+    ) : ReceiverOrganizationsState()
+
+    data class Error(
+        val message: String
+    ) : ReceiverOrganizationsState()
 }

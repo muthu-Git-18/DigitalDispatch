@@ -13,7 +13,7 @@ import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
+import org.json.JSONObject
 
 
 class MasterDataRepository(
@@ -426,8 +426,10 @@ class MasterDataRepository(
             val response = apiService.createDispatchHeader(request)
 
             if (!response.isSuccessful) {
+                val serverMessage = parseServerMessage(response.errorBody()?.string())
+
                 throw Exception(
-                    "Create dispatch API failed: ${response.code()}"
+                    serverMessage ?: "Create dispatch API failed: ${response.code()}"
                 )
             }
 
@@ -450,9 +452,18 @@ class MasterDataRepository(
         }
     }
 
+    private fun parseServerMessage(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+
+        return try {
+            JSONObject(raw).optString("message").takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null   // body was not JSON
+        }
+    }
     suspend fun getTruckTypes(
         fromOrgn: String,
-        toOrgn: String
+        toOrgn: String?
     ): List<TruckMasterEntity> {
 
         return withContext(Dispatchers.IO) {
@@ -462,6 +473,14 @@ class MasterDataRepository(
                     fromOrgn = fromOrgn,
                     toOrgn = toOrgn
                 )
+        }
+    }
+
+    suspend fun getTruckMasterOrganizations(): List<String> {
+        return withContext(Dispatchers.IO) {
+            database
+                .transporterDao()
+                .getDistinctToOrganizations()
         }
     }
 
