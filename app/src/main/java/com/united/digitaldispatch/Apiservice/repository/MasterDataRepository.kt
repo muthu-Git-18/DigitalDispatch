@@ -3,8 +3,10 @@ package com.united.digitaldispatch.Apiservice.repository
 import com.united.digitaldispatch.Apiservice.network.ApiService
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
+import com.united.digitaldispatch.Dispatch.models.DispatchHeaderItem
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.data.local.AppDatabase
+import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.ItemMasterEntity
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.StockEntity
@@ -14,6 +16,8 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 class MasterDataRepository(
@@ -482,6 +486,135 @@ class MasterDataRepository(
                 .transporterDao()
                 .getDistinctToOrganizations()
         }
+    }
+
+
+    suspend fun syncDispatchHeaders(orgnCode: String): Result<Int> {
+        return try {
+
+            val response = apiService.getDispatchHeaders(orgnCode)
+
+            if (!response.isSuccessful) {
+                val serverMessage = parseServerMessage(response.errorBody()?.string())
+                throw Exception(
+                    serverMessage ?: "Dispatch headers API failed: ${response.code()}"
+                )
+            }
+
+            val body = response.body()
+                ?: throw Exception("Dispatch headers response is empty")
+
+            val headers = body.data.orEmpty().mapNotNull { it.toEntity() }
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+                    database.dispatchHeaderDao().deleteAll()
+                    database.dispatchHeaderDao().insertAll(headers)
+                }
+            }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "Dispatch headers sync completed: ${headers.size} records"
+            )
+
+            Result.success(headers.size)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e("MasterDataRepository", "Dispatch headers sync failed", e)
+
+            Result.failure(e)
+        }
+    }
+
+    /** Local headers, newest first. */
+    suspend fun getLocalDispatchHeaders(): List<DispatchHeaderEntity> {
+        return withContext(Dispatchers.IO) {
+            database.dispatchHeaderDao()
+                .getAll()
+                .sortedByDescending { parseHeaderDate(it.senderDate) }
+        }
+    }
+
+    /** Store a header we just created, so it shows in the list without a re-sync. */
+    suspend fun saveCreatedHeaderLocally(request: CreateDispatchHeaderRequest) {
+        withContext(Dispatchers.IO) {
+            database.dispatchHeaderDao().insert(
+                DispatchHeaderEntity(
+                    shipmentNo = request.shipmentNo.orEmpty(),
+                    senderOrgnCode = request.senderOrgnCode,
+                    receiverOrgnCode = request.receiverOrgnCode,
+                    senderDate = normalizeHeaderDate(request.senderDate),
+                    sentBy = request.sentBy,
+                    senderTruckNo = request.senderTruckNo,
+                    rcNo = request.rcNo,
+                    driverName = request.driverName,
+                    drivingLicenceNo = request.drivingLicenceNo,
+                    transportName = request.transportName,
+                    typeOfTruck = request.typeOfTruck,
+                    frieghtCharges = request.frieghtCharges,
+                    uom = request.uom,
+                    status = request.status,
+                    attribute1 = request.frieghtCharges?.toString(),
+                    attribute2 = request.attribute2,
+                    attribute3 = request.attribute3,
+                    attribute4 = request.attribute4,
+                    isWmsShipment = request.isWmsShipment,
+                    weighmentType = request.weighmentType
+                )
+            )
+        }
+    }
+
+    private fun DispatchHeaderItem.toEntity(): DispatchHeaderEntity? {
+        val no = shipmentNo?.trim()
+        if (no.isNullOrEmpty()) return null
+
+        return DispatchHeaderEntity(
+            shipmentNo = no,
+            senderOrgnCode = senderOrgnCode,
+            receiverOrgnCode = receiverOrgnCode,
+            senderDate = senderDate,
+            sentBy = sentBy,
+            senderTruckNo = senderTruckNo,
+            rcNo = rcNo,
+            driverName = driverName,
+            drivingLicenceNo = drivingLicenceNo,
+            transportName = transportName,
+            typeOfTruck = typeOfTruck,
+            frieghtCharges = frieghtCharges,
+            uom = uom,
+            status = status,
+            attribute1 = attribute1,
+            attribute2 = attribute2,
+            attribute3 = attribute3,
+            attribute4 = attribute4,
+            isWmsShipment = isWmsShipment,
+            weighmentType = weighmentType
+        )
+    }
+
+    // server format: "29-09-2026 15:08:32"
+    private val headerDatePatterns = listOf("dd-MM-yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss")
+
+    private fun parseHeaderDate(value: String?): Long {
+        if (value.isNullOrBlank()) return 0L
+        for (pattern in headerDatePatterns) {
+            try {
+                val parsed = SimpleDateFormat(pattern, Locale.US).parse(value)
+                if (parsed != null) return parsed.time
+            } catch (_: Exception) {
+            }
+        }
+        return 0L
+    }
+
+    private fun normalizeHeaderDate(value: String?): String? {
+        if (value.isNullOrBlank()) return value
+        val time = parseHeaderDate(value)
+        if (time == 0L) return value
+        return SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US).format(java.util.Date(time))
     }
 
 }

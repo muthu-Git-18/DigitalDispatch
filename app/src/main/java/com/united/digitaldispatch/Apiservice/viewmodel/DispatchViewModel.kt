@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
+import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +39,11 @@ class DispatchViewModel(
             val result =
                 repository.createDispatchHeader(request)
 
+            // keep the local ref-id list in step with the server
+            if (result.isSuccess) {
+                runCatching { repository.saveCreatedHeaderLocally(request) }
+            }
+
             _createDispatchState.value = result.fold(
 
                 onSuccess = { response ->
@@ -56,6 +62,49 @@ class DispatchViewModel(
 
     fun resetCreateDispatchState() {
         _createDispatchState.value = CreateDispatchState.Idle
+    }
+
+
+    // -----------------------------
+    // DISPATCH HEADERS (ref id list)
+    // -----------------------------
+
+    private val _syncHeadersState =
+        MutableStateFlow<SyncHeadersState>(SyncHeadersState.Idle)
+
+    val syncHeadersState: StateFlow<SyncHeadersState> = _syncHeadersState
+
+    fun syncDispatchHeaders(orgnCode: String) {
+
+        viewModelScope.launch {
+
+            _syncHeadersState.value = SyncHeadersState.Loading
+
+            _syncHeadersState.value =
+                repository.syncDispatchHeaders(orgnCode).fold(
+                    onSuccess = { count -> SyncHeadersState.Success(count) },
+                    onFailure = { e ->
+                        SyncHeadersState.Error(
+                            e.message ?: "Failed to load dispatch headers"
+                        )
+                    }
+                )
+        }
+    }
+
+    fun resetSyncHeadersState() {
+        _syncHeadersState.value = SyncHeadersState.Idle
+    }
+
+    private val _localHeaders =
+        MutableStateFlow<List<DispatchHeaderEntity>>(emptyList())
+
+    val localHeaders: StateFlow<List<DispatchHeaderEntity>> = _localHeaders
+
+    fun loadLocalHeaders() {
+        viewModelScope.launch {
+            _localHeaders.value = repository.getLocalDispatchHeaders()
+        }
     }
 
 
@@ -155,6 +204,26 @@ sealed class CreateDispatchState {
     data class Error(
         val message: String
     ) : CreateDispatchState()
+}
+
+
+// ---------------------------------
+// SYNC HEADERS STATE
+// ---------------------------------
+
+sealed class SyncHeadersState {
+
+    object Idle : SyncHeadersState()
+
+    object Loading : SyncHeadersState()
+
+    data class Success(
+        val count: Int
+    ) : SyncHeadersState()
+
+    data class Error(
+        val message: String
+    ) : SyncHeadersState()
 }
 
 

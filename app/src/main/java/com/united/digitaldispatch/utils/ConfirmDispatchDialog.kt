@@ -19,6 +19,8 @@ import com.united.digitaldispatch.R
  *
  * rows        -> label / value pairs shown in the body
  * freightText -> highlighted freight line (e.g. "2.0 /Kg")
+ * title       -> dialog heading
+ * confirmText -> text of the gold button
  * onConfirm   -> called after the dialog has animated out
  */
 class ConfirmDispatchDialog(
@@ -26,6 +28,8 @@ class ConfirmDispatchDialog(
     private val shipmentNo: String,
     private val rows: List<Pair<String, String>>,
     private val freightText: String,
+    private val title: String = "Confirm Dispatch",
+    private val confirmText: String = "Confirm & Send",
     private val onConfirm: () -> Unit
 ) {
 
@@ -54,8 +58,10 @@ class ConfirmDispatchDialog(
         val btnCancel = dialog.findViewById<TextView>(R.id.btnCancel)
         val btnConfirm = dialog.findViewById<TextView>(R.id.btnConfirm)
 
+        dialog.findViewById<TextView>(R.id.tvDialogTitle).text = title
         dialog.findViewById<TextView>(R.id.tvShipment).text = shipmentNo
         dialog.findViewById<TextView>(R.id.tvFreight).text = freightText
+        btnConfirm.text = confirmText
 
         // ---- build rows ----
         val rowViews = rows.mapIndexed { index, (label, value) ->
@@ -134,7 +140,6 @@ class ConfirmDispatchDialog(
             .setInterpolator(OvershootInterpolator(2.2f))
             .start()
 
-        // truck "drives in"
         ivTruck.animate()
             .translationX(0f)
             .setStartDelay(320)
@@ -142,7 +147,6 @@ class ConfirmDispatchDialog(
             .setInterpolator(DecelerateInterpolator(1.6f))
             .start()
 
-        // rows slide up one after another
         rowViews.forEachIndexed { i, row ->
             row.animate()
                 .alpha(1f)

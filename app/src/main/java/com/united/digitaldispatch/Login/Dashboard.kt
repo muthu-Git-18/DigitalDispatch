@@ -5,10 +5,12 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
@@ -19,10 +21,16 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
+import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModel
+import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModelFactory
+import com.united.digitaldispatch.Apiservice.viewmodel.SyncHeadersState
 import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
@@ -65,6 +73,15 @@ import kotlinx.coroutines.withContext
  *      Stock API has reported success.
  *   6. Once it reports in, a toast shows the total records synced, the
  *      dialog (if shown) dismisses, and the cards become usable.
+ *
+ * Dispatch card:
+ *   Tapping the Dispatch card first downloads the dispatch headers of the
+ *   logged-in organization (Dispatch/dispatch-headers?orgnCode=...) and
+ *   stores them in the local dispatch_header table, showing a small
+ *   "Loading dispatch headers..." dialog. The Ref ID screen ([Dispatch])
+ *   then opens and lists the headers from the local table. If the API
+ *   fails, the error is shown and the screen still opens with whatever
+ *   headers were saved earlier.
  */
 class Dashboard : AppCompatActivity() {
 
@@ -77,6 +94,9 @@ class Dashboard : AppCompatActivity() {
     private var hourglassAnimator: ObjectAnimator? = null
     private var loadingProgressBar: ProgressBar? = null
     private var tvLoadingPercent: TextView? = null
+
+    /** Small spinner dialog shown while the dispatch headers are downloading. */
+    private var headerSyncDialog: AlertDialog? = null
 
     /** Latest known sync progress, kept even while no dialog is showing yet. */
     private var lastProgressPercent = 0
@@ -120,6 +140,16 @@ class Dashboard : AppCompatActivity() {
         val labelSizeSp: Float
     )
 
+    // Dispatch headers (Ref ID list) sync
+    private val dispatchViewModel: DispatchViewModel by viewModels {
+        DispatchViewModelFactory(
+            MasterDataRepository(
+                ApiClient.instance,
+                AppDatabase.getInstance(applicationContext)
+            )
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -130,6 +160,8 @@ class Dashboard : AppCompatActivity() {
         inits()
 
         setContentData()
+
+        observeDispatchHeaderSync()
 
     }
 
@@ -192,12 +224,9 @@ class Dashboard : AppCompatActivity() {
                 label = findViewById(R.id.tvDispatchLabel),
                 screen = DashboardScreen.DISPATCH
             ) {
-                startActivity(
-                    Intent(
-                        this,
-                        Dispatch::class.java
-                    )
-                )
+                // Download the dispatch headers first; the observer
+                // (observeDispatchHeaderSync) opens the Ref ID screen after.
+                startDispatchHeaderSync()
             },
 
             CardViews(
@@ -304,6 +333,143 @@ class Dashboard : AppCompatActivity() {
 
         showWelcomePopup()
 
+    }
+
+    // -------------------------------------------------
+    // DISPATCH HEADERS (Ref ID list)
+    // -------------------------------------------------
+
+    /**
+     * Called when the Dispatch card is tapped (after the stock sync has
+     * finished). Starts the headers download; the result is handled in
+     * [observeDispatchHeaderSync].
+     */
+    private fun startDispatchHeaderSync() {
+
+        // ignore extra taps while a download is already running
+        if (dispatchViewModel.syncHeadersState.value is SyncHeadersState.Loading) {
+            return
+        }
+
+        val code = session.getOrganizationCode()
+
+        if (code.isNullOrBlank()) {
+
+            Toast.makeText(
+                this,
+                "Organization not found in session",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        dispatchViewModel.syncDispatchHeaders(code)
+    }
+
+    /**
+     * Reacts to the headers download:
+     *  - Loading -> small spinner dialog
+     *  - Success -> dismiss, open the Ref ID screen
+     *  - Error   -> dismiss, show the message, still open the Ref ID screen
+     *               (it shows the headers saved earlier)
+     */
+    private fun observeDispatchHeaderSync() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                dispatchViewModel.syncHeadersState.collect { state ->
+
+                    when (state) {
+
+                        is SyncHeadersState.Idle -> {
+                            hideHeaderSyncDialog()
+                        }
+
+                        is SyncHeadersState.Loading -> {
+                            showHeaderSyncDialog()
+                        }
+
+                        is SyncHeadersState.Success -> {
+
+                            hideHeaderSyncDialog()
+                            dispatchViewModel.resetSyncHeadersState()
+
+                            startActivity(
+                                Intent(
+                                    this@Dashboard,
+                                    Dispatch::class.java
+                                )
+                            )
+                        }
+
+                        is SyncHeadersState.Error -> {
+
+                            hideHeaderSyncDialog()
+                            dispatchViewModel.resetSyncHeadersState()
+
+                            Toast.makeText(
+                                this@Dashboard,
+                                "${state.message}\nShowing saved headers",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            startActivity(
+                                Intent(
+                                    this@Dashboard,
+                                    Dispatch::class.java
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showHeaderSyncDialog() {
+
+        if (headerSyncDialog?.isShowing == true) {
+            return
+        }
+
+        val content = LinearLayout(this).apply {
+
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(24), dp(20), dp(24), dp(20))
+
+            addView(
+                ProgressBar(this@Dashboard).apply {
+                    isIndeterminate = true
+                },
+                LinearLayout.LayoutParams(dp(36), dp(36))
+            )
+
+            addView(
+                TextView(this@Dashboard).apply {
+                    text = "Loading dispatch headers..."
+                    textSize = 15f
+                    setTextColor(Color.parseColor("#2E353A"))
+                    setPadding(dp(16), 0, 0, 0)
+                }
+            )
+        }
+
+        headerSyncDialog =
+            AlertDialog.Builder(this)
+                .setView(content)
+                .setCancelable(false)
+                .create()
+
+        headerSyncDialog?.show()
+    }
+
+    private fun hideHeaderSyncDialog() {
+        headerSyncDialog?.dismiss()
+        headerSyncDialog = null
     }
 
     /**
@@ -827,5 +993,6 @@ class Dashboard : AppCompatActivity() {
         syncIconAnimator?.cancel()
 
         loadingDialog?.dismiss()
+        headerSyncDialog?.dismiss()
     }
 }

@@ -2,6 +2,7 @@ package com.united.digitaldispatch.Apiservice.network
 
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
+import com.united.digitaldispatch.Dispatch.models.DispatchHeaderListResponse
 import com.united.digitaldispatch.Login.models.ItemMasterResponse
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.Login.models.StockResponse
@@ -41,4 +42,9 @@ interface ApiService {
     suspend fun createDispatchHeader(
         @Body request: CreateDispatchHeaderRequest
     ): Response<CreateDispatchHeaderResponse>
+
+    @GET("Dispatch/dispatch-headers")
+    suspend fun getDispatchHeaders(
+        @Query("orgnCode") orgnCode: String
+    ): Response<DispatchHeaderListResponse>
 }

@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:fontFamily="serif"
+            android:id="@+id/tvDialogTitle"
             android:text="Confirm Dispatch"
             android:textColor="#FFF8E8"
             android:textSize="20sp"

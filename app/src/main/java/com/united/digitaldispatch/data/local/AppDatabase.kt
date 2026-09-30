@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.united.digitaldispatch.data.local.dao.DispatchHeaderDao
 import com.united.digitaldispatch.data.local.dao.ItemMasterDao
 import com.united.digitaldispatch.data.local.dao.OrganizationDao
 import com.united.digitaldispatch.data.local.dao.StockDao
 import com.united.digitaldispatch.data.local.dao.TransporterDao
 import com.united.digitaldispatch.data.local.dao.UserDao
+import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.ItemMasterEntity
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.StockEntity
@@ -22,7 +24,8 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
                 TransporterEntity::class,
                 ItemMasterEntity::class,
                 StockEntity::class,
-                TruckMasterEntity::class
+                TruckMasterEntity::class,
+                DispatchHeaderEntity::class
                ],
     version = 4,
     exportSchema = false
@@ -37,6 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun stockDao(): StockDao
 
+    abstract fun dispatchHeaderDao(): DispatchHeaderDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
