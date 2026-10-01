@@ -45,6 +45,17 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/ivDelete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete"
+            android:padding="7dp"
+            android:src="@drawable/ic_delete"
+            android:tint="#C0392B" />
+
         <FrameLayout
             android:id="@+id/checkWrap"
             android:layout_width="28dp"

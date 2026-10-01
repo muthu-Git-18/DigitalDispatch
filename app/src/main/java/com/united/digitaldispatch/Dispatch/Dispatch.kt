@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -19,11 +21,13 @@ import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModelFactory
-import com.united.digitaldispatch.Dispatch.Adaptor.DispatchHeaderAdapter
+import com.united.digitaldispatch.Apiservice.viewmodel.SyncHeadersState
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
+import com.united.digitaldispatch.utils.AppLoader
 import com.united.digitaldispatch.utils.ConfirmDispatchDialog
+import com.united.digitaldispatch.utils.DeleteConfirmDialog
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -46,7 +50,19 @@ class Dispatch : AppCompatActivity() {
     private lateinit var btnCreateHeader: AppCompatButton
     private lateinit var btnProceed: AppCompatButton
 
-    private val adapter = DispatchHeaderAdapter()
+    private val adapter = DispatchHeaderAdapter { header ->
+        confirmDelete(header)
+    }
+
+    private val loader by lazy { AppLoader(this) }
+
+    // Create Header screen returns RESULT_OK after a header was created
+    private val createHeaderLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                refreshHeadersFromServer()
+            }
+        }
 
     private var allHeaders: List<DispatchHeaderEntity> = emptyList()
     private var animateNextSubmit = true
@@ -76,6 +92,8 @@ class Dispatch : AppCompatActivity() {
         setupSearch()
         setupClickListeners()
         observeHeaders()
+        //observeDelete()
+        observeSync()
     }
 
     override fun onResume() {
@@ -83,6 +101,11 @@ class Dispatch : AppCompatActivity() {
         // e.g. coming back from Create Header -> show the new header
         animateNextSubmit = true
         viewModel.loadLocalHeaders()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        loader.dismiss()
     }
 
     // -------------------------------------------------
@@ -154,9 +177,9 @@ class Dispatch : AppCompatActivity() {
             tvEmpty.text =
                 if (q.isEmpty()) "No dispatch headers yet.\nTap Create Header to add one."
                 else "No header matches \"$q\""
-            tvEmpty.visibility = android.view.View.VISIBLE
+            tvEmpty.visibility = View.VISIBLE
         } else {
-            tvEmpty.visibility = android.view.View.GONE
+            tvEmpty.visibility = View.GONE
         }
     }
 
@@ -178,6 +201,112 @@ class Dispatch : AppCompatActivity() {
         }
     }
 
+/*    private fun observeDelete() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModel.deleteHeaderState.collect { state ->
+
+                    when (state) {
+
+                        is DeleteHeaderState.Idle -> {
+                        }
+
+                        is DeleteHeaderState.Loading -> {
+                            loader.show("Deleting Shipment")
+                        }
+
+                        is DeleteHeaderState.Success -> {
+                            loader.dismiss()
+                            Toast.makeText(this@Dispatch, state.message, Toast.LENGTH_SHORT).show()
+                            viewModel.resetDeleteHeaderState()
+                            viewModel.loadLocalHeaders()
+                        }
+
+                        is DeleteHeaderState.Error -> {
+                            loader.dismiss()
+                            Toast.makeText(this@Dispatch, state.message, Toast.LENGTH_LONG).show()
+                            viewModel.resetDeleteHeaderState()
+                        }
+                    }
+                }
+            }
+        }
+    }*/
+
+    // -------------------------------------------------
+    // REFRESH FROM SERVER (after a header was created)
+    // -------------------------------------------------
+
+    private fun refreshHeadersFromServer() {
+
+        val code = sessionManager.getOrganizationCode()
+
+        if (code.isNullOrBlank()) {
+            return
+        }
+
+        viewModel.syncDispatchHeaders(code)
+    }
+
+    private fun observeSync() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModel.syncHeadersState.collect { state ->
+
+                    when (state) {
+
+                        is SyncHeadersState.Idle -> {
+                        }
+
+                        is SyncHeadersState.Loading -> {
+                            loader.show("Dispatch Header Loading")
+                        }
+
+                        is SyncHeadersState.Success -> {
+                            loader.dismiss()
+                            viewModel.resetSyncHeadersState()
+                            animateNextSubmit = true
+                            viewModel.loadLocalHeaders()
+                        }
+
+                        is SyncHeadersState.Error -> {
+                            loader.dismiss()
+                            viewModel.resetSyncHeadersState()
+                            // the new header is already saved locally, so the list is still correct
+                            Toast.makeText(
+                                this@Dispatch,
+                                "${state.message}\nShowing saved headers",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // -------------------------------------------------
+    // DELETE
+    // -------------------------------------------------
+
+    private fun confirmDelete(header: DispatchHeaderEntity) {
+
+        DeleteConfirmDialog(
+            activity = this,
+            title = "Delete Shipment?",
+            highlight = header.shipmentNo,
+            message = "This shipment will be deleted.\nThis action cannot be undone."
+        ) {
+            //viewModel.deleteDispatchHeader(header.shipmentNo)
+        }.show()
+    }
+
     // -------------------------------------------------
     // CLICKS
     // -------------------------------------------------
@@ -189,7 +318,7 @@ class Dispatch : AppCompatActivity() {
         }
 
         btnCreateHeader.setOnClickListener {
-            startActivity(Intent(this@Dispatch, CreateHeaderDispatch::class.java))
+            createHeaderLauncher.launch(Intent(this@Dispatch, CreateHeaderDispatch::class.java))
         }
 
         btnProceed.setOnClickListener {

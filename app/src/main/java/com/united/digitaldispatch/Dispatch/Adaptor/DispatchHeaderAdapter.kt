@@ -1,4 +1,4 @@
-package com.united.digitaldispatch.Dispatch.Adaptor
+package com.united.digitaldispatch.Dispatch
 
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 
-class DispatchHeaderAdapter :
-    ListAdapter<DispatchHeaderEntity, DispatchHeaderAdapter.VH>(DIFF) {
+class DispatchHeaderAdapter(
+    private val onDeleteClick: (DispatchHeaderEntity) -> Unit
+) : ListAdapter<DispatchHeaderEntity, DispatchHeaderAdapter.VH>(DIFF) {
 
     private var selectedShipmentNo: String? = null
 
@@ -52,6 +53,7 @@ class DispatchHeaderAdapter :
         private val tvType = view.findViewById<TextView>(R.id.tvType)
         private val tvFreight = view.findViewById<TextView>(R.id.tvFreight)
         private val tvWeighment = view.findViewById<TextView>(R.id.tvWeighment)
+        private val ivDelete = view.findViewById<View>(R.id.ivDelete)
         private val checkWrap = view.findViewById<View>(R.id.checkWrap)
         private val ivCheck = view.findViewById<View>(R.id.ivCheck)
 
@@ -60,7 +62,7 @@ class DispatchHeaderAdapter :
             tvShipment.text = item.shipmentNo
             tvRoute.text = "${item.senderOrgnCode.orEmpty()}  \u2192  ${item.receiverOrgnCode.orEmpty()}"
             tvTruckNo.text = item.senderTruckNo.orDash()
-            tvDate.text = item.senderDate.orDash()
+            tvDate.text = dateOnly(item.senderDate)
             tvType.text = item.typeOfTruck.orDash()
             tvFreight.text = freightText(item)
             tvWeighment.text = when (item.weighmentType) {
@@ -76,6 +78,10 @@ class DispatchHeaderAdapter :
             ivCheck.alpha = if (selected) 1f else 0f
             ivCheck.scaleX = if (selected) 1f else 0.4f
             ivCheck.scaleY = if (selected) 1f else 0.4f
+
+            ivDelete.setOnClickListener {
+                onDeleteClick(item)
+            }
 
             itemView.setOnClickListener {
 
@@ -98,6 +104,15 @@ class DispatchHeaderAdapter :
 
         private fun String?.orDash(): String =
             if (this.isNullOrBlank()) "-" else this
+
+        /** "29-09-2026 15:08:32" (or ISO "...T...") -> "29-09-2026" */
+        private fun dateOnly(value: String?): String {
+            if (value.isNullOrBlank()) return "-"
+            return value.trim()
+                .substringBefore(' ')
+                .substringBefore('T')
+                .ifBlank { "-" }
+        }
 
         private fun freightText(item: DispatchHeaderEntity): String {
             val value = item.frieghtCharges ?: return "-"

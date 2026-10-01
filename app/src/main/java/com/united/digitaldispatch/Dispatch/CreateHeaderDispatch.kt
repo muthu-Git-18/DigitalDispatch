@@ -12,7 +12,6 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.Lifecycle
@@ -31,14 +30,13 @@ import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
+import com.united.digitaldispatch.utils.AppLoader
+import com.united.digitaldispatch.utils.AppSuccessDialog
 import com.united.digitaldispatch.utils.ConfirmDispatchDialog
 import com.united.digitaldispatch.utils.SearchableSpinnerDialog
 import com.united.digitaldispatch.utils.SessionManager
 import com.united.digitaldispatch.utils.TimeUtils
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.Executors
 
 class CreateHeaderDispatch : AppCompatActivity() {
@@ -48,13 +46,6 @@ class CreateHeaderDispatch : AppCompatActivity() {
         // Same limits as the old app
         const val MAX_FREIGHT_PER_KG = 15.0
         const val MAX_FREIGHT_PER_TRUCK = 100000.0
-
-        // TODO: must match TimeUtils.simpleCompetitionYearMonthDateFormat of the OLD app
-        // (used for the shipment number). Placeholder until confirmed.
-        const val SHIPMENT_DATE_PATTERN = "yyMMdd"
-
-        // TODO: must match TimeUtils.simpleYearMonthDateFormat of the OLD app / backend
-        const val SENDER_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss"
     }
 
     // -------------------------------------------------
@@ -65,6 +56,12 @@ class CreateHeaderDispatch : AppCompatActivity() {
     private lateinit var db: AppDatabase
 
     private val ioExecutor = Executors.newSingleThreadExecutor()
+
+    // Reusable animated loader ("Creating Dispatch Header...")
+    private val loader by lazy { AppLoader(this) }
+
+    // shown on the success dialog
+    private var lastShipmentNo: String = ""
 
     // -------------------------------------------------
     // VIEWS
@@ -590,19 +587,19 @@ class CreateHeaderDispatch : AppCompatActivity() {
 
                             is CreateDispatchState.Loading -> {
                                 btnSave.isEnabled = false
+                                loader.show("Creating Dispatch Header")
                             }
 
                             is CreateDispatchState.Success -> {
+                                loader.dismiss()
                                 btnSave.isEnabled = true
-                                showToast("Dispatch header created")
-
-                                // TODO: like the old app -> save header id / truck no
-                                // locally and open the dispatch details screen here.
-                                clearForm()
                                 viewModel.resetCreateDispatchState()
+
+                                showSuccessAndReturn()
                             }
 
                             is CreateDispatchState.Error -> {
+                                loader.dismiss()
                                 btnSave.isEnabled = true
                                 showToast(state.message)
                                 viewModel.resetCreateDispatchState()
@@ -612,6 +609,22 @@ class CreateHeaderDispatch : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // -------------------------------------------------
+    // SUCCESS -> back to the Dispatch screen (it refreshes the headers)
+    // -------------------------------------------------
+
+    private fun showSuccessAndReturn() {
+
+        AppSuccessDialog(
+            activity = this,
+            message = "Header Created Successfully",
+            subMessage = if (lastShipmentNo.isNotBlank()) "Shipment No : $lastShipmentNo" else null
+        ) {
+            setResult(RESULT_OK)
+            finish()
+        }.show()
     }
 
     // -------------------------------------------------
@@ -705,7 +718,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
 
     /**
      * Old app: shipmentNo = senderOrgCode + receiverOrgCode + date
-     * (txtHeaderId). Date pattern must match the old TimeUtils format.
+     * (txtHeaderId). Date pattern lives in TimeUtils.
      */
     private fun generateShipmentNo(senderCode: String, receiverCode: String): String =
         senderCode + receiverCode + TimeUtils.shipmentDatePart()
@@ -876,6 +889,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
             rows = rows,
             freightText = "${request.frieghtCharges} $unit"
         ) {
+            lastShipmentNo = request.shipmentNo.orEmpty()
             viewModel.createDispatchHeader(request)
         }.show()
     }
@@ -914,6 +928,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        loader.dismiss()
         ioExecutor.shutdown()
     }
 }

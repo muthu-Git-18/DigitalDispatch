@@ -5,12 +5,10 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
@@ -40,6 +38,7 @@ import com.united.digitaldispatch.Receipt.Receipt
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.DashboardScreen
 import com.united.digitaldispatch.data.local.ModuleScreens
+import com.united.digitaldispatch.utils.AppLoader
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -77,8 +76,8 @@ import kotlinx.coroutines.withContext
  * Dispatch card:
  *   Tapping the Dispatch card first downloads the dispatch headers of the
  *   logged-in organization (Dispatch/dispatch-headers?orgnCode=...) and
- *   stores them in the local dispatch_header table, showing a small
- *   "Loading dispatch headers..." dialog. The Ref ID screen ([Dispatch])
+ *   stores them in the local dispatch_header table, showing the
+ *   reusable [AppLoader] ("Dispatch Header Loading..."). The Ref ID screen ([Dispatch])
  *   then opens and lists the headers from the local table. If the API
  *   fails, the error is shown and the screen still opens with whatever
  *   headers were saved earlier.
@@ -95,8 +94,8 @@ class Dashboard : AppCompatActivity() {
     private var loadingProgressBar: ProgressBar? = null
     private var tvLoadingPercent: TextView? = null
 
-    /** Small spinner dialog shown while the dispatch headers are downloading. */
-    private var headerSyncDialog: AlertDialog? = null
+    /** Reusable animated loader (used here for the dispatch headers download). */
+    private val appLoader by lazy { AppLoader(this) }
 
     /** Latest known sync progress, kept even while no dialog is showing yet. */
     private var lastProgressPercent = 0
@@ -430,46 +429,11 @@ class Dashboard : AppCompatActivity() {
     }
 
     private fun showHeaderSyncDialog() {
-
-        if (headerSyncDialog?.isShowing == true) {
-            return
-        }
-
-        val content = LinearLayout(this).apply {
-
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(24), dp(20), dp(24), dp(20))
-
-            addView(
-                ProgressBar(this@Dashboard).apply {
-                    isIndeterminate = true
-                },
-                LinearLayout.LayoutParams(dp(36), dp(36))
-            )
-
-            addView(
-                TextView(this@Dashboard).apply {
-                    text = "Loading dispatch headers..."
-                    textSize = 15f
-                    setTextColor(Color.parseColor("#2E353A"))
-                    setPadding(dp(16), 0, 0, 0)
-                }
-            )
-        }
-
-        headerSyncDialog =
-            AlertDialog.Builder(this)
-                .setView(content)
-                .setCancelable(false)
-                .create()
-
-        headerSyncDialog?.show()
+        appLoader.show("Dispatch Header Loading")
     }
 
     private fun hideHeaderSyncDialog() {
-        headerSyncDialog?.dismiss()
-        headerSyncDialog = null
+        appLoader.dismiss()
     }
 
     /**
@@ -993,6 +957,6 @@ class Dashboard : AppCompatActivity() {
         syncIconAnimator?.cancel()
 
         loadingDialog?.dismiss()
-        headerSyncDialog?.dismiss()
+        appLoader.dismiss()
     }
 }
