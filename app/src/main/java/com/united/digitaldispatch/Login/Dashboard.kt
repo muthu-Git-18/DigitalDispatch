@@ -26,9 +26,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
+import com.united.digitaldispatch.Apiservice.viewmodel.CreatePSWDispatchState
 import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.DispatchViewModelFactory
+import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModel
+import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModelFactory
 import com.united.digitaldispatch.Apiservice.viewmodel.SyncHeadersState
+import com.united.digitaldispatch.Apiservice.viewmodel.SyncPswHeadersState
 import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
@@ -149,6 +153,17 @@ class Dashboard : AppCompatActivity() {
         )
     }
 
+    // Dispatch headers (Ref ID list) sync
+    private val PSWdispatchViewModel: PswDispatchViewModel by viewModels {
+        PswDispatchViewModelFactory(
+            MasterDataRepository(
+                ApiClient.instance,
+                AppDatabase.getInstance(applicationContext)
+            )
+        )
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -161,6 +176,8 @@ class Dashboard : AppCompatActivity() {
         setContentData()
 
         observeDispatchHeaderSync()
+
+        observePSWDispatchHeaderSync()
 
     }
 
@@ -250,12 +267,7 @@ class Dashboard : AppCompatActivity() {
                 label = findViewById(R.id.tvPswdispatchLabel),
                 screen = DashboardScreen.PSW_DISPATCH
             ) {
-                startActivity(
-                    Intent(
-                        this,
-                        PswDispatch::class.java
-                    )
-                )
+                startPSWDispatchHeaderSync()
             },
 
             CardViews(
@@ -366,6 +378,84 @@ class Dashboard : AppCompatActivity() {
         dispatchViewModel.syncDispatchHeaders(code)
     }
 
+
+    private fun startPSWDispatchHeaderSync() {
+
+        // ignore extra taps while a download is already running
+        if (PSWdispatchViewModel.syncPswHeadersState.value is SyncPswHeadersState.Loading) {
+            return
+        }
+
+        val code = session.getOrganizationCode()
+
+        if (code.isNullOrBlank()) {
+
+            Toast.makeText(
+                this,
+                "Organization not found in session",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        PSWdispatchViewModel.syncPswDispatchHeaders(code)
+    }
+
+    private fun observePSWDispatchHeaderSync() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                PSWdispatchViewModel.syncPswHeadersState.collect { state ->
+
+                    when (state) {
+
+                        is SyncPswHeadersState.Idle -> {
+                            hideHeaderSyncDialog()
+                        }
+
+                        is SyncPswHeadersState.Loading -> {
+                            showHeaderSyncDialog()
+                        }
+
+                        is SyncPswHeadersState.Success -> {
+
+                            hideHeaderSyncDialog()
+                            PSWdispatchViewModel.resetSyncPswHeadersState()
+
+                            startActivity(
+                                Intent(
+                                    this@Dashboard,
+                                    PswDispatch::class.java
+                                )
+                            )
+                        }
+
+                        is SyncPswHeadersState.Error -> {
+
+                            hideHeaderSyncDialog()
+                            PSWdispatchViewModel.resetSyncPswHeadersState()
+
+                            Toast.makeText(
+                                this@Dashboard,
+                                "${state.message}\nShowing saved headers",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            startActivity(
+                                Intent(
+                                    this@Dashboard,
+                                    Dispatch::class.java
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
     /**
      * Reacts to the headers download:
      *  - Loading -> small spinner dialog

@@ -140,7 +140,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -168,7 +168,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 07-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -298,18 +298,36 @@
              REFERENCE ID LIST
              ===================================================== -->
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_header_select"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="14dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingTop="4dp"
-            android:paddingBottom="8dp"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:layout_marginTop="10dp"
+            android:layout_weight="1">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_header_select"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:layoutAnimation="@anim/layout_anim_slide"
+                android:paddingTop="4dp"
+                android:paddingBottom="8dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:text="No PSW dispatch headers yet."
+                android:textColor="#85745E"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </FrameLayout>
     </LinearLayout>
 
 

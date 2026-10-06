@@ -1,12 +1,12 @@
-package com.united.digitaldispatch.Dispatch.models
+package com.united.digitaldispatch.PSWDispatch.models
 
-data class DispatchHeaderListResponse(
+data class PSWDispatchHeaderListResponse(
     val statusCode: String? = null,
     val message: String? = null,
-    val data: List<DispatchHeaderItem>? = null
+    val data: List<PSWDispatchHeaderItem>? = null
 )
 
-data class DispatchHeaderItem(
+data class PSWDispatchHeaderItem(
     val shipmentNo: String? = null,
     val senderOrgnCode: String? = null,
     val receiverOrgnCode: String? = null,
