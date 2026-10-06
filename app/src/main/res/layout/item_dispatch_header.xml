@@ -45,17 +45,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ivDelete"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="6dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete"
-            android:padding="7dp"
-            android:src="@drawable/ic_delete"
-            android:tint="#C0392B" />
-
         <FrameLayout
             android:id="@+id/checkWrap"
             android:layout_width="28dp"
@@ -132,11 +121,12 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Chips -->
+    <!-- Chips + delete (delete sits at the free space on the right) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -179,6 +169,22 @@
             android:textColor="#5A4630"
             android:textSize="11sp"
             android:textStyle="bold" />
+
+        <!-- pushes the delete icon to the right end -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/ivDelete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete"
+            android:padding="6dp"
+            android:src="@drawable/ic_delete"
+            android:tint="#C0392B" />
     </LinearLayout>
 
 </LinearLayout>
