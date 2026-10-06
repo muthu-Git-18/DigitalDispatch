@@ -7,6 +7,11 @@ import com.united.digitaldispatch.Login.models.ItemMasterResponse
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.Login.models.StockResponse
 import com.united.digitaldispatch.Login.models.TruckMasterResponse
+import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequest
+import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderListResponse
+import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
+
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -47,4 +52,15 @@ interface ApiService {
     suspend fun getDispatchHeaders(
         @Query("orgnCode") orgnCode: String
     ): Response<DispatchHeaderListResponse>
+
+    // PSW DISPATCH - vikram
+    @POST("PSW_Dispatch/create-dispatch-header")
+    suspend fun createPswDispatchHeader(
+        @Body request: CreatePSWDispatchHeaderRequest
+    ): Response<CreatePSWDispatchHeaderResponse>
+
+    @GET("PSW_Dispatch/dispatch-headers")
+    suspend fun getPswDispatchHeaders(
+        @Query("orgnCode") orgnCode: String
+    ): Response<PSWDispatchHeaderListResponse>
 }

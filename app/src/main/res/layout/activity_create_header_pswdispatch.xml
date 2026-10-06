@@ -1,54 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#D9D8D5">
-
-
-    <!-- =========================================================
-         BACKGROUND WATERMARK
-         ========================================================= -->
-
+    android:layout_height="match_parent">
+    <!--  =========================================================
+             BACKGROUND WATERMARK
+             =========================================================  -->
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="280dp"
         android:layout_height="500dp"
         android:alpha="0.13"
         android:contentDescription="Background"
-        android:src="@drawable/dashbg3"
         android:scaleType="fitXY"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/dashbg3"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
-    <!-- =========================================================
-         NORMAL CHARCOAL HEADER
-         ========================================================= -->
-
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--  =========================================================
+             NORMAL CHARCOAL HEADER
+             =========================================================  -->
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="90dp"
         android:background="#2E353A"
         android:elevation="10dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Gold bottom border -->
+        app:layout_constraintTop_toTopOf="parent">
+        <!--  Gold bottom border  -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_alignParentBottom="true"
             android:background="#DCB765" />
-
-        <!-- LOGO -->
+        <!--  LOGO  -->
         <FrameLayout
             android:id="@+id/logoContainer"
             android:layout_width="62dp"
@@ -67,10 +57,8 @@
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
                 android:src="@drawable/logooo" />
-
         </FrameLayout>
-
-        <!-- TITLE + SUBTITLE -->
+        <!--  TITLE + SUBTITLE  -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,14 +72,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="PSW Dispatch"
-                android:textColor="#FFF8E8"
-                android:textSize="21sp"
-                android:textStyle="bold"
                 android:shadowColor="#80000000"
                 android:shadowDx="2"
                 android:shadowDy="2"
-                android:shadowRadius="2" />
+                android:shadowRadius="2"
+                android:text="PSW Dispatch"
+                android:textColor="#FFF8E8"
+                android:textSize="21sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/sub_tittle"
@@ -102,10 +90,8 @@
                 android:textColor="#DCB765"
                 android:textSize="12sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
-        <!-- ORG + DATE -->
+        <!--  ORG + DATE  -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -123,7 +109,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -135,7 +121,6 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -148,7 +133,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 08-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -160,28 +145,22 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </RelativeLayout>
-
-
-    <!-- =========================================================
-         BODY (scrollable, card-styled)
-         ========================================================= -->
-
+    <!--  =========================================================
+             BODY (scrollable, card-styled)
+             =========================================================  -->
     <ScrollView
         android:id="@+id/bodyScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
         android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toTopOf="@id/footer"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <LinearLayout
             android:id="@+id/body"
@@ -189,16 +168,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="20dp"
-            android:paddingEnd="20dp"
             android:paddingTop="14dp"
+            android:paddingEnd="20dp"
             android:paddingBottom="14dp">
-
-
-            <!-- =====================================================
-                 CARD 1 : WEIGHMENT
-                 ===================================================== -->
-
-            <LinearLayout
+            <!--  =====================================================
+                             CARD 1 : WEIGHMENT
+                             =====================================================  -->
+            <RadioGroup
+                android:id="@+id/rgWeighment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/dashboard_card_background"
@@ -227,14 +204,10 @@
                     android:textColor="@color/brown_font"
                     android:textSize="12sp"
                     android:textStyle="bold" />
-
-            </LinearLayout>
-
-
-            <!-- =====================================================
-                 CARD 2 : SENDER / RECEIVER ORG
-                 ===================================================== -->
-
+            </RadioGroup>
+            <!--  =====================================================
+                             CARD 2 : SENDER / RECEIVER ORG
+                             =====================================================  -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -266,7 +239,6 @@
                         android:textColor="#2E353A"
                         android:textSize="13sp"
                         android:textStyle="bold" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -284,24 +256,38 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/spRecOrg"
+                    <LinearLayout
+                        android:id="@+id/dropdownReceiverOrg"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
                         android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingStart="10dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingEnd="8dp">
 
+                        <TextView
+                            android:id="@+id/tvReceiverOrg"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select Receiver Organization"
+                            android:textColor="#5A4630"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Expand"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="#A47C3C" />
+                    </LinearLayout>
                 </LinearLayout>
-
             </LinearLayout>
-
-
-            <!-- =====================================================
-                 CARD 3 : VEHICLE / DRIVER DETAILS
-                 ===================================================== -->
-
+            <!--  =====================================================
+                             CARD 3 : VEHICLE / DRIVER DETAILS
+                             =====================================================  -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -310,8 +296,7 @@
                 android:elevation="8dp"
                 android:orientation="vertical"
                 android:padding="12dp">
-
-                <!-- Truck No -->
+                <!--  Truck No  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -339,10 +324,8 @@
                         android:textColor="#2E353A"
                         android:textColorHint="#85745E"
                         android:textSize="13sp" />
-
                 </LinearLayout>
-
-                <!-- RC No -->
+                <!--  RC No  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -371,10 +354,8 @@
                         android:textColor="#2E353A"
                         android:textColorHint="#85745E"
                         android:textSize="13sp" />
-
                 </LinearLayout>
-
-                <!-- Driver Name -->
+                <!--  Driver Name  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -403,10 +384,8 @@
                         android:textColor="#2E353A"
                         android:textColorHint="#85745E"
                         android:textSize="13sp" />
-
                 </LinearLayout>
-
-                <!-- Driver License -->
+                <!--  Driver License  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -435,16 +414,11 @@
                         android:textColor="#2E353A"
                         android:textColorHint="#85745E"
                         android:textSize="13sp" />
-
                 </LinearLayout>
-
             </LinearLayout>
-
-
-            <!-- =====================================================
-                 CARD 4 : TRANSPORT DETAILS
-                 ===================================================== -->
-
+            <!--  =====================================================
+                             CARD 4 : TRANSPORT DETAILS
+                             =====================================================  -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -453,8 +427,7 @@
                 android:elevation="8dp"
                 android:orientation="vertical"
                 android:padding="12dp">
-
-                <!-- Transporter Name -->
+                <!--  Transporter Name  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -469,18 +442,35 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/spTransporterName"
+                    <LinearLayout
+                        android:id="@+id/dropdownTransporter"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
                         android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingStart="10dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingEnd="8dp">
 
+                        <TextView
+                            android:id="@+id/tvTransporter"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select Transporter"
+                            android:textColor="#5A4630"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Expand"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="#A47C3C" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- Type of Truck -->
+                <!--  Type of Truck  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -496,18 +486,35 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <Spinner
-                        android:id="@+id/spTypeofTruck"
+                    <LinearLayout
+                        android:id="@+id/dropdownTruckType"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
                         android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingStart="10dp"
-                        android:paddingEnd="8dp" />
+                        android:paddingEnd="8dp">
 
+                        <TextView
+                            android:id="@+id/tvTruckType"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select Type of Truck"
+                            android:textColor="#5A4630"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Expand"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="#A47C3C" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- Freight Charges -->
+                <!--  Freight Charges  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -538,6 +545,7 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvFreightUnit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -545,20 +553,13 @@
                         android:textColor="#A47C3C"
                         android:textSize="12sp"
                         android:textStyle="bold" />
-
                 </LinearLayout>
-
             </LinearLayout>
-
         </LinearLayout>
-
     </ScrollView>
-
-
-    <!-- =========================================================
-         FOOTER (same fixed-height pattern as other screens)
-         ========================================================= -->
-
+    <!--  =========================================================
+             FOOTER (same fixed-height pattern as other screens)
+             =========================================================  -->
     <LinearLayout
         android:id="@+id/footer"
         android:layout_width="0dp"
@@ -571,17 +572,15 @@
         android:paddingEnd="18dp"
         android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Save -->
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        <!--  Save  -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSave"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_weight="1"
             android:layout_marginEnd="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_proceed_button1"
             android:backgroundTint="@null"
             android:elevation="6dp"
@@ -590,16 +589,14 @@
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
-
-        <!-- Clear -->
-
+        <!--  Clear  -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnClear"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_weight="1"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_create_button"
             android:backgroundTint="@null"
             android:elevation="6dp"
@@ -608,9 +605,7 @@
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
-
-        <!-- Back -->
-
+        <!--  Back  -->
         <FrameLayout
             android:layout_width="52dp"
             android:layout_height="52dp"
@@ -634,9 +629,6 @@
                 android:padding="11dp"
                 android:src="@drawable/arrow_back"
                 android:tint="#5A3517" />
-
         </FrameLayout>
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,6 +13,10 @@ import com.united.digitaldispatch.data.local.entity.StockEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
+import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequest
+import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
+import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderItem
+import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -456,6 +460,49 @@ class MasterDataRepository(
         }
     }
 
+    //Create PSW Dispatch Header - vikram
+    suspend fun createPswDispatchHeader(
+        request: CreatePSWDispatchHeaderRequest
+    ): Result<CreatePSWDispatchHeaderResponse> {
+
+        return try {
+
+            val response =
+                apiService.createPswDispatchHeader(request)
+
+            if (!response.isSuccessful) {
+
+                val serverMessage =
+                    parseServerMessage(
+                        response.errorBody()?.string()
+                    )
+
+                throw Exception(
+                    serverMessage
+                        ?: "Create PSW dispatch API failed: ${response.code()}"
+                )
+            }
+
+            val body = response.body()
+                ?: throw Exception(
+                    "Create PSW dispatch API returned empty response"
+                )
+
+            Result.success(body)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e(
+                "MasterDataRepository",
+                "Create PSW dispatch header failed",
+                e
+            )
+
+            Result.failure(e)
+        }
+    }
+
+
     private fun parseServerMessage(raw: String?): String? {
         if (raw.isNullOrBlank()) return null
 
@@ -528,12 +575,74 @@ class MasterDataRepository(
         }
     }
 
+    //SyncPSWDispatchHeaders - vikram
+    suspend fun syncPswDispatchHeaders(
+        orgnCode: String
+    ): Result<Int> {
+
+        return try {
+
+            val response =
+                apiService.getPswDispatchHeaders(orgnCode)
+
+            if (!response.isSuccessful) {
+
+                val serverMessage =
+                    parseServerMessage(
+                        response.errorBody()?.string()
+                    )
+
+                throw Exception(
+                    serverMessage
+                        ?: "PSW dispatch headers API failed: ${response.code()}"
+                )
+            }
+
+            val body =
+                response.body()
+                    ?: throw Exception(
+                        "PSW dispatch headers response is empty"
+                    )
+
+            val headers =
+                body.data.orEmpty()
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "PSW dispatch headers received: ${headers.size}"
+            )
+
+            Result.success(headers.size)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e(
+                "MasterDataRepository",
+                "PSW dispatch headers sync failed",
+                e
+            )
+
+            Result.failure(e)
+        }
+    }
+
     /** Local headers, newest first. */
     suspend fun getLocalDispatchHeaders(): List<DispatchHeaderEntity> {
         return withContext(Dispatchers.IO) {
             database.dispatchHeaderDao()
                 .getAll()
                 .sortedByDescending { parseHeaderDate(it.senderDate) }
+        }
+    }
+
+    suspend fun getLocalPswDispatchHeaders():
+            List<PswDispatchHeaderEntity> {
+        return withContext(Dispatchers.IO) {
+            database.pswDispatchHeaderDao()
+                .getAll()
+                .sortedByDescending {
+                    parseHeaderDate(it.senderDate)
+                }
         }
     }
 
@@ -567,11 +676,74 @@ class MasterDataRepository(
         }
     }
 
+    suspend fun saveCreatedPswHeaderLocally(
+        request: CreatePSWDispatchHeaderRequest
+    ) {
+        withContext(Dispatchers.IO) {
+            database.pswDispatchHeaderDao().insert(
+                PswDispatchHeaderEntity(
+                    shipmentNo = request.shipmentNo,
+                    senderOrgnCode = request.senderOrgnCode,
+                    receiverOrgnCode = request.receiverOrgnCode,
+                    senderDate = normalizeHeaderDate(
+                        request.senderDate
+                    ),
+                    sentBy = request.sentBy,
+                    senderTruckNo = request.senderTruckNo,
+                    rcNo = request.rcNo,
+                    driverName = request.driverName,
+                    drivingLicenceNo = request.drivingLicenceNo,
+                    transportName = request.transportName,
+                    typeOfTruck = request.typeOfTruck,
+                    frieghtCharges = request.frieghtCharges,
+                    uom = request.uom,
+                    status = request.status,
+                    attribute1 = request.frieghtCharges.toString(),
+                    attribute2 = request.attribute2,
+                    attribute3 = request.attribute3,
+                    attribute4 = request.attribute4,
+                    isWmsShipment = request.isWmsShipment,
+                    weighmentType = request.weighmentType
+                )
+            )
+        }
+    }
+
     private fun DispatchHeaderItem.toEntity(): DispatchHeaderEntity? {
         val no = shipmentNo?.trim()
         if (no.isNullOrEmpty()) return null
 
         return DispatchHeaderEntity(
+            shipmentNo = no,
+            senderOrgnCode = senderOrgnCode,
+            receiverOrgnCode = receiverOrgnCode,
+            senderDate = senderDate,
+            sentBy = sentBy,
+            senderTruckNo = senderTruckNo,
+            rcNo = rcNo,
+            driverName = driverName,
+            drivingLicenceNo = drivingLicenceNo,
+            transportName = transportName,
+            typeOfTruck = typeOfTruck,
+            frieghtCharges = frieghtCharges,
+            uom = uom,
+            status = status,
+            attribute1 = attribute1,
+            attribute2 = attribute2,
+            attribute3 = attribute3,
+            attribute4 = attribute4,
+            isWmsShipment = isWmsShipment,
+            weighmentType = weighmentType
+        )
+    }
+
+    private fun PSWDispatchHeaderItem.toEntity():
+            PswDispatchHeaderEntity? {
+        val no = shipmentNo?.trim()
+        if (no.isNullOrEmpty()) {
+            return null
+        }
+        return PswDispatchHeaderEntity(
             shipmentNo = no,
             senderOrgnCode = senderOrgnCode,
             receiverOrgnCode = receiverOrgnCode,

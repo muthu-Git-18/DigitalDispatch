@@ -17,6 +17,8 @@ import com.united.digitaldispatch.data.local.entity.StockEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
+import com.united.digitaldispatch.data.local.dao.PswDispatchHeaderDao
+import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 
 @Database(
     entities = [OrganizationEntity::class,
@@ -25,7 +27,8 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
                 ItemMasterEntity::class,
                 StockEntity::class,
                 TruckMasterEntity::class,
-                DispatchHeaderEntity::class
+                DispatchHeaderEntity::class,
+                PswDispatchHeaderEntity::class
                ],
     version = 4,
     exportSchema = false
@@ -41,6 +44,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun stockDao(): StockDao
 
     abstract fun dispatchHeaderDao(): DispatchHeaderDao
+
+    abstract fun pswDispatchHeaderDao(): PswDispatchHeaderDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
