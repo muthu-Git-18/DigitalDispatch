@@ -48,18 +48,18 @@ interface ApiService {
         @Body request: CreateDispatchHeaderRequest
     ): Response<CreateDispatchHeaderResponse>
 
-    @GET("Dispatch/dispatch-headers")
+    @GET("Dispatch/GetDispatch-headers")
     suspend fun getDispatchHeaders(
         @Query("orgnCode") orgnCode: String
     ): Response<DispatchHeaderListResponse>
 
     // PSW DISPATCH - vikram
-    @POST("PSW_Dispatch/create-dispatch-header")
+    @POST("PSW_Dispatch/create-PSW-dispatch-header")
     suspend fun createPswDispatchHeader(
         @Body request: CreatePSWDispatchHeaderRequest
     ): Response<CreatePSWDispatchHeaderResponse>
 
-    @GET("PSW_Dispatch/dispatch-headers")
+    @GET("PSW_Dispatch/PSW-dispatch-headers")
     suspend fun getPswDispatchHeaders(
         @Query("orgnCode") orgnCode: String
     ): Response<PSWDispatchHeaderListResponse>

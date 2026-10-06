@@ -604,8 +604,14 @@ class MasterDataRepository(
                         "PSW dispatch headers response is empty"
                     )
 
-            val headers =
-                body.data.orEmpty()
+            val headers = body.data.orEmpty().mapNotNull { it.toEntity() }
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+                    database.pswDispatchHeaderDao().deleteAll()
+                    database.pswDispatchHeaderDao().insertAll(headers)
+                }
+            }
 
             android.util.Log.d(
                 "MasterDataRepository",

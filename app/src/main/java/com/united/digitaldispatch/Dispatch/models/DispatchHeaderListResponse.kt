@@ -26,5 +26,6 @@ data class DispatchHeaderItem(
     val attribute3: String? = null,
     val attribute4: String? = null,
     val isWmsShipment: String? = null,
+    val type_Of_Dispatch: String? = null,
     val weighmentType: String? = null
 )
