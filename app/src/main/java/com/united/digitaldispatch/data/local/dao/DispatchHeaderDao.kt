@@ -18,6 +18,9 @@ interface DispatchHeaderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: DispatchHeaderEntity)
 
+    @Query("SELECT * FROM dispatch_header WHERE shipmentNo = :shipmentNo LIMIT 1")
+    fun getByShipmentNo(shipmentNo: String): DispatchHeaderEntity?
+
     @Query("DELETE FROM dispatch_header")
     fun deleteAll()
 

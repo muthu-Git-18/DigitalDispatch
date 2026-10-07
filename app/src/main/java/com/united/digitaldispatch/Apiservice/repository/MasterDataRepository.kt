@@ -1,6 +1,7 @@
 package com.united.digitaldispatch.Apiservice.repository
 
 import com.united.digitaldispatch.Apiservice.network.ApiService
+import com.united.digitaldispatch.Dispatch.models.BaleInfo
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Dispatch.models.DispatchHeaderItem
@@ -794,5 +795,37 @@ class MasterDataRepository(
         if (time == 0L) return value
         return SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US).format(java.util.Date(time))
     }
+
+
+    //Dispatch Details
+
+    /** One dispatch header from the local table (weighment type, sender, receiver ...). */
+    suspend fun getLocalDispatchHeader(shipmentNo: String): DispatchHeaderEntity? {
+        return withContext(Dispatchers.IO) {
+            database.dispatchHeaderDao().getByShipmentNo(shipmentNo)
+        }
+    }
+
+    /** Looks a bale up in the local stock table (synced on the dashboard). */
+    suspend fun findBaleInStock(baleNo: String): BaleInfo? {
+        return withContext(Dispatchers.IO) {
+            database.stockDao().getByBaleNumber(baleNo)?.let { s ->
+                BaleInfo(
+                    baleNumber = s.gpiL_BALE_NUMBER?.toString().orEmpty(),
+                    tbLotNumber = s.tB_LOT_NO?.toString().orEmpty(),
+                    markedWeight = s.markeD_WT?.toString().orEmpty(),
+                    grade = s.grade?.toString().orEmpty(),
+                    buyerGrade = s.buyeR_GRADE?.toString().orEmpty(),
+                    subInventoryCode = s.subinventorY_CODE?.toString().orEmpty(),
+                    price = s.price?.toString().orEmpty(),
+                    status = s.status?.toString().orEmpty(),
+                    processStatus = s.procesS_STATUS?.toString().orEmpty(),
+                    currentOrgnCode = s.curR_ORGN_CODE?.toString().orEmpty(),
+                    purchaseDate = s.createD_DATE?.toString().orEmpty()
+                )
+            }
+        }
+    }
+
 
 }

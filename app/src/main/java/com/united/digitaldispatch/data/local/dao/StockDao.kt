@@ -20,5 +20,8 @@ interface StockDao {
 
     @Query("SELECT * FROM stock_table")
     fun getAll(): List<StockEntity>
+
+    @Query("SELECT * FROM stock_table WHERE gpiL_BALE_NUMBER = :baleNo LIMIT 1")
+    fun getByBaleNumber(baleNo: String): StockEntity?
 }
 
