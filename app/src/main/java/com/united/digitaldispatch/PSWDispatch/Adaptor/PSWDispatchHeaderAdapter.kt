@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 
-class PSWDispatchHeaderAdapter :
-    ListAdapter<PswDispatchHeaderEntity, PSWDispatchHeaderAdapter.VH>(DIFF) {
+class PSWDispatchHeaderAdapter(
+    private val onDeleteClick: (PswDispatchHeaderEntity) -> Unit
+) : ListAdapter<PswDispatchHeaderEntity, PSWDispatchHeaderAdapter.VH>(DIFF) {
 
     private var selectedShipmentNo: String? = null
 
@@ -69,6 +70,8 @@ class PSWDispatchHeaderAdapter :
         private val tvFreight =
             view.findViewById<TextView>(R.id.tvFreight)
 
+        private val ivDelete = view.findViewById<View>(R.id.ivDelete)
+
         private val tvWeighment =
             view.findViewById<TextView>(R.id.tvWeighment)
 
@@ -88,8 +91,7 @@ class PSWDispatchHeaderAdapter :
             tvTruckNo.text =
                 item.senderTruckNo.orDash()
 
-            tvDate.text =
-                item.senderDate.orDash()
+            tvDate.text = dateOnly(item.senderDate)
 
             tvType.text =
                 item.typeOfTruck.orDash()
@@ -120,6 +122,10 @@ class PSWDispatchHeaderAdapter :
             ivCheck.scaleY =
                 if (selected) 1f else 0.4f
 
+            ivDelete.setOnClickListener {
+                onDeleteClick(item)
+            }
+
             itemView.setOnClickListener {
 
                 // small press "bounce"
@@ -146,6 +152,15 @@ class PSWDispatchHeaderAdapter :
 
         private fun String?.orDash(): String =
             if (this.isNullOrBlank()) "-" else this
+
+        private fun dateOnly(value: String?): String {
+            if (value.isNullOrBlank()) return "-"
+
+            return value.trim()
+                .substringBefore(' ')
+                .substringBefore('T')
+                .ifBlank { "-" }
+        }
 
         private fun freightText(
             item: PswDispatchHeaderEntity

@@ -31,6 +31,8 @@ import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.OrganizationEntity
 import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
+import com.united.digitaldispatch.utils.AppLoader
+import com.united.digitaldispatch.utils.AppSuccessDialog
 import com.united.digitaldispatch.utils.ConfirmDispatchDialog
 import com.united.digitaldispatch.utils.SearchableSpinnerDialog
 import com.united.digitaldispatch.utils.SessionManager
@@ -64,6 +66,12 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
     private lateinit var db: AppDatabase
 
     private val ioExecutor = Executors.newSingleThreadExecutor()
+
+    // Reusable loader while creating PSW Dispatch Header
+    private val loader by lazy { AppLoader(this) }
+
+    // Shipment number shown in success dialog
+    private var lastShipmentNo: String = ""
 
     // -------------------------------------------------
     // VIEWS
@@ -764,10 +772,8 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
 
                                 is TruckMasterState.Idle -> {
                                 }
-
                                 is TruckMasterState.Loading -> {
                                 }
-
                                 is TruckMasterState.Success -> {
 
                                     truckMasterList =
@@ -805,53 +811,54 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
                  */
 
                 launch {
-
                     pswViewModel
                         .createPswDispatchState
                         .collect { state ->
-
                             when (state) {
                                 is CreatePSWDispatchState.Idle -> {
-                                    btnSave.isEnabled =
-                                        true
+                                    btnSave.isEnabled = true
                                 }
-
                                 is CreatePSWDispatchState.Loading -> {
-                                    btnSave.isEnabled =
-                                        false
+                                    btnSave.isEnabled = false
+                                    loader.show("Creating PSW Dispatch Header")
                                 }
-
                                 is CreatePSWDispatchState.Success -> {
-                                    btnSave.isEnabled =
-                                        true
-
-                                    showToast(
-                                        "PSW Dispatch header created"
-                                    )
-
-                                    clearForm()
-
-                                    pswViewModel
-                                        .resetCreatePswDispatchState()
+                                    loader.dismiss()
+                                    btnSave.isEnabled = true
+                                    pswViewModel.resetCreatePswDispatchState()
+                                    showSuccessAndReturn()
                                 }
-
                                 is CreatePSWDispatchState.Error -> {
-
-                                    btnSave.isEnabled =
-                                        true
-
-                                    showToast(
-                                        state.message
-                                    )
-
-                                    pswViewModel
-                                        .resetCreatePswDispatchState()
+                                    loader.dismiss()
+                                    btnSave.isEnabled = true
+                                    showToast(state.message)
+                                    pswViewModel.resetCreatePswDispatchState()
                                 }
                             }
                         }
                 }
             }
         }
+    }
+
+    // -------------------------------------------------
+// SUCCESS -> back to PSW Dispatch screen
+// -------------------------------------------------
+
+    private fun showSuccessAndReturn() {
+
+        AppSuccessDialog(
+            activity = this,
+            message = "PSW Dispatch Header Created Successfully",
+            subMessage = if (lastShipmentNo.isNotBlank()) {
+                "Shipment No : $lastShipmentNo"
+            } else {
+                null
+            }
+        ) {
+            setResult(RESULT_OK)
+            finish()
+        }.show()
     }
 
     // -------------------------------------------------
@@ -1510,10 +1517,9 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
              * PSW:
              * pswViewModel.createPswDispatchHeader(request)
              */
-            pswViewModel
-                .createPswDispatchHeader(
-                    request
-                )
+            lastShipmentNo = request.shipmentNo.orEmpty()
+
+            pswViewModel.createPswDispatchHeader(request)
 
         }.show()
     }
@@ -1581,9 +1587,9 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
     // -------------------------------------------------
 
     override fun onDestroy() {
-
         super.onDestroy()
 
+        loader.dismiss()
         ioExecutor.shutdown()
     }
 }

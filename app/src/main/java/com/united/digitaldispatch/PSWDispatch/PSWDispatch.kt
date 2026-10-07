@@ -14,15 +14,18 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.RecyclerView
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModelFactory
+import com.united.digitaldispatch.Apiservice.viewmodel.SyncPswHeadersState
 import com.united.digitaldispatch.PSWDispatch.Adaptor.PSWDispatchHeaderAdapter
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
+import com.united.digitaldispatch.utils.AppLoader
 import com.united.digitaldispatch.utils.ConfirmDispatchDialog
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
@@ -47,6 +50,17 @@ class PswDispatch : AppCompatActivity() {
     private lateinit var btnProceed: AppCompatButton
 
     private val adapter = PSWDispatchHeaderAdapter()
+
+    private val loader by lazy { AppLoader(this) }
+
+    private val createHeaderLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                refreshPswHeadersFromServer()
+            }
+        }
 
     private var allHeaders: List<PswDispatchHeaderEntity> = emptyList()
     private var animateNextSubmit = true
@@ -76,8 +90,7 @@ class PswDispatch : AppCompatActivity() {
         setupSearch()
         setupClickListeners()
         observeHeaders()
-
-
+        observeSync()
     }
 
     override fun onResume() {
@@ -221,6 +234,52 @@ class PswDispatch : AppCompatActivity() {
     // OBSERVE
     // -------------------------------------------------
 
+
+    private fun observeSync() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModel.syncPswHeadersState.collect { state ->
+
+                    when (state) {
+
+                        is SyncPswHeadersState.Idle -> {
+                            // Nothing to do
+                        }
+
+                        is SyncPswHeadersState.Loading -> {
+                            loader.show("PSW Dispatch Header Loading")
+                        }
+
+                        is SyncPswHeadersState.Success -> {
+
+                            loader.dismiss()
+
+                            viewModel.resetSyncPswHeadersState()
+
+                            viewModel.loadLocalPswHeaders()
+                        }
+
+                        is SyncPswHeadersState.Error -> {
+
+                            loader.dismiss()
+
+                            viewModel.resetSyncPswHeadersState()
+
+                            Toast.makeText(
+                                this@PswDispatch,
+                                "${state.message}\nShowing saved PSW headers",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            // Keep showing whatever is already in Room
+                            viewModel.loadLocalPswHeaders()
+                        }
+                    }
+                }
+            }
+        }
+    }
     private fun observeHeaders() {
 
         lifecycleScope.launch {
@@ -245,6 +304,17 @@ class PswDispatch : AppCompatActivity() {
     // CLICKS
     // -------------------------------------------------
 
+    private fun refreshPswHeadersFromServer() {
+
+        val code = sessionManager.getOrganizationCode()
+
+        if (code.isNullOrBlank()) {
+            return
+        }
+
+        viewModel.syncPswDispatchHeaders(code)
+    }
+
     private fun setupClickListeners() {
 
         btnBack.setOnClickListener {
@@ -252,8 +322,7 @@ class PswDispatch : AppCompatActivity() {
         }
 
         btnCreateHeader.setOnClickListener {
-
-            startActivity(
+            createHeaderLauncher.launch(
                 Intent(
                     this@PswDispatch,
                     CreateHeaderPSWDispatch::class.java
