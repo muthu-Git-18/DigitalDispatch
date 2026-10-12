@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequest
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
-import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderItem
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +15,7 @@ class PswDispatchViewModel(
     private val repository: MasterDataRepository
 ) : ViewModel() {
 
+
     // ---------------------------------
     // CREATE PSW DISPATCH
     // ---------------------------------
@@ -25,7 +25,9 @@ class PswDispatchViewModel(
             CreatePSWDispatchState.Idle
         )
 
-    val createPswDispatchState: StateFlow<CreatePSWDispatchState> = _createPswDispatchState
+    val createPswDispatchState: StateFlow<CreatePSWDispatchState> =
+        _createPswDispatchState
+
 
     fun createPswDispatchHeader(
         request: CreatePSWDispatchHeaderRequest
@@ -39,6 +41,7 @@ class PswDispatchViewModel(
             val result =
                 repository.createPswDispatchHeader(request)
 
+            // Save locally only when API creation succeeds
             if (result.isSuccess) {
                 runCatching {
                     repository.saveCreatedPswHeaderLocally(request)
@@ -62,11 +65,74 @@ class PswDispatchViewModel(
         }
     }
 
+
+    fun resetCreatePswDispatchState() {
+
+        _createPswDispatchState.value =
+            CreatePSWDispatchState.Idle
+    }
+
+
+    // ---------------------------------
+    // DELETE PSW DISPATCH HEADER
+    // ---------------------------------
+
+//    private val _deletePswHeaderState =
+//        MutableStateFlow<DeletePswHeaderState>(
+//            DeletePswHeaderState.Idle
+//        )
+//
+//    val deletePswHeaderState: StateFlow<DeletePswHeaderState> =
+//        _deletePswHeaderState
+//
+//
+//    fun deletePswDispatchHeader(
+//        shipmentNo: String
+//    ) {
+//
+//        viewModelScope.launch {
+//
+//            _deletePswHeaderState.value =
+//                DeletePswHeaderState.Loading
+//
+//            _deletePswHeaderState.value =
+//                repository.deletePswDispatchHeader(shipmentNo)
+//                    .fold(
+//
+//                        onSuccess = { message ->
+//                            DeletePswHeaderState.Success(message)
+//                        },
+//
+//                        onFailure = { exception ->
+//                            DeletePswHeaderState.Error(
+//                                exception.message
+//                                    ?: "Failed to delete shipment"
+//                            )
+//                        }
+//                    )
+//        }
+//    }
+//
+//
+//    fun resetDeletePswHeaderState() {
+//
+//        _deletePswHeaderState.value =
+//            DeletePswHeaderState.Idle
+//    }
+
+
+    // ---------------------------------
+    // LOCAL PSW DISPATCH HEADERS
+    // ---------------------------------
+
     private val _localPswHeaders =
-        MutableStateFlow<List<PswDispatchHeaderEntity>>(emptyList())
+        MutableStateFlow<List<PswDispatchHeaderEntity>>(
+            emptyList()
+        )
 
     val localPswHeaders: StateFlow<List<PswDispatchHeaderEntity>> =
         _localPswHeaders
+
 
     fun loadLocalPswHeaders() {
 
@@ -77,14 +143,9 @@ class PswDispatchViewModel(
         }
     }
 
-    fun resetCreatePswDispatchState() {
-
-        _createPswDispatchState.value = CreatePSWDispatchState.Idle
-    }
-
 
     // ---------------------------------
-    // PSW DISPATCH HEADERS
+    // PSW DISPATCH HEADERS SYNC
     // ---------------------------------
 
     private val _syncPswHeadersState =
@@ -92,25 +153,23 @@ class PswDispatchViewModel(
             SyncPswHeadersState.Idle
         )
 
-    val syncPswHeadersState: StateFlow<SyncPswHeadersState> = _syncPswHeadersState
+    val syncPswHeadersState: StateFlow<SyncPswHeadersState> =
+        _syncPswHeadersState
 
 
-    fun syncPswDispatchHeaders(
-        orgnCode: String
-    ) {
-
+    fun syncPswDispatchHeaders(orgnCode: String) {
         viewModelScope.launch {
 
-            _syncPswHeadersState.value = SyncPswHeadersState.Loading
+            _syncPswHeadersState.value =
+                SyncPswHeadersState.Loading
 
-            _syncPswHeadersState.value = repository.syncPswDispatchHeaders(orgnCode)
+            _syncPswHeadersState.value =
+                repository
+                    .syncPswDispatchHeaders(orgnCode)
                     .fold(
                         onSuccess = { count ->
-                            SyncPswHeadersState.Success(
-                                count
-                            )
+                            SyncPswHeadersState.Success(count)
                         },
-
                         onFailure = { exception ->
                             SyncPswHeadersState.Error(
                                 exception.message
@@ -124,7 +183,8 @@ class PswDispatchViewModel(
 
     fun resetSyncPswHeadersState() {
 
-        _syncPswHeadersState.value = SyncPswHeadersState.Idle
+        _syncPswHeadersState.value =
+            SyncPswHeadersState.Idle
     }
 }
 
@@ -146,6 +206,26 @@ sealed class CreatePSWDispatchState {
     data class Error(
         val message: String
     ) : CreatePSWDispatchState()
+}
+
+
+// ---------------------------------
+// DELETE PSW HEADER STATE
+// ---------------------------------
+
+sealed class DeletePswHeaderState {
+
+    object Idle : DeletePswHeaderState()
+
+    object Loading : DeletePswHeaderState()
+
+    data class Success(
+        val message: String
+    ) : DeletePswHeaderState()
+
+    data class Error(
+        val message: String
+    ) : DeletePswHeaderState()
 }
 
 

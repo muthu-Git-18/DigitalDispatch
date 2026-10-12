@@ -23,6 +23,7 @@ import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModelFacto
 import com.united.digitaldispatch.Apiservice.viewmodel.SyncPswHeadersState
 import com.united.digitaldispatch.PSWDispatch.Adaptor.PSWDispatchHeaderAdapter
 import com.united.digitaldispatch.R
+import com.united.digitaldispatch.utils.DeleteConfirmDialog
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import com.united.digitaldispatch.utils.AppLoader
@@ -49,7 +50,9 @@ class PswDispatch : AppCompatActivity() {
     private lateinit var btnCreateHeader: AppCompatButton
     private lateinit var btnProceed: AppCompatButton
 
-    private val adapter = PSWDispatchHeaderAdapter()
+    private val adapter = PSWDispatchHeaderAdapter { header ->
+        confirmDelete(header)
+    }
 
     private val loader by lazy { AppLoader(this) }
 
@@ -91,6 +94,7 @@ class PswDispatch : AppCompatActivity() {
         setupClickListeners()
         observeHeaders()
         observeSync()
+        //observeDelete()
     }
 
     override fun onResume() {
@@ -168,6 +172,18 @@ class PswDispatch : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun confirmDelete(header: PswDispatchHeaderEntity) {
+
+        DeleteConfirmDialog(
+            activity = this,
+            title = "Delete Shipment?",
+            highlight = header.shipmentNo,
+            message = "This shipment will be deleted.\nThis action cannot be undone."
+        ) {
+           // viewModel.deletePswDispatchHeader( header.shipmentNo )
+        }.show()
     }
 
     private fun applyFilter(query: String) {
@@ -280,6 +296,55 @@ class PswDispatch : AppCompatActivity() {
             }
         }
     }
+
+//    private fun observeDelete() {
+//
+//        lifecycleScope.launch {
+//
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//
+//                viewModel.deletePswHeaderState.collect { state ->
+//
+//                    when (state) {
+//
+//                        is DeletePswHeaderState.Idle -> {
+//                        }
+//
+//                        is DeletePswHeaderState.Loading -> {
+//                            loader.show("Deleting Shipment")
+//                        }
+//
+//                        is DeletePswHeaderState.Success -> {
+//                            loader.dismiss()
+//
+//                            Toast.makeText(
+//                                this@PswDispatch,
+//                                state.message,
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//
+//                            viewModel.resetDeletePswHeaderState()
+//
+//                            viewModel.loadLocalPswHeaders()
+//                        }
+//
+//                        is DeletePswHeaderState.Error -> {
+//                            loader.dismiss()
+//
+//                            Toast.makeText(
+//                                this@PswDispatch,
+//                                state.message,
+//                                Toast.LENGTH_LONG
+//                            ).show()
+//
+//                            viewModel.resetDeletePswHeaderState()
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
     private fun observeHeaders() {
 
         lifecycleScope.launch {
@@ -305,7 +370,6 @@ class PswDispatch : AppCompatActivity() {
     // -------------------------------------------------
 
     private fun refreshPswHeadersFromServer() {
-
         val code = sessionManager.getOrganizationCode()
 
         if (code.isNullOrBlank()) {
