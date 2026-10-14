@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DDR-GPI</string>
+    <string name="create_variety">Variety</string>
+    <string name="create_crop_year">Crop Year</string>
 </resources>

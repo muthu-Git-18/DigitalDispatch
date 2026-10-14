@@ -1,28 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@color/main_bg">
-
-
-    <!-- =========================
-         CURVED BLUE HEADER
-         ========================= -->
-
+    android:background="@color/main_bg"
+    android:fitsSystemWindows="true">
+    <!--  =========================
+             CURVED BLUE HEADER
+             =========================  -->
     <ImageView
         android:id="@+id/imgHeader"
         android:layout_width="0dp"
         android:layout_height="180dp"
         android:scaleType="fitXY"
         android:src="@drawable/dashboard_header_wave1"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/logoContainer"
@@ -43,7 +36,6 @@
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
             android:src="@drawable/logooo" />
-
     </FrameLayout>
 
     <TextView
@@ -52,18 +44,15 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="100dp"
         android:fontFamily="serif"
-
-        android:text="Dashboard"
-        android:textColor="#FFF8E8"
-        android:textSize="20sp"
-        android:textStyle="bold"
         android:letterSpacing="0.04"
-
         android:shadowColor="#A65A3517"
         android:shadowDx="2"
         android:shadowDy="3"
         android:shadowRadius="2"
-
+        android:text="Dashboard"
+        android:textColor="#FFF8E8"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/imgHeader"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/imgHeader"
@@ -73,38 +62,36 @@
         android:id="@+id/imgDashboardBackground"
         android:layout_width="280dp"
         android:layout_height="500dp"
+        android:layout_marginTop="0dp"
         android:alpha="0.13"
         android:contentDescription="Dashboard Background"
         android:scaleType="fitXY"
         android:src="@drawable/dashbg3"
-        android:layout_marginTop="0dp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- ==================================================
-         DASHBOARD CARDS
-         Positioning is now handled entirely by the Flow
-         below (see bottom of file). Each card only defines
-         its own size/appearance here - NOT where it sits
-         relative to other cards. That's what lets hidden
-         cards (visibility=GONE, set in Dashboard.kt) leave
-         no gaps: Flow automatically re-packs whatever is
-         left visible.
-         ================================================== -->
-
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--  ==================================================
+             DASHBOARD CARDS
+             Positioning is now handled entirely by the Flow
+             below (see bottom of file). Each card only defines
+             its own size/appearance here - NOT where it sits
+             relative to other cards. That's what lets hidden
+             cards (visibility=GONE, set in Dashboard.kt) leave
+             no gaps: Flow automatically re-packs whatever is
+             left visible.
+             ==================================================  -->
     <LinearLayout
         android:id="@+id/cardDispatch"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
         android:elevation="10dp"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="6dp">
 
         <FrameLayout
             android:id="@+id/frameDispatchIcon"
@@ -116,11 +103,10 @@
                 android:id="@+id/imgDispatchIcon"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/dispatc"
                 android:layout_marginBottom="5dp"
-                android:contentDescription="Dispatch" />
-
+                android:contentDescription="Dispatch"
+                android:scaleType="fitCenter"
+                android:src="@drawable/dispatc" />
         </FrameLayout>
 
         <TextView
@@ -129,12 +115,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="-8dp"
             android:gravity="center"
-            android:text="Dispatch"
             android:shadowColor="#FFFFFF"
+            android:text="Dispatch"
             android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -142,12 +127,12 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
         android:elevation="10dp"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="6dp">
 
         <FrameLayout
             android:id="@+id/frameReceiptIcon"
@@ -160,11 +145,10 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:scaleType="fitCenter"
                 android:layout_marginBottom="5dp"
-                android:src="@drawable/receip"
-                android:contentDescription="Receipt" />
-
+                android:contentDescription="Receipt"
+                android:scaleType="fitCenter"
+                android:src="@drawable/receip" />
         </FrameLayout>
 
         <TextView
@@ -173,15 +157,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="-10dp"
             android:gravity="center"
-            android:text="Receipt"
-            android:textSize="11sp"
-            android:textStyle="bold"
             android:shadowColor="#FFFFFF"
-            android:textColor="@color/brown_font"
             android:shadowDx="0"
             android:shadowDy="1"
-            android:shadowRadius="1" />
-
+            android:shadowRadius="1"
+            android:text="Receipt"
+            android:textColor="@color/brown_font"
+            android:textSize="11sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -189,12 +172,12 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
         android:elevation="10dp"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="6dp">
 
         <FrameLayout
             android:id="@+id/framePswdispatchIcon"
@@ -207,11 +190,10 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:scaleType="fitCenter"
                 android:layout_marginBottom="5dp"
-                android:src="@drawable/pswdispatc"
-                android:contentDescription="PSW Dispatch" />
-
+                android:contentDescription="PSW Dispatch"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pswdispatc" />
         </FrameLayout>
 
         <TextView
@@ -220,12 +202,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="-10dp"
             android:gravity="center"
-            android:text="PSW Dispatch"
             android:shadowColor="#FFFFFF"
+            android:text="PSW Dispatch"
             android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -233,12 +214,12 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
         android:elevation="10dp"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="6dp">
 
         <FrameLayout
             android:id="@+id/framePswreceiptIcon"
@@ -250,12 +231,11 @@
                 android:id="@+id/imgPswreceiptIcon"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
-                android:layout_marginBottom="5dp"
                 android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="PSW Receipt"
                 android:scaleType="fitCenter"
-                android:src="@drawable/pswreceip"
-                android:contentDescription="PSW Receipt" />
-
+                android:src="@drawable/pswreceip" />
         </FrameLayout>
 
         <TextView
@@ -264,12 +244,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="-10dp"
             android:gravity="center"
-            android:text="PSW Receipt"
             android:shadowColor="#FFFFFF"
+            android:text="PSW Receipt"
             android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -277,12 +256,12 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
         android:elevation="10dp"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="6dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="6dp">
 
         <FrameLayout
             android:id="@+id/frameGtdispatchIcon"
@@ -295,11 +274,10 @@
                 android:layout_width="75dp"
                 android:layout_height="75dp"
                 android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
                 android:contentDescription="GTD Dispatch"
                 android:scaleType="fitCenter"
-                android:layout_marginBottom="5dp"
                 android:src="@drawable/gtdispatc" />
-
         </FrameLayout>
 
         <TextView
@@ -308,42 +286,122 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="-10dp"
             android:gravity="center"
-            android:text="GTD Dispatch"
             android:shadowColor="#FFFFFF"
+            android:text="GTD Dispatch"
             android:textColor="@color/brown_font"
             android:textSize="11sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
-    <!-- ==================================================
-         FLOW: lays out only the currently-VISIBLE cards
-         (order given in constraint_referenced_ids), up to
-         3 per row, and re-centers/re-packs automatically
-         whenever a card is hidden - no manual repositioning
-         needed in Dashboard.kt beyond setting visibility.
-         ================================================== -->
+    <LinearLayout
+        android:id="@+id/cardStock"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
+        android:elevation="10dp"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp">
 
+        <FrameLayout
+            android:id="@+id/stockIcon"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/imgStockIcon"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="Stock"
+                android:scaleType="fitCenter"
+                android:src="@drawable/stock" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvStockLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:shadowColor="#FFFFFF"
+            android:text="Stock"
+            android:textColor="@color/brown_font"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <!--  Case Inquiry card  -->
+    <LinearLayout
+        android:id="@+id/cardCaseInquiry"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/dashboard_card_background"
+        android:clickable="true"
+        android:elevation="10dp"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp">
+
+        <FrameLayout
+            android:id="@+id/frameCaseInquiryIcon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/imgCaseInquiryIcon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="Case Inquiry"
+                android:scaleType="fitCenter"
+                android:src="@drawable/caseinquiry" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvCaseInquiryLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:gravity="center"
+            android:shadowColor="#FFFFFF"
+            android:text="Case Inquiry"
+            android:textColor="@color/brown_font"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <!--  ==================================================
+             FLOW: lays out only the currently-VISIBLE cards
+             (order given in constraint_referenced_ids), up to
+             3 per row, and re-centers/re-packs automatically
+             whenever a card is hidden - no manual repositioning
+             needed in Dashboard.kt beyond setting visibility.
+             ==================================================  -->
     <androidx.constraintlayout.helper.widget.Flow
         android:id="@+id/dashboardCardFlow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/imgHeader"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="16dp"
-        app:flow_wrapMode="chain"
-        app:flow_maxElementsWrap="3"
-        app:flow_horizontalGap="24dp"
-        app:flow_verticalGap="28dp"
-        app:flow_horizontalStyle="packed"
+        app:constraint_referenced_ids="cardDispatch,cardReceipt,cardPswdispatch,cardPswreceipt,cardGtdispatch,cardStock,cardCaseInquiry"
         app:flow_horizontalBias="0.5"
+        app:flow_horizontalGap="24dp"
+        app:flow_horizontalStyle="packed"
+        app:flow_maxElementsWrap="3"
+        app:flow_verticalGap="28dp"
         app:flow_verticalStyle="packed"
-        app:constraint_referenced_ids="cardDispatch,cardReceipt,cardPswdispatch,cardPswreceipt,cardGtdispatch" />
-
-    <!-- Floating Sync Button -->
+        app:flow_wrapMode="chain"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgHeader" />
+    <!--  Floating Sync Button  -->
     <FrameLayout
         android:id="@+id/syncButtonContainer"
         android:layout_width="62dp"
@@ -352,8 +410,8 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/sync_button_background"
         android:clickable="true"
-        android:focusable="true"
         android:elevation="12dp"
+        android:focusable="true"
         android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -364,69 +422,61 @@
             android:layout_height="match_parent"
             android:contentDescription="Sync"
             android:scaleType="fitCenter"
-            android:src="@drawable/sync"
-            />
-
+            android:src="@drawable/sync" />
     </FrameLayout>
+    <!--  ==================================================
+             WELCOME / SYNCING POPUP (bottom-left, one-time)
+             Starts GONE. Dashboard.kt fades it in on open,
+             swaps the message, then fades it back out.
+             Drop your uploaded arrow/leaf image into
+             res/drawable as "welcome_popup_icon".
 
-    <!-- ==================================================
-         WELCOME / SYNCING POPUP (bottom-left, one-time)
-         Starts GONE. Dashboard.kt fades it in on open,
-         swaps the message, then fades it back out.
-         Drop your uploaded arrow/leaf image into
-         res/drawable as "welcome_popup_icon".
-
-         Structure:
-           popupContainer (fixed size, doesn't clip)
-             |- imgPopup      -> anchored bottom-start
-             |- bubbleWrapper -> anchored top-end, holds the
-                                  bubble AND its tail together
-                                  so the tail always points at
-                                  the bubble regardless of where
-                                  the wrapper sits
-                  |- bubbleTail  -> peeks out the bottom-start
-                                     corner of the bubble, aimed
-                                     down at the arrow tip
-                  |- bubbleCard  -> the speech bubble itself
-         ================================================== -->
-
+             Structure:
+               popupContainer (fixed size, doesn't clip)
+                 |- imgPopup      -> anchored bottom-start
+                 |- bubbleWrapper -> anchored top-end, holds the
+                                      bubble AND its tail together
+                                      so the tail always points at
+                                      the bubble regardless of where
+                                      the wrapper sits
+                      |- bubbleTail  -> peeks out the bottom-start
+                                         corner of the bubble, aimed
+                                         down at the arrow tip
+                      |- bubbleCard  -> the speech bubble itself
+             ==================================================  -->
     <FrameLayout
         android:id="@+id/popupContainer"
         android:layout_width="match_parent"
         android:layout_height="280dp"
-        android:elevation="20dp"
         android:clipChildren="false"
-        android:visibility="gone"
         android:clipToPadding="false"
-        app:layout_constraintStart_toStartOf="parent"
+        android:elevation="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        >
-
-        <!-- The arrow / leaf image, anchored bottom-left of the container -->
+        app:layout_constraintStart_toStartOf="parent">
+        <!--  The arrow / leaf image, anchored bottom-left of the container  -->
         <ImageView
             android:id="@+id/imgPopup"
             android:layout_width="220dp"
             android:layout_height="220dp"
             android:layout_gravity="bottom|start"
+            android:contentDescription="Welcome"
             android:scaleType="fitCenter"
-            android:src="@drawable/og_welcome_img"
-            android:contentDescription="Welcome" />
-
-        <!-- Bubble + tail, kept together so they always line up.
-             Sits in the clear space ABOVE the image, not on top
-             of the arrow, so the arrow stays fully visible. -->
+            android:src="@drawable/og_welcome_img" />
+        <!--  Bubble + tail, kept together so they always line up.
+                     Sits in the clear space ABOVE the image, not on top
+                     of the arrow, so the arrow stays fully visible.  -->
         <FrameLayout
             android:id="@+id/bubbleWrapper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:clipChildren="false"
             android:layout_marginTop="10dp"
-            android:clipToPadding="false"
-            android:layout_marginEnd="4dp">
-
-            <!-- Tail: rotated square, one corner pokes out below the
-                 bubble's bottom-start edge, aimed at the arrow tip -->
+            android:layout_marginEnd="4dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+            <!--  Tail: rotated square, one corner pokes out below the
+                             bubble's bottom-start edge, aimed at the arrow tip  -->
             <View
                 android:id="@+id/bubbleTail"
                 android:layout_width="16dp"
@@ -434,35 +484,30 @@
                 android:layout_gravity="bottom|start"
                 android:layout_marginStart="25dp"
                 android:layout_marginBottom="-6dp"
-                android:rotation="45"
-                android:background="@drawable/bg_speech_bubble_tail" />
+                android:background="@drawable/bg_speech_bubble_tail"
+                android:rotation="45" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/bubbleCard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="20dp"
-
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="@android:color/transparent">
+                app:cardElevation="6dp">
 
                 <TextView
                     android:id="@+id/tvPopupText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_speech_bubble"
-                    android:maxWidth="250dp"
-                    android:gravity="center"
                     android:fontFamily="serif"
+                    android:gravity="center"
+                    android:maxWidth="250dp"
+                    android:text="Hello TeamLiftss....."
                     android:textColor="@color/brown_font"
                     android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:text="Hello TeamLiftss....." />
-
+                    android:textStyle="bold" />
             </androidx.cardview.widget.CardView>
-
         </FrameLayout>
-
     </FrameLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -33,12 +33,14 @@ import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModelFactory
 import com.united.digitaldispatch.Apiservice.viewmodel.SyncHeadersState
 import com.united.digitaldispatch.Apiservice.viewmodel.SyncPswHeadersState
+import com.united.digitaldispatch.CaseInquiry.CaseInquiry
 import com.united.digitaldispatch.Dispatch.Dispatch
 import com.united.digitaldispatch.GTDispatch.GtdDispatch
 import com.united.digitaldispatch.PSWDispatch.PswDispatch
 import com.united.digitaldispatch.PSWReceipt.PswReceipt
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.Receipt.Receipt
+import com.united.digitaldispatch.Stock.Stock
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.DashboardScreen
 import com.united.digitaldispatch.data.local.ModuleScreens
@@ -296,6 +298,36 @@ class Dashboard : AppCompatActivity() {
                     Intent(
                         this,
                         GtdDispatch::class.java
+                    )
+                )
+            },
+
+            CardViews(
+                container = findViewById(R.id.cardStock),
+                iconFrame = findViewById(R.id.stockIcon),
+                icon = findViewById(R.id.imgStockIcon),
+                label = findViewById(R.id.tvStockLabel),
+                screen = DashboardScreen.STOCK
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        Stock::class.java
+                    )
+                )
+            },
+
+            CardViews(
+                container = findViewById(R.id.cardCaseInquiry),
+                iconFrame = findViewById(R.id.frameCaseInquiryIcon),
+                icon = findViewById(R.id.imgCaseInquiryIcon),
+                label = findViewById(R.id.tvCaseInquiryLabel),
+                screen = DashboardScreen.CASE_INQUIRY
+            ) {
+                startActivity(
+                    Intent(
+                        this,
+                        CaseInquiry::class.java
                     )
                 )
             }

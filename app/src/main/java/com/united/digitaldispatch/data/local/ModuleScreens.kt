@@ -22,7 +22,7 @@ object ModuleType {
 }
 
 enum class DashboardScreen {
-    DISPATCH, RECEIPT, PSW_DISPATCH, PSW_RECEIPT, GTD_DISPATCH
+    DISPATCH, RECEIPT, PSW_DISPATCH, PSW_RECEIPT, GTD_DISPATCH, STOCK, CASE_INQUIRY
 }
 
 object ModuleScreens {
@@ -39,7 +39,9 @@ object ModuleScreens {
             DashboardScreen.DISPATCH,
             DashboardScreen.RECEIPT,
             DashboardScreen.PSW_DISPATCH,
-            DashboardScreen.PSW_RECEIPT
+            DashboardScreen.PSW_RECEIPT,
+            DashboardScreen.STOCK,
+            DashboardScreen.CASE_INQUIRY
         ),
         ModuleType.WH to setOf(
             DashboardScreen.DISPATCH,
