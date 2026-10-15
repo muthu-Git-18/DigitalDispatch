@@ -828,4 +828,35 @@ class MasterDataRepository(
     }
 
 
+    // Read available crops from locally stored stock
+    suspend fun getLocalStockCrops(): List<String> {
+        return withContext(Dispatchers.IO) {
+            database.stockDao().getDistinctCrops()
+        }
+    }
+
+    // Read available varieties, optionally filtered by crop
+    suspend fun getLocalStockVarieties(
+        crop: String?
+    ): List<String> {
+        return withContext(Dispatchers.IO) {
+            database.stockDao().getDistinctVarieties(crop)
+        }
+    }
+
+    // Read stock filtered by crop and variety
+    suspend fun getLocalFilteredStock(
+        crop: String?,
+        variety: String?
+    ): List<StockEntity> {
+        return withContext(Dispatchers.IO) {
+            database.stockDao().getFilteredStock(
+                crop = crop,
+                variety = variety
+            )
+        }
+    }
+
+
+
 }

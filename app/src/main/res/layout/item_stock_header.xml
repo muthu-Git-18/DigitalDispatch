@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/stock_header_background"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="10dp">
+
+    <!-- S.No -->
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.8"
+        android:gravity="center"
+        android:text="S.No"
+        android:textColor="#DCB765"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <!-- Grade -->
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:gravity="center"
+        android:text="Grade"
+        android:textColor="#DCB765"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+    <!-- Bales -->
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:gravity="center"
+        android:text="Bales"
+        android:textColor="#DCB765"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <!-- Quantity -->
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.4"
+        android:gravity="center"
+        android:text="Quantity"
+        android:textColor="#DCB765"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

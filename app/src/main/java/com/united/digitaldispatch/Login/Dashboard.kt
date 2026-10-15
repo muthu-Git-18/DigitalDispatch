@@ -113,19 +113,18 @@ class Dashboard : AppCompatActivity() {
     private var apiCallsCompleted = 0
     private val totalApiCallsNeeded = 1
 
-    private lateinit var tvDashboardName : TextView
+    private lateinit var tvDashboardName: TextView
 
-    private lateinit var orgCode : String
+    private lateinit var orgCode: String
 
-    private lateinit var moduleType : String
+    private lateinit var moduleType: String
 
-    private lateinit var userName : String
+    private lateinit var userName: String
 
     private var isSyncing = false
     private lateinit var syncButtonContainer: FrameLayout
     private lateinit var btnSync: ImageView
     private var syncIconAnimator: ObjectAnimator? = null
-
 
 
     /** Holds references to one card's outer container + the 3 inner views that get resized. */
@@ -183,7 +182,7 @@ class Dashboard : AppCompatActivity() {
 
     }
 
-    private fun inits(){
+    private fun inits() {
 
         tvDashboardName = findViewById(R.id.tvDashboard)
         syncButtonContainer = findViewById(R.id.syncButtonContainer)
@@ -198,7 +197,7 @@ class Dashboard : AppCompatActivity() {
     }
 
 
-    private fun setContentData(){
+    private fun setContentData() {
         repository = MasterDataRepository(
             ApiClient.instance,
             AppDatabase.getInstance(applicationContext)
@@ -226,7 +225,7 @@ class Dashboard : AppCompatActivity() {
         }
 
         moduleType = module
-        orgCode= session.getOrganizationCode().toString()
+        orgCode = session.getOrganizationCode().toString()
         userName = session.getUserName().orEmpty()
 
         tvDashboardName.text = "$moduleType Dashboard"
@@ -488,6 +487,7 @@ class Dashboard : AppCompatActivity() {
             }
         }
     }
+
     /**
      * Reacts to the headers download:
      *  - Loading -> small spinner dialog
@@ -612,6 +612,7 @@ class Dashboard : AppCompatActivity() {
             }
         }
     }
+
     private fun fetchStockData() {
 
         val orgnType = session.getModuleType()

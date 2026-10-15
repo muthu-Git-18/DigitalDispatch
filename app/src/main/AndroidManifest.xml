@@ -15,6 +15,15 @@
         android:theme="@style/Theme.DigitalDispatch"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Stock.StockHeaderAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".Stock.StockSummaryAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".Stock.StockDetailAdapter"
+            android:exported="false" />
+        <activity
             android:name=".CaseInquiry.CaseInquiry"
             android:exported="false" />
         <activity
