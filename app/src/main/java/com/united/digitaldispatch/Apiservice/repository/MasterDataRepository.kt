@@ -1,10 +1,14 @@
 package com.united.digitaldispatch.Apiservice.repository
 
 import com.united.digitaldispatch.Apiservice.network.ApiService
+import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.Dispatch.models.BaleInfo
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Dispatch.models.DispatchHeaderItem
+import com.united.digitaldispatch.Dispatch.models.DispatchUploadRecord
+import com.united.digitaldispatch.Dispatch.models.DispatchUploadRequest
+import com.united.digitaldispatch.Dispatch.models.UploadSummary
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
@@ -17,8 +21,12 @@ import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequest
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
 import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderItem
+import com.united.digitaldispatch.data.local.entity.DispatchSyncState
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
+import com.united.digitaldispatch.sync.DispatchChangeParser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -35,6 +43,22 @@ class MasterDataRepository(
     private companion object {
         const val ITEM_PAGE_SIZE = 200
         const val STOCK_PAGE_SIZE = 10000
+
+        const val MAX_UPLOAD_ATTEMPTS = 5
+        const val UPLOAD_BATCH_SIZE = 50
+
+        // TODO: confirm with the backend. Chosen by the same pattern as the
+        // purchase app (P2 = purchase upload, W2 = weighment upload).
+        const val DISPATCH_PROCESS_TYPE = "D2"
+
+        // Return-sync endpoint, exactly as given (note: port 85).
+        // If it is really on the same server as the other APIs, change the port here.
+        const val DISPATCH_CHANGES_URL =
+            "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/api/Dispatch/sync-dispatch-changes"
+
+        // one download at a time (screen open + SignalR + network-back can overlap)
+        val pullMutex = Mutex()
+
     }
 
     suspend fun syncMasterData(): Result<MasterDataResponse> {
@@ -857,6 +881,274 @@ class MasterDataRepository(
         }
     }
 
+
+
+
+    // ------------------------------
+    // DISPATCH DETAILS (local table)
+    // ------------------------------
+
+    suspend fun getLocalDetails(shipmentNo: String): List<BaleDetail> {
+        return withContext(Dispatchers.IO) {
+            database.dispatchDetailDao().getByShipment(shipmentNo)
+        }
+    }
+
+    /** the bale in any shipment, or null */
+    suspend fun findDetailByBale(baleNo: String): BaleDetail? {
+        return withContext(Dispatchers.IO) {
+            database.dispatchDetailDao().getByBale(baleNo)
+        }
+    }
+
+    suspend fun saveDispatchDetail(detail: BaleDetail) {
+        withContext(Dispatchers.IO) {
+            database.dispatchDetailDao().insert(detail)
+        }
+    }
+
+    suspend fun deleteDispatchDetail(detailId: String) {
+        withContext(Dispatchers.IO) {
+            database.dispatchDetailDao().deleteByDetailId(detailId)
+        }
+    }
+
+    suspend fun countUnsyncedDetails(): Int {
+        return withContext(Dispatchers.IO) {
+            database.dispatchDetailDao().countUnsynced()
+        }
+    }
+
+    // ------------------------------
+    // DISPATCH DETAILS UPLOAD (offline-first)
+    // ------------------------------
+
+    /**
+     * Sends the bales that are not on the server yet (PENDING, or FAILED with
+     * fewer than MAX_UPLOAD_ATTEMPTS tries) in one batch.
+     *
+     *  - "Success" / "Duplicate" -> marked SUCCESS
+     *  - "Failed"                -> marked FAILED (+1 attempt, reason saved)
+     *  - network / HTTP error    -> Result.failure, nothing is changed, so the
+     *                               worker simply tries again later
+     */
+    suspend fun uploadPendingDispatchDetails(deviceId: String): Result<UploadSummary> {
+
+        return try {
+
+            val dao = database.dispatchDetailDao()
+
+            val pending = withContext(Dispatchers.IO) {
+                dao.getUnsynced(MAX_UPLOAD_ATTEMPTS, UPLOAD_BATCH_SIZE)
+            }
+
+            if (pending.isEmpty()) {
+                return Result.success(UploadSummary(0, 0, 0))
+            }
+
+            val request = DispatchUploadRequest(
+                records = pending.map { it.toUploadRecord(deviceId) }
+            )
+
+            val response = apiService.uploadDispatchBales(request)
+
+            if (!response.isSuccessful) {
+                throw Exception("Dispatch upload failed: ${response.code()}")
+            }
+
+            val body = response.body()
+                ?: throw Exception("Dispatch upload response is empty")
+
+            val items = body.dispatchDetailsResponse.orEmpty()
+
+            if (!body.isSuccess && items.isEmpty()) {
+                throw Exception("Dispatch upload was not accepted by the server")
+            }
+
+            var uploaded = 0
+            var failed = 0
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    items.forEach { item ->
+
+                        val bale = item.baleNumber ?: return@forEach
+
+                        when {
+                            item.status.equals("Success", ignoreCase = true) ||
+                                    item.status.equals("Duplicate", ignoreCase = true) -> {
+
+                                dao.markSynced(bale, item.reason ?: "Uploaded successfully")
+                                uploaded++
+                            }
+
+                            else -> {
+
+                                dao.markFailed(bale, item.reason ?: "Upload failed")
+                                failed++
+                            }
+                        }
+                    }
+                }
+            }
+
+            val remaining = withContext(Dispatchers.IO) { dao.countUnsynced() }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "Dispatch upload: $uploaded uploaded, $failed failed, $remaining remaining"
+            )
+
+            Result.success(UploadSummary(uploaded, failed, remaining))
+
+        } catch (e: Exception) {
+
+            android.util.Log.e("MasterDataRepository", "Dispatch upload failed", e)
+
+            Result.failure(e)
+        }
+    }
+
+    private fun BaleDetail.toUploadRecord(deviceId: String) = DispatchUploadRecord(
+        shipmenT_NO = shipmentNo,
+        detaiL_ID = detailId,
+        gpiL_BALE_NUMBER = gpilBaleNumber,
+        grade = grade,
+        markeD_WT = markedWeight.toDoubleOrNull() ?: 0.0,
+        dispatcH_WEIGHT = dispatchWeight.toDoubleOrNull() ?: 0.0,
+        froM_SUBINVENTORY_CODE = fromSubinventoryCode,
+        tO_SUBINVENTORY_CODE = toSubinventoryCode,
+        status = status,
+        headeR_STATUS = headerStatus,
+        createD_BY = createdBy,
+        createD_DATE = createdDate,
+        attributE4 = "",
+        attributE5 = "",
+        sendeR_ORGN_CODE = senderOrgnCode,
+        receiveR_ORGN_CODE = receiverOrgnCode,
+        processType = DISPATCH_PROCESS_TYPE,
+        devicE_ID = deviceId
+        //dispatcH_WEIGHMENT_STATUS = dispatchWeighmentStatus
+    )
+
+
+
+    // ------------------------------
+    // DISPATCH DETAILS DOWNLOAD (return sync)
+    // ------------------------------
+
+    /**
+     * Downloads the changes of ONE shipment that happened after the last change id
+     * we applied (saved in dispatch_sync_state), applies them to dispatch_detail,
+     * then moves the bookmark forward. Returns how many bales were changed.
+     *
+     * [hintChangeId] = change id announced by SignalR; nothing is downloaded when
+     * we already have it.
+     */
+    suspend fun pullDispatchChanges(
+        shipmentNo: String,
+        hintChangeId: Long? = null
+    ): Result<Int> = pullMutex.withLock {
+
+        try {
+
+            val stateDao = database.dispatchSyncStateDao()
+
+            val lastId = withContext(Dispatchers.IO) {
+                stateDao.getLastChangeId(shipmentNo)
+            } ?: 0L
+
+            if (hintChangeId != null && hintChangeId <= lastId) {
+                return@withLock Result.success(0)
+            }
+
+            val response = apiService.getDispatchChanges(
+                url = DISPATCH_CHANGES_URL,
+                shipmentNo = shipmentNo,
+                fromChangeId = lastId
+            )
+
+            if (!response.isSuccessful) {
+                throw Exception("Dispatch changes API failed: ${response.code()}")
+            }
+
+            val raw = withContext(Dispatchers.IO) {
+                response.body()?.string().orEmpty()
+            }
+
+            android.util.Log.d("MasterDataRepository", "Dispatch changes raw: ${raw.take(500)}")
+
+            val parsed = DispatchChangeParser.parse(raw)
+
+            if (!parsed.isSuccess) {
+                if (parsed.message.contains("no changes", ignoreCase = true)) {
+                    return@withLock Result.success(0)
+                }
+                throw Exception(parsed.message.ifBlank { "Dispatch changes were not accepted" })
+            }
+
+            var applied = 0
+            var maxId = lastId
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    parsed.changes.sortedBy { it.changeId }.forEach { change ->
+
+                        if (applyDispatchChange(change, shipmentNo)) applied++
+
+                        if (change.changeId > maxId) maxId = change.changeId
+                    }
+
+                    if (maxId > lastId) {
+                        stateDao.save(DispatchSyncState(shipmentNo, maxId))
+                    }
+                }
+            }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "Dispatch changes: $applied applied, last change id $maxId"
+            )
+
+            Result.success(applied)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e("MasterDataRepository", "Dispatch changes failed", e)
+
+            Result.failure(e)
+        }
+    }
+
+    /** one server change -> local table. Returns true when a bale was added / updated / removed */
+    private fun applyDispatchChange(
+        change: DispatchChangeParser.ParsedChange,
+        shipmentNo: String
+    ): Boolean {
+
+        val dao = database.dispatchDetailDao()
+
+        val payload = change.payload ?: return false
+        val bale = DispatchChangeParser.baleOf(payload) ?: return false
+
+        // assumption: a delete change has "DELETE" in its process name - confirm with the backend
+        if (change.processName.uppercase().contains("DELETE")) {
+            dao.deleteByBale(bale)
+            return true
+        }
+
+        val existing = dao.getByBale(bale)
+
+        val detail = DispatchChangeParser.toBaleDetail(payload, shipmentNo, existing)
+            ?: return false
+
+        // server data wins and is marked as "on the server"
+        dao.insert(detail)
+
+        return true
+    }
 
 
 }

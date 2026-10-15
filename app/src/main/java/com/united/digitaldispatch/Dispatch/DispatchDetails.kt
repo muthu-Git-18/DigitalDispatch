@@ -34,6 +34,10 @@ import com.united.digitaldispatch.utils.AppAlertDialog
 import com.united.digitaldispatch.utils.DecimalInputFilter
 import com.united.digitaldispatch.utils.DeleteConfirmDialog
 import com.united.digitaldispatch.utils.SessionManager
+import com.united.digitaldispatch.sync.DispatchSignalRService
+import com.united.digitaldispatch.sync.NetworkMonitor
+import com.united.digitaldispatch.sync.SyncEvents
+import com.united.digitaldispatch.sync.SyncManager
 import com.united.digitaldispatch.utils.TimeUtils
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -48,8 +52,13 @@ import java.util.Locale
  *  - the weighment type (20% / 100%) comes from the header:
  *        TWT (20%)  -> weight checkbox optional
  *        HND (100%) -> weight checkbox compulsory (ticked + locked)
- *  - scanned bales are kept in memory only (DispatchViewModel);
- *    saving to the server / local DB is added when the details API is ready
+ *  - OFFLINE-FIRST: every bale is saved in the local table first, then uploaded
+ *    in the background (right away when the network is good, otherwise later
+ *    automatically). Bales already uploaded cannot be updated / deleted yet
+ *    (no update / delete API).
+ *  - RETURN SYNC: changes made on other devices are downloaded when the screen
+ *    opens, when the network comes back and (if the hub is configured) live
+ *    through SignalR.
  */
 class DispatchDetails : AppCompatActivity() {
 
@@ -136,11 +145,34 @@ class DispatchDetails : AppCompatActivity() {
         observeViewModel()
 
         viewModel.loadHeader(shipmentNo)
+        viewModel.loadDetails(shipmentNo)
+
+        // return sync: bring in what other devices did, and listen for live changes
+        viewModel.pullChanges(shipmentNo)
+        DispatchSignalRService.start(this, shipmentNo)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // refresh the list (upload status may have changed in the background)
+        if (shipmentNo.isNotBlank()) viewModel.loadDetails(shipmentNo)
     }
 
     override fun onStart() {
         super.onStart()
+        SyncManager.setActiveShipment(shipmentNo)
         if (edtBaleNo.isEnabled) edtBaleNo.requestFocus()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        SyncManager.setActiveShipment(null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // leaving the shipment for good -> stop the live connection
+        if (isFinishing) DispatchSignalRService.stop(this)
     }
 
     // -------------------------------------------------
@@ -260,7 +292,7 @@ class DispatchDetails : AppCompatActivity() {
             if (viewModel.details.value.isEmpty()) {
                 showError("No Bales Added", "No Bales Are Added Yet")
             } else {
-                // TODO: data upload (offline-first sync) before the summary, once the API is ready
+                SyncManager.requestSync(applicationContext)
                 startActivity(
                     Intent(this, DispatchSummary::class.java)
                         .putExtra(Dispatch.EXTRA_SHIPMENT_NO, shipmentNo)
@@ -319,13 +351,32 @@ class DispatchDetails : AppCompatActivity() {
                                 viewModel.resetBaleLookup()
                                 onBaleNotFound(state.baleNo)
                             }
+                            is BaleLookupState.Existing -> {
+                                viewModel.resetBaleLookup()
+                                onBaleAlreadyScanned(state.detail)
+                            }
+                            is BaleLookupState.InOtherShipment -> {
+                                viewModel.resetBaleLookup()
+                                showError("Bale Not Available", "Bale Dispatched in some other header") {
+                                    clearFields()
+                                }
+                            }
                         }
                     }
                 }
 
                 launch {
+                    // a download changed the local bales -> reload the list
+                    SyncEvents.detailsChanged.collect { changedShipment ->
+                        if (changedShipment == shipmentNo) viewModel.loadDetails(shipmentNo)
+                    }
+                }
+
+                launch {
                     viewModel.details.collect { list ->
-                        txtCount.text = list.size.toString()
+                        val pending = list.count { it.syncStatus != BaleDetail.SYNC_SUCCESS }
+                        txtCount.text =
+                            if (pending > 0) "${list.size} ($pending pending)" else list.size.toString()
                     }
                 }
             }
@@ -416,25 +467,33 @@ class DispatchDetails : AppCompatActivity() {
 
         edtBaleNo.error = null
 
-        // already scanned in this shipment -> offer to update it
-        val existing = viewModel.findDetail(bale)
+        // this shipment -> other shipment -> stock table (answer comes in observeViewModel)
+        viewModel.lookupBale(bale, shipmentNo)
+    }
 
-        if (existing != null) {
-            AppAlertDialog(
-                activity = this,
-                title = "Bale Already Scanned",
-                message = "Bale is already scanned for dispatch.\nDo you want to update it?",
-                type = AppAlertDialog.Type.WARNING,
-                positiveText = "Update",
-                negativeText = "Cancel",
-                onNegative = { clearFields() }
-            ) {
-                enterUpdateMode(existing)
-            }.show()
+    /** bale is already in this shipment */
+    private fun onBaleAlreadyScanned(existing: BaleDetail) {
+
+        // already on the server: there is no update API yet
+        if (existing.syncStatus == BaleDetail.SYNC_SUCCESS) {
+            showError(
+                "Already Uploaded",
+                "This bale is already uploaded to the server.\nUpdate is not available yet."
+            ) { clearFields() }
             return
         }
 
-        viewModel.lookupBale(bale)
+        AppAlertDialog(
+            activity = this,
+            title = "Bale Already Scanned",
+            message = "Bale is already scanned for dispatch.\nDo you want to update it?",
+            type = AppAlertDialog.Type.WARNING,
+            positiveText = "Update",
+            negativeText = "Cancel",
+            onNegative = { clearFields() }
+        ) {
+            enterUpdateMode(existing)
+        }.show()
     }
 
     private fun onBaleNotFound(bale: String) {
@@ -622,7 +681,7 @@ class DispatchDetails : AppCompatActivity() {
             val weightLoss = (weight * WEIGHT_LOSS_PERCENT) / 100f
             val lowLimit = markedWeight - weightLoss
 
-            if (weight < lowLimit) {
+         /*   if (weight < lowLimit) {
 
                 if (weighmentType == HND) {
                     confirmWeightLoss { saveDetail(bale, true, weightText) }
@@ -638,7 +697,7 @@ class DispatchDetails : AppCompatActivity() {
                     }
                 }
                 return
-            }
+            }*/
         }
 
         saveDetail(bale, weighing, weightText)
@@ -664,12 +723,8 @@ class DispatchDetails : AppCompatActivity() {
     }
 
     /**
-     * Builds the detail record and stores it.
-     *
-     * TODO (offline-first): when the details API is ready
-     *   - network available -> send to the server
-     *   - otherwise         -> save in the local table and sync later
-     * For now it is kept in the view model only.
+     * Builds the detail record and stores it on the device (offline-first).
+     * The upload runs in the background - see SyncManager / DispatchSyncWorker.
      */
     private fun saveDetail(bale: String, weighing: Boolean, weightText: String) {
 
@@ -700,10 +755,21 @@ class DispatchDetails : AppCompatActivity() {
         )
 
         val wasUpdate = base != null
+        val appContext = applicationContext
+        val online = NetworkMonitor.isHighQuality.value == true
 
-        viewModel.saveDetail(detail)
+        // 1) save on the device  2) upload now if the network is good, else it waits
+        viewModel.saveDetail(detail) {
+            SyncManager.requestSync(appContext)
+        }
 
-        toast(if (wasUpdate) "Bale updated successfully" else "Bale saved successfully")
+        toast(
+            when {
+                !online -> "Bale saved on the device - it will upload when the network is available"
+                wasUpdate -> "Bale updated - uploading"
+                else -> "Bale saved - uploading"
+            }
+        )
 
         clearFields()
     }
@@ -721,8 +787,19 @@ class DispatchDetails : AppCompatActivity() {
             return
         }
 
-        if (viewModel.findDetail(bale) == null) {
+        val existing = viewModel.findDetail(bale)
+
+        if (existing == null) {
             showError("Bale Not Available", "Bale Not Available")
+            return
+        }
+
+        // already on the server: there is no delete API yet
+        if (existing.syncStatus == BaleDetail.SYNC_SUCCESS) {
+            showError(
+                "Already Uploaded",
+                "This bale is already uploaded to the server.\nDelete is not available yet."
+            )
             return
         }
 
@@ -732,10 +809,10 @@ class DispatchDetails : AppCompatActivity() {
             highlight = bale,
             message = "This bale will be removed from this shipment.\nThis action cannot be undone."
         ) {
-            // TODO: delete on the server / local table too, once the API is ready
-            viewModel.deleteDetail(bale)
-            toast("Deleted Successfully")
-            clearFields()
+            viewModel.deleteDetail(existing) {
+                toast("Deleted Successfully")
+                clearFields()
+            }
         }.show()
     }
 

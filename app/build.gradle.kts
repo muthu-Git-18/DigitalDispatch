@@ -62,4 +62,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
+
+    //Signal R based --work manager
+    // build.gradle.kts
+    implementation("com.microsoft.signalr:signalr:8.0.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 }

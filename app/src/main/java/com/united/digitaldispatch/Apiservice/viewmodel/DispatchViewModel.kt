@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.Dispatch.models.BaleInfo
+import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
@@ -114,11 +115,11 @@ class DispatchViewModel(
     // DELETE DISPATCH HEADER
     // -----------------------------
 
-/*
     private val _deleteHeaderState =
         MutableStateFlow<DeleteHeaderState>(DeleteHeaderState.Idle)
 
     val deleteHeaderState: StateFlow<DeleteHeaderState> = _deleteHeaderState
+/*
 
     fun deleteDispatchHeader(shipmentNo: String) {
 
@@ -137,12 +138,12 @@ class DispatchViewModel(
                 )
         }
     }
+*/
 
     fun resetDeleteHeaderState() {
         _deleteHeaderState.value = DeleteHeaderState.Idle
     }
 
-*/
 
     // -----------------------------
     // DISPATCH DETAILS SCREEN
@@ -159,16 +160,30 @@ class DispatchViewModel(
         }
     }
 
-    // bale lookup in the local stock table
+    // bale lookup: this shipment -> other shipment -> local stock table
     private val _baleLookup = MutableStateFlow<BaleLookupState>(BaleLookupState.Idle)
     val baleLookup: StateFlow<BaleLookupState> = _baleLookup
 
-    fun lookupBale(baleNo: String) {
+    fun lookupBale(baleNo: String, shipmentNo: String) {
         viewModelScope.launch {
-            val info = repository.findBaleInStock(baleNo)
-            _baleLookup.value =
-                if (info == null) BaleLookupState.NotFound(baleNo)
-                else BaleLookupState.Found(info as BaleInfo)
+
+            val saved = repository.findDetailByBale(baleNo)
+
+            _baleLookup.value = when {
+
+                saved != null && saved.shipmentNo == shipmentNo ->
+                    BaleLookupState.Existing(saved)
+
+                saved != null ->
+                    BaleLookupState.InOtherShipment(saved)
+
+                else -> {
+                    val info = repository.findBaleInStock(baleNo)
+
+                    if (info == null) BaleLookupState.NotFound(baleNo)
+                    else BaleLookupState.Found(info)
+                }
+            }
         }
     }
 
@@ -176,24 +191,49 @@ class DispatchViewModel(
         _baleLookup.value = BaleLookupState.Idle
     }
 
-    // scanned bales of this shipment
-    //
-    // TEMPORARY: kept in memory only (survives rotation, lost when the app
-    // is closed). Replace with Room + API sync (offline-first) once the
-    // details API is ready - the screen only uses these 3 functions.
+    // scanned bales of the open shipment (local table dispatch_detail)
     private val _details = MutableStateFlow<List<BaleDetail>>(emptyList())
     val details: StateFlow<List<BaleDetail>> = _details
+
+    fun loadDetails(shipmentNo: String) {
+        viewModelScope.launch {
+            _details.value = repository.getLocalDetails(shipmentNo)
+        }
+    }
 
     fun findDetail(baleNo: String): BaleDetail? =
         _details.value.firstOrNull { it.gpilBaleNumber == baleNo }
 
-    fun saveDetail(detail: BaleDetail) {
-        _details.value =
-            _details.value.filterNot { it.gpilBaleNumber == detail.gpilBaleNumber } + detail
+    /** saves locally first, then [onSaved] runs (used to start the upload) */
+    fun saveDetail(detail: BaleDetail, onSaved: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.saveDispatchDetail(detail)
+            _details.value = repository.getLocalDetails(detail.shipmentNo)
+            onSaved()
+        }
     }
 
-    fun deleteDetail(baleNo: String) {
-        _details.value = _details.value.filterNot { it.gpilBaleNumber == baleNo }
+    fun deleteDetail(detail: BaleDetail, onDeleted: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.deleteDispatchDetail(detail.detailId)
+            _details.value = repository.getLocalDetails(detail.shipmentNo)
+            onDeleted()
+        }
+    }
+
+
+    /** downloads what other devices changed in this shipment (return sync) */
+    fun pullChanges(shipmentNo: String) {
+        viewModelScope.launch {
+
+            if (NetworkMonitor.isHighQuality.value != true) return@launch
+
+            val applied = repository.pullDispatchChanges(shipmentNo).getOrDefault(0)
+
+            if (applied > 0) {
+                _details.value = repository.getLocalDetails(shipmentNo)
+            }
+        }
     }
 
 
@@ -381,6 +421,15 @@ sealed class HeaderState {
 
 sealed class BaleLookupState {
     object Idle : BaleLookupState()
+
+    /** bale found in the local stock table */
     data class Found(val info: BaleInfo) : BaleLookupState()
+
     data class NotFound(val baleNo: String) : BaleLookupState()
+
+    /** already scanned in THIS shipment */
+    data class Existing(val detail: BaleDetail) : BaleLookupState()
+
+    /** already scanned in ANOTHER shipment */
+    data class InOtherShipment(val detail: BaleDetail) : BaleLookupState()
 }

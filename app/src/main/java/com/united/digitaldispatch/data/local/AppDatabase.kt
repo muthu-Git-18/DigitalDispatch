@@ -4,7 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.united.digitaldispatch.Dispatch.models.BaleDetail
+import com.united.digitaldispatch.data.local.dao.DispatchDetailDao
 import com.united.digitaldispatch.data.local.dao.DispatchHeaderDao
+import com.united.digitaldispatch.data.local.dao.DispatchSyncStateDao
 import com.united.digitaldispatch.data.local.dao.ItemMasterDao
 import com.united.digitaldispatch.data.local.dao.OrganizationDao
 import com.united.digitaldispatch.data.local.dao.StockDao
@@ -18,6 +21,7 @@ import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import com.united.digitaldispatch.data.local.dao.PswDispatchHeaderDao
+import com.united.digitaldispatch.data.local.entity.DispatchSyncState
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 
 @Database(
@@ -28,7 +32,9 @@ import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
                 StockEntity::class,
                 TruckMasterEntity::class,
                 DispatchHeaderEntity::class,
-                PswDispatchHeaderEntity::class
+                PswDispatchHeaderEntity::class,
+                BaleDetail::class,
+                DispatchSyncState::class
                ],
     version = 4,
     exportSchema = false
@@ -46,6 +52,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun dispatchHeaderDao(): DispatchHeaderDao
 
     abstract fun pswDispatchHeaderDao(): PswDispatchHeaderDao
+
+    abstract fun dispatchDetailDao(): DispatchDetailDao
+
+    abstract fun dispatchSyncStateDao(): DispatchSyncStateDao
 
     companion object {
         @Volatile
