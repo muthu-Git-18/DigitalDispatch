@@ -80,9 +80,8 @@ interface ApiService {
     ): Response<DispatchUploadResponse>
 
     /** return sync - full url is passed in (see DISPATCH_CHANGES_URL in the repository) */
-    @GET
+    @GET("Dispatch/sync-dispatch-changes")
     suspend fun getDispatchChanges(
-        @Url url: String,
         @Query("shipmentNo") shipmentNo: String,
         @Query("fromChangeId") fromChangeId: Long
     ): Response<ResponseBody>

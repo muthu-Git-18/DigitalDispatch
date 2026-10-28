@@ -18,10 +18,9 @@ data class DispatchUploadRecord(
     val headeR_STATUS: String,
     val createD_BY: String,
     val createD_DATE: String,
-    val attributE4: String,
-    val attributE5: String,
     val sendeR_ORGN_CODE: String,
     val receiveR_ORGN_CODE: String,
+    val dispatcH_WEIGHMENT_STATUS: String,
     val processType: String,
     val devicE_ID: String,
 

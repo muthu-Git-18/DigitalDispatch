@@ -15,6 +15,7 @@ data class DispatchHeaderEntity(
     val rcNo: String? = null,
     val driverName: String? = null,
     val drivingLicenceNo: String? = null,
+    val phone_Number: String? = null,
     val transportName: String? = null,
     val typeOfTruck: String? = null,
     val frieghtCharges: Double? = null,

@@ -10,6 +10,7 @@ import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -195,20 +196,26 @@ class DispatchViewModel(
     private val _details = MutableStateFlow<List<BaleDetail>>(emptyList())
     val details: StateFlow<List<BaleDetail>> = _details
 
+    private var detailsJob: Job? = null
+
     fun loadDetails(shipmentNo: String) {
-        viewModelScope.launch {
-            _details.value = repository.getLocalDetails(shipmentNo)
+        detailsJob?.cancel()
+
+        detailsJob = viewModelScope.launch {
+            repository.getLocalDetails(shipmentNo).collect { list ->
+                _details.value = list
+            }
         }
     }
 
     fun findDetail(baleNo: String): BaleDetail? =
-        _details.value.firstOrNull { it.gpilBaleNumber == baleNo }
+        _details.value.firstOrNull {
+            it.gpilBaleNumber == baleNo
+        }
 
-    /** saves locally first, then [onSaved] runs (used to start the upload) */
     fun saveDetail(detail: BaleDetail, onSaved: () -> Unit = {}) {
         viewModelScope.launch {
             repository.saveDispatchDetail(detail)
-            _details.value = repository.getLocalDetails(detail.shipmentNo)
             onSaved()
         }
     }
@@ -216,26 +223,22 @@ class DispatchViewModel(
     fun deleteDetail(detail: BaleDetail, onDeleted: () -> Unit = {}) {
         viewModelScope.launch {
             repository.deleteDispatchDetail(detail.detailId)
-            _details.value = repository.getLocalDetails(detail.shipmentNo)
             onDeleted()
         }
     }
 
-
-    /** downloads what other devices changed in this shipment (return sync) */
     fun pullChanges(shipmentNo: String) {
         viewModelScope.launch {
-
             if (NetworkMonitor.isHighQuality.value != true) return@launch
 
             val applied = repository.pullDispatchChanges(shipmentNo).getOrDefault(0)
 
             if (applied > 0) {
-                _details.value = repository.getLocalDetails(shipmentNo)
+                // No manual reload needed.
+                // Room Flow emits the updated database rows automatically.
             }
         }
     }
-
 
     // -----------------------------
     // TRUCK MASTER

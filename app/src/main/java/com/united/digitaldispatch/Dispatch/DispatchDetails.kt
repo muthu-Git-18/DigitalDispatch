@@ -3,6 +3,7 @@ package com.united.digitaldispatch.Dispatch
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
@@ -374,9 +375,16 @@ class DispatchDetails : AppCompatActivity() {
 
                 launch {
                     viewModel.details.collect { list ->
-                        val pending = list.count { it.syncStatus != BaleDetail.SYNC_SUCCESS }
+                        val pending = list.count {
+                            it.syncStatus != BaleDetail.SYNC_SUCCESS
+                        }
+
                         txtCount.text =
-                            if (pending > 0) "${list.size} ($pending pending)" else list.size.toString()
+                            if (pending > 0) {
+                                "${list.size} ($pending pending)"
+                            } else {
+                                list.size.toString()
+                            }
                     }
                 }
             }
@@ -733,6 +741,12 @@ class DispatchDetails : AppCompatActivity() {
 
         val fromSub = txtSubInvCode.text.toString()
 
+        val deviceId = Settings.Secure.getString(
+            applicationContext.contentResolver,
+            Settings.Secure.ANDROID_ID
+        ).orEmpty()
+
+
         val detail = BaleDetail(
             shipmentNo = shipmentNo,
             detailId = base?.detailId
@@ -751,7 +765,8 @@ class DispatchDetails : AppCompatActivity() {
             price = info?.price?.ifBlank { "0" } ?: base?.price ?: "0",
             tbLotNumber = txtLotNo.text.toString(),
             purchaseDate = info?.purchaseDate ?: base?.purchaseDate.orEmpty(),
-            dispatchWeighmentStatus = if (chkWeight.isChecked) "Y" else "N"
+            dispatchWeighmentStatus = if (chkWeight.isChecked) "Y" else "N",
+            deviceId = deviceId
         )
 
         val wasUpdate = base != null
@@ -761,6 +776,7 @@ class DispatchDetails : AppCompatActivity() {
         // 1) save on the device  2) upload now if the network is good, else it waits
         viewModel.saveDetail(detail) {
             SyncManager.requestSync(appContext)
+
         }
 
         toast(
@@ -770,6 +786,7 @@ class DispatchDetails : AppCompatActivity() {
                 else -> "Bale saved - uploading"
             }
         )
+
 
         clearFields()
     }

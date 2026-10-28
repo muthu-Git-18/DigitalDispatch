@@ -15,7 +15,7 @@ package com.united.digitaldispatch.sync
 object DispatchHubConfig {
 
     /** e.g. "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/dispatchHub" */
-    val HUB_URL: String = ""
+    val HUB_URL: String = "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/dispatchHub"
 
     /** server -> app: a change happened   (changeId: Long, shipmentNo: String) */
     const val EVENT_CHANGED = "DispatchUpdated"

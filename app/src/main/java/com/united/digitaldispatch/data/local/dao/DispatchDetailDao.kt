@@ -5,12 +5,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DispatchDetailDao {
 
     @Query("SELECT * FROM dispatch_detail WHERE shipmentNo = :shipmentNo ORDER BY createdDate DESC")
-    fun getByShipment(shipmentNo: String): List<BaleDetail>
+    fun getByShipment(shipmentNo: String): Flow<List<BaleDetail>>
 
     /** the bale in ANY shipment (a bale can only be dispatched once) */
     @Query("SELECT * FROM dispatch_detail WHERE gpilBaleNumber = :baleNo LIMIT 1")
@@ -18,6 +19,27 @@ interface DispatchDetailDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(detail: BaleDetail)
+
+    @Query("""
+    SELECT * FROM dispatch_detail
+    WHERE shipmentNo = :shipmentNo
+      AND gpilBaleNumber = :baleNumber
+    LIMIT 1
+""")
+    fun getByShipmentAndBale(
+        shipmentNo: String,
+        baleNumber: String
+    ): BaleDetail?
+
+    @Query("""
+    DELETE FROM dispatch_detail
+    WHERE shipmentNo = :shipmentNo
+      AND gpilBaleNumber = :baleNumber
+""")
+    fun deleteByShipmentAndBale(
+        shipmentNo: String,
+        baleNumber: String
+    )
 
     @Query("DELETE FROM dispatch_detail WHERE detailId = :detailId")
     fun deleteByDetailId(detailId: String)

@@ -10,6 +10,7 @@ data class CreateDispatchHeaderRequest(
     val rcNo: String,
     val driverName: String,
     val drivingLicenceNo: String,
+    val phone_Number: String,
     val transportName: String,
     val typeOfTruck: String,
     val frieghtCharges: Double,

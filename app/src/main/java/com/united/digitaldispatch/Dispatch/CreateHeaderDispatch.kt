@@ -88,6 +88,8 @@ class CreateHeaderDispatch : AppCompatActivity() {
     private lateinit var edtRcNo: EditText
     private lateinit var edtDriverName: EditText
     private lateinit var edtDriverLicense: EditText
+
+    private lateinit var edtMobileNumber: EditText
     private lateinit var edtFreightCharges: EditText
 
     // -------------------------------------------------
@@ -171,6 +173,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         edtRcNo = findViewById(R.id.edtRcNo)
         edtDriverName = findViewById(R.id.edtDriverName)
         edtDriverLicense = findViewById(R.id.edtDriverLicense)
+        edtMobileNumber = findViewById(R.id.edtMobileNum)
         edtFreightCharges = findViewById(R.id.edtFreightCharges)
 
         // Force capital letters on every keystroke / paste
@@ -179,6 +182,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         edtRcNo.filters = allCaps
         edtDriverName.filters = allCaps
         edtDriverLicense.filters = allCaps
+
 
         // Field order + locked until receiver org is chosen
         setupFieldFlow()
@@ -216,6 +220,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         edtRcNo.imeOptions = EditorInfo.IME_ACTION_NEXT
         edtDriverName.imeOptions = EditorInfo.IME_ACTION_NEXT
         edtDriverLicense.imeOptions = EditorInfo.IME_ACTION_DONE
+        edtMobileNumber.imeOptions = EditorInfo.IME_ACTION_DONE
 
         edtTruckNo.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
@@ -240,6 +245,12 @@ class CreateHeaderDispatch : AppCompatActivity() {
 
         edtDriverLicense.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                edtMobileNumber.requestFocus()
+                true
+            } else false
+        }
+        edtMobileNumber.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 hideKeyboard(v)
                 showTransporterDialog()
                 true
@@ -252,6 +263,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         edtRcNo.isEnabled = enabled
         edtDriverName.isEnabled = enabled
         edtDriverLicense.isEnabled = enabled
+        edtMobileNumber.isEnabled=enabled
     }
 
     private fun focusAndShowKeyboard(view: EditText) {
@@ -762,6 +774,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         val rcNo = edtRcNo.text.toString().trim().uppercase()
         val driverName = edtDriverName.text.toString().trim().uppercase()
         val license = edtDriverLicense.text.toString().trim().uppercase()
+        val mobileNumber = edtMobileNumber.text.toString()
 
         if (truckNo.isEmpty()) return fieldError(edtTruckNo, "Enter the truck number")
         if (rcNo.isEmpty()) return fieldError(edtRcNo, "Enter the RC number")
@@ -840,6 +853,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
             rcNo = rcNo,
             driverName = driverName,
             drivingLicenceNo = license,
+            phone_Number = mobileNumber,
             // Old app sent the transporter CODE here
             transportName = transporter.transporterCode,
             typeOfTruck = truckType,
@@ -913,6 +927,7 @@ class CreateHeaderDispatch : AppCompatActivity() {
         edtRcNo.setText("")
         edtDriverName.setText("")
         edtDriverLicense.setText("")
+        edtMobileNumber.setText("")
 
         // lock the fields again until a receiver org is chosen
         setDetailFieldsEnabled(false)

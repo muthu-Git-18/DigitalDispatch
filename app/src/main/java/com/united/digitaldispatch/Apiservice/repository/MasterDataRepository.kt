@@ -25,6 +25,7 @@ import com.united.digitaldispatch.data.local.entity.DispatchSyncState
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import com.united.digitaldispatch.sync.DispatchChangeParser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -49,7 +50,7 @@ class MasterDataRepository(
 
         // TODO: confirm with the backend. Chosen by the same pattern as the
         // purchase app (P2 = purchase upload, W2 = weighment upload).
-        const val DISPATCH_PROCESS_TYPE = "D2"
+        const val DISPATCH_PROCESS_TYPE = "DISPATCH"
 
         // Return-sync endpoint, exactly as given (note: port 85).
         // If it is really on the same server as the other APIs, change the port here.
@@ -715,6 +716,7 @@ class MasterDataRepository(
                     rcNo = request.rcNo,
                     driverName = request.driverName,
                     drivingLicenceNo = request.drivingLicenceNo,
+                    phone_Number = request.phone_Number,
                     transportName = request.transportName,
                     typeOfTruck = request.typeOfTruck,
                     frieghtCharges = request.frieghtCharges,
@@ -778,6 +780,7 @@ class MasterDataRepository(
             rcNo = rcNo,
             driverName = driverName,
             drivingLicenceNo = drivingLicenceNo,
+            phone_Number=phone_Number,
             transportName = transportName,
             typeOfTruck = typeOfTruck,
             frieghtCharges = frieghtCharges,
@@ -912,7 +915,7 @@ class MasterDataRepository(
     // DISPATCH DETAILS (local table)
     // ------------------------------
 
-    suspend fun getLocalDetails(shipmentNo: String): List<BaleDetail> {
+    suspend fun getLocalDetails(shipmentNo: String): Flow<List<BaleDetail>> {
         return withContext(Dispatchers.IO) {
             database.dispatchDetailDao().getByShipment(shipmentNo)
         }
@@ -956,7 +959,7 @@ class MasterDataRepository(
      *  - network / HTTP error    -> Result.failure, nothing is changed, so the
      *                               worker simply tries again later
      */
-    suspend fun uploadPendingDispatchDetails(deviceId: String): Result<UploadSummary> {
+    suspend fun uploadPendingDispatchDetails(): Result<UploadSummary> {
 
         return try {
 
@@ -971,7 +974,7 @@ class MasterDataRepository(
             }
 
             val request = DispatchUploadRequest(
-                records = pending.map { it.toUploadRecord(deviceId) }
+                records = pending.map { it.toUploadRecord() }
             )
 
             val response = apiService.uploadDispatchBales(request)
@@ -1034,7 +1037,7 @@ class MasterDataRepository(
         }
     }
 
-    private fun BaleDetail.toUploadRecord(deviceId: String) = DispatchUploadRecord(
+    private fun BaleDetail.toUploadRecord() = DispatchUploadRecord(
         shipmenT_NO = shipmentNo,
         detaiL_ID = detailId,
         gpiL_BALE_NUMBER = gpilBaleNumber,
@@ -1047,13 +1050,12 @@ class MasterDataRepository(
         headeR_STATUS = headerStatus,
         createD_BY = createdBy,
         createD_DATE = createdDate,
-        attributE4 = "",
-        attributE5 = "",
         sendeR_ORGN_CODE = senderOrgnCode,
-        receiveR_ORGN_CODE = receiverOrgnCode,
+        receiveR_ORGN_CODE = receiverOrgnCode ,
+        dispatcH_WEIGHMENT_STATUS = dispatchWeighmentStatus,
         processType = DISPATCH_PROCESS_TYPE,
         devicE_ID = deviceId
-        //dispatcH_WEIGHMENT_STATUS = dispatchWeighmentStatus
+
     )
 
 
@@ -1088,7 +1090,6 @@ class MasterDataRepository(
             }
 
             val response = apiService.getDispatchChanges(
-                url = DISPATCH_CHANGES_URL,
                 shipmentNo = shipmentNo,
                 fromChangeId = lastId
             )
@@ -1152,24 +1153,28 @@ class MasterDataRepository(
         shipmentNo: String
     ): Boolean {
 
-        val dao = database.dispatchDetailDao()
-
         val payload = change.payload ?: return false
+
         val bale = DispatchChangeParser.baleOf(payload) ?: return false
 
-        // assumption: a delete change has "DELETE" in its process name - confirm with the backend
-        if (change.processName.uppercase().contains("DELETE")) {
-            dao.deleteByBale(bale)
+        // Use a shipment-specific lookup if your DAO supports it.
+        val existing = database.dispatchDetailDao()
+            .getByShipmentAndBale(shipmentNo, bale)
+
+        // Handle deletion only after confirming the backend's delete convention.
+        if (change.processName.contains("DELETE", ignoreCase = true)) {
+            database.dispatchDetailDao()
+                .deleteByShipmentAndBale(shipmentNo, bale)
             return true
         }
 
-        val existing = dao.getByBale(bale)
+        val detail = DispatchChangeParser.toBaleDetail(
+            payload = payload,
+            shipmentNo = shipmentNo,
+            existing = existing
+        ) ?: return false
 
-        val detail = DispatchChangeParser.toBaleDetail(payload, shipmentNo, existing)
-            ?: return false
-
-        // server data wins and is marked as "on the server"
-        dao.insert(detail)
+        database.dispatchDetailDao().insert(detail)
 
         return true
     }

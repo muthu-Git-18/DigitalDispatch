@@ -27,12 +27,12 @@ class DispatchSyncWorker(
             AppDatabase.getInstance(ctx)
         )
 
-        val deviceId = Settings.Secure.getString(
+       /* val deviceId = Settings.Secure.getString(
             ctx.contentResolver,
             Settings.Secure.ANDROID_ID
-        ).orEmpty()
+        ).orEmpty()*/
 
-        val result = repository.uploadPendingDispatchDetails(deviceId)
+        val result = repository.uploadPendingDispatchDetails()
 
         val summary = result.getOrNull()
 

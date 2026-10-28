@@ -16,6 +16,7 @@ data class PswDispatchHeaderEntity(
     val rcNo: String? = null,
     val driverName: String? = null,
     val drivingLicenceNo: String? = null,
+    val phone_Number: String? = null,
     val transportName: String? = null,
     val typeOfTruck: String? = null,
     val frieghtCharges: Double? = null,
@@ -27,12 +28,4 @@ data class PswDispatchHeaderEntity(
     val attribute4: String? = null,
     val isWmsShipment: String? = null,
     val weighmentType: String? = null
-) {
-    /** Lets the PSW list screen reuse the existing DispatchHeaderAdapter. */
-    fun toDispatchHeaderEntity() = DispatchHeaderEntity(
-        shipmentNo, senderOrgnCode, receiverOrgnCode, senderDate, sentBy,
-        senderTruckNo, rcNo, driverName, drivingLicenceNo, transportName,
-        typeOfTruck, frieghtCharges, uom, status, attribute1, attribute2,
-        attribute3, attribute4, isWmsShipment, weighmentType
-    )
-}
+)

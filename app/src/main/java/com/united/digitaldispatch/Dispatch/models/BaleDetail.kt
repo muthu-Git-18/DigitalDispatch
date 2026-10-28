@@ -34,6 +34,7 @@ data class BaleDetail(
     val purchaseDate: String,
     /** "Y" when the bale was weighed (weight checkbox ticked), else "N" */
     val dispatchWeighmentStatus: String,
+    val deviceId: String,
 
     // ---- sync info ----
     val syncStatus: String = SYNC_PENDING,
