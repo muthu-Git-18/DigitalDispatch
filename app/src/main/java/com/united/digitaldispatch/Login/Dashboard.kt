@@ -23,6 +23,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import android.app.Dialog
+import com.google.android.material.button.MaterialButton
 import androidx.lifecycle.repeatOnLifecycle
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
@@ -110,6 +112,9 @@ class Dashboard : AppCompatActivity() {
 
     /** Flips to true only once the startup Stock API has completed. */
     private var isDataLoaded = false
+
+    private var hasSyncFailed = false
+
     private var apiCallsCompleted = 0
     private val totalApiCallsNeeded = 1
 
@@ -194,6 +199,11 @@ class Dashboard : AppCompatActivity() {
         syncButtonContainer.setOnClickListener {
             onSyncButtonClicked()
         }
+
+        findViewById<FrameLayout>(R.id.logoutButtonContainer)
+            .setOnClickListener {
+                showLogoutDialog()
+            }
     }
 
 
@@ -409,6 +419,61 @@ class Dashboard : AppCompatActivity() {
         dispatchViewModel.syncDispatchHeaders(code)
     }
 
+    private fun showLogoutDialog() {
+        val dialog = Dialog(this)
+
+        val dialogView = layoutInflater.inflate(
+            R.layout.dialog_logout,
+            null
+        )
+
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+
+        dialog.window?.setBackgroundDrawableResource(
+            android.R.color.transparent
+        )
+
+        dialog.show()
+
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.90f).toInt(),
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+
+        val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancel)
+        val btnOk = dialogView.findViewById<MaterialButton>(R.id.btnOk)
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnOk.setOnClickListener {
+            dialog.dismiss()
+            performLogout()
+        }
+    }
+
+    private fun performLogout() {
+        // Clear the saved login session using your SessionManager.
+        // Replace clearSession() with the actual method in your class,
+        // if it has a different name.
+        session.clearSession()
+
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        startActivity(intent)
+        finishAffinity()
+    }
 
     private fun startPSWDispatchHeaderSync() {
 
@@ -573,11 +638,7 @@ class Dashboard : AppCompatActivity() {
     private fun fetchTruckMasterData() {
 
         if (orgCode.isNullOrBlank()) {
-            Toast.makeText(
-                this,
-                "Organization code is missing",
-                Toast.LENGTH_SHORT
-            ).show()
+            handleStockSyncFailure("Organization code is missing")
             return
         }
 
@@ -597,19 +658,13 @@ class Dashboard : AppCompatActivity() {
                 fetchStockData()
 
             } else {
+            val errorMessage = result.exceptionOrNull()
+                ?.message
+                ?.takeIf { it.isNotBlank() }
+                ?: "Truck master sync failed"
 
-                android.util.Log.e(
-                    "Dashboard",
-                    "Truck master sync failed",
-                    result.exceptionOrNull()
-                )
-
-                Toast.makeText(
-                    this@Dashboard,
-                    "Truck master sync failed",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            handleStockSyncFailure(errorMessage)
+        }
         }
     }
 
@@ -619,73 +674,104 @@ class Dashboard : AppCompatActivity() {
         val orgnCode = session.getOrganizationCode()
 
         if (orgnType.isNullOrBlank() || orgnCode.isNullOrBlank()) {
-
-            Toast.makeText(
-                this,
-                "Session organization details are missing",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            handleStockSyncFailure("Organization details are missing")
             return
         }
 
         lifecycleScope.launch {
-
-            val result = withContext(Dispatchers.IO) {
-
-                repository.syncStock(
-                    orgnType = orgnType,
-                    orgnCode = orgnCode
-                ) { percent, current, total ->
-
-                    runOnUiThread {
-                        updateLoadingProgress(percent, current, total)
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    repository.syncStock(
+                        orgnType = orgnType,
+                        orgnCode = orgnCode
+                    ) { percent, current, total ->
+                        runOnUiThread {
+                            updateLoadingProgress(percent, current, total)
+                        }
                     }
                 }
-            }
 
-            if (result.isSuccess) {
+                if (result.isSuccess) {
+                    val totalSynced = result.getOrDefault(0)
 
-                val totalSynced = result.getOrDefault(0)
+                    if (totalSynced == 0) {
+                        handleStockSyncFailure("Stock data not found")
+                        return@launch
+                    }
 
-                android.util.Log.d(
-                    "Dashboard",
-                    "Stock sync completed successfully: $totalSynced records"
-                )
+                    android.util.Log.d(
+                        "Dashboard",
+                        "Stock sync completed: $totalSynced records"
+                    )
 
-                updateLoadingProgress(100, totalSynced, totalSynced)
+                    updateLoadingProgress(100, totalSynced, totalSynced)
 
-                Toast.makeText(
-                    this@Dashboard,
-                    "Stock Updated Successfully: $totalSynced records",
-                    Toast.LENGTH_LONG
-                ).show()
+                    Toast.makeText(
+                        this@Dashboard,
+                        "Stock Updated Successfully: $totalSynced records",
+                        Toast.LENGTH_LONG
+                    ).show()
 
-                onApiCallCompleted()
+                    onApiCallCompleted()
 
-            } else {
+                } else {
+                    val errorMessage = result.exceptionOrNull()
+                        ?.message
+                        ?.takeIf { it.isNotBlank() }
+                        ?: "Unable to load stock data"
 
+                    handleStockSyncFailure(errorMessage)
+                }
+
+            } catch (e: Exception) {
                 android.util.Log.e(
                     "Dashboard",
-                    "Stock sync failed",
-                    result.exceptionOrNull()
+                    "Stock API error",
+                    e
                 )
 
-                Toast.makeText(
-                    this@Dashboard,
-                    "Stock sync failed",
-                    Toast.LENGTH_LONG
-                ).show()
-
-                // NOTE: onApiCallCompleted() is intentionally NOT called
-                // here, so the screen stays locked and the dialog (if
-                // shown) stays up on failure rather than silently letting
-                // the user in with stale/missing stock data. Right now
-                // that means it stays locked indefinitely on failure --
-                // worth adding a dismiss + retry action here later.
+                handleStockSyncFailure(
+                    e.message ?: "Unable to connect to the server"
+                )
             }
         }
     }
+
+    private fun handleStockSyncFailure(message: String) {
+        // Prevent the delayed welcome animation from reopening the dialog.
+        hasSyncFailed = true
+        isDataLoaded = false
+        isSyncing = false
+
+        // Stop animations.
+        hourglassAnimator?.cancel()
+        hourglassAnimator = null
+        stopSyncIconRotation()
+
+        // Dismiss and clear the loading dialog.
+        loadingDialog?.dismiss()
+        loadingDialog = null
+        loadingProgressBar = null
+        tvLoadingPercent = null
+
+        // Re-enable the sync button so the user can retry.
+        syncButtonContainer.isEnabled = true
+        syncButtonContainer.alpha = 1f
+
+        // Stop the welcome popup if it is still animating.
+        val popupContainer = findViewById<View>(R.id.popupContainer)
+        popupHandler.removeCallbacksAndMessages(null)
+
+        popupContainer?.animate()?.cancel()
+        popupContainer?.visibility = View.GONE
+
+        Toast.makeText(
+            this,
+            message,
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
 
 
     /**
@@ -695,24 +781,20 @@ class Dashboard : AppCompatActivity() {
      * the sync icon itself spins for as long as that dialog stays up.
      */
     private fun onSyncButtonClicked() {
-
-        if (!isDataLoaded || isSyncing) {
-
+        if (isSyncing) {
             Toast.makeText(
                 this,
-                "Please wait, sync is already in progress...",
+                "Sync is already in progress",
                 Toast.LENGTH_SHORT
             ).show()
-
             return
         }
 
+        hasSyncFailed = false
         isSyncing = true
         isDataLoaded = false
         apiCallsCompleted = 0
 
-        // Reset tracked progress so the dialog opens at 0%, not the
-        // previous sync's leftover 100%.
         lastProgressPercent = 0
         lastProgressCurrent = 0
         lastProgressTotal = 0
@@ -777,9 +859,9 @@ class Dashboard : AppCompatActivity() {
         )
 
         else -> SizeTier(
-            cardSizeDp = 115,
-            iconSizeDp = 75,
-            labelSizeSp = 11f
+            cardSizeDp = 100,
+            iconSizeDp = 62,
+            labelSizeSp = 10f
         )
     }
 
@@ -927,7 +1009,7 @@ class Dashboard : AppCompatActivity() {
      */
     private fun showLoadingDialogAndFetchData() {
 
-        if (isDataLoaded) {
+        if (isDataLoaded || hasSyncFailed || isFinishing || isDestroyed) {
             return
         }
 

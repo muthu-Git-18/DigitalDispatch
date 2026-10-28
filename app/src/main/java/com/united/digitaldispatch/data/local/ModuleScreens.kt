@@ -29,11 +29,15 @@ object ModuleScreens {
 
     private val map: Map<String, Set<DashboardScreen>> = mapOf(
         ModuleType.TAP to setOf(
-            DashboardScreen.DISPATCH
+            DashboardScreen.DISPATCH,
+            DashboardScreen.STOCK,
+            DashboardScreen.CASE_INQUIRY
         ),
         ModuleType.PPD to setOf(
             DashboardScreen.GTD_DISPATCH,
-            DashboardScreen.RECEIPT
+            DashboardScreen.RECEIPT,
+            DashboardScreen.STOCK,
+            DashboardScreen.CASE_INQUIRY
         ),
         ModuleType.GLT to setOf(
             DashboardScreen.DISPATCH,
@@ -47,7 +51,9 @@ object ModuleScreens {
             DashboardScreen.DISPATCH,
             DashboardScreen.RECEIPT,
             DashboardScreen.PSW_DISPATCH,
-            DashboardScreen.PSW_RECEIPT
+            DashboardScreen.PSW_RECEIPT,
+            DashboardScreen.STOCK,
+            DashboardScreen.CASE_INQUIRY
         )
     )
 

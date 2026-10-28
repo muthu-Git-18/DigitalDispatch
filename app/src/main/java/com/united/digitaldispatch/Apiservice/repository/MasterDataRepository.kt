@@ -342,20 +342,44 @@ class MasterDataRepository(
                 )
 
                 if (!response.isSuccessful) {
+                    val errorBody = response.errorBody()?.string()
+
+                    val serverMessage = try {
+                        errorBody?.let {
+                            org.json.JSONObject(it)
+                                .optString("message")
+                                .takeIf { message -> message.isNotBlank() }
+                        }
+                    } catch (_: Exception) {
+                        errorBody?.takeIf { it.isNotBlank() }
+                    }
+
                     throw Exception(
-                        "Stock API failed: ${response.code()}"
+                        serverMessage ?: "Stock API failed: ${response.code()}"
                     )
                 }
 
                 val body = response.body()
-                    ?: throw Exception(
-                        "Stock API returned empty response"
-                    )
+                    ?: throw Exception("Stock API returned empty response")
+
+                // Check the API message before accessing the page data.
+                if (body.message?.contains(
+                        "Stock data not found",
+                        ignoreCase = true
+                    ) == true
+                ) {
+                    throw Exception("Stock data not found")
+                }
 
                 val page = body.data
                     ?: throw Exception(
-                        "Stock API returned empty data"
+                        body.message?.takeIf { it.isNotBlank() }
+                            ?: "Stock data not found"
                     )
+
+                if (page.data.isEmpty() || page.totalRecords == 0) {
+                    throw Exception("Stock data not found")
+                }
 
                 val stockItems = page.data.map { stock ->
 

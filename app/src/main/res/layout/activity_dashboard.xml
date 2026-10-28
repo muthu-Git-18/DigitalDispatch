@@ -42,7 +42,7 @@
         android:id="@+id/tvDashboard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="100dp"
+        android:layout_marginEnd="80dp"
         android:fontFamily="serif"
         android:letterSpacing="0.04"
         android:shadowColor="#A65A3517"
@@ -57,6 +57,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/imgHeader"
         app:layout_constraintVertical_bias="0.169" />
+
+    <FrameLayout
+        android:id="@+id/logoutButtonContainer"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/sync_button_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp"
+        android:padding="7dp"
+        android:contentDescription="Logout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imgHeader"
+        app:layout_constraintBottom_toBottomOf="@id/imgHeader"
+        app:layout_constraintVertical_bias="0.10">
+
+        <ImageView
+            android:id="@+id/imgLogout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/logout"
+            android:scaleType="fitCenter"
+            android:padding="0dp"
+            android:contentDescription="Logout" />
+
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/imgDashboardBackground"
@@ -83,8 +110,8 @@
              ==================================================  -->
     <LinearLayout
         android:id="@+id/cardDispatch"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -101,8 +128,8 @@
 
             <ImageView
                 android:id="@+id/imgDispatchIcon"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="Dispatch"
                 android:scaleType="fitCenter"
@@ -113,19 +140,19 @@
             android:id="@+id/tvDispatchLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-8dp"
+            android:layout_marginTop="-13dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="Dispatch"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardReceipt"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -142,8 +169,8 @@
 
             <ImageView
                 android:id="@+id/imgReceiptIcon"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="Receipt"
@@ -155,7 +182,7 @@
             android:id="@+id/tvReceiptLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-18dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:shadowDx="0"
@@ -163,14 +190,14 @@
             android:shadowRadius="1"
             android:text="Receipt"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardPswdispatch"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -187,8 +214,8 @@
 
             <ImageView
                 android:id="@+id/imgPswdispatchIcon"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="PSW Dispatch"
@@ -200,19 +227,19 @@
             android:id="@+id/tvPswdispatchLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-18dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="PSW Dispatch"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardPswreceipt"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -229,8 +256,8 @@
 
             <ImageView
                 android:id="@+id/imgPswreceiptIcon"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="PSW Receipt"
@@ -242,19 +269,19 @@
             android:id="@+id/tvPswreceiptLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-15dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="PSW Receipt"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardGtdispatch"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -271,8 +298,8 @@
 
             <ImageView
                 android:id="@+id/imgGtdispatchIcon"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="GTD Dispatch"
@@ -284,19 +311,19 @@
             android:id="@+id/tvGtdispatchLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-18dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="GTD Dispatch"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardStock"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -313,8 +340,8 @@
 
             <ImageView
                 android:id="@+id/imgStockIcon"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="Stock"
@@ -326,19 +353,19 @@
             android:id="@+id/tvStockLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-16dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="Stock"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
     <!--  Case Inquiry card  -->
     <LinearLayout
         android:id="@+id/cardCaseInquiry"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
         android:background="@drawable/dashboard_card_background"
         android:clickable="true"
         android:elevation="10dp"
@@ -355,8 +382,8 @@
 
             <ImageView
                 android:id="@+id/imgCaseInquiryIcon"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="5dp"
                 android:contentDescription="Case Inquiry"
@@ -368,12 +395,12 @@
             android:id="@+id/tvCaseInquiryLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-10dp"
+            android:layout_marginTop="-13dp"
             android:gravity="center"
             android:shadowColor="#FFFFFF"
             android:text="Case Inquiry"
             android:textColor="@color/brown_font"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
     <!--  ==================================================
@@ -387,15 +414,15 @@
         android:id="@+id/dashboardCardFlow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
         app:constraint_referenced_ids="cardDispatch,cardReceipt,cardPswdispatch,cardPswreceipt,cardGtdispatch,cardStock,cardCaseInquiry"
         app:flow_horizontalBias="0.5"
         app:flow_horizontalGap="24dp"
         app:flow_horizontalStyle="packed"
-        app:flow_maxElementsWrap="3"
-        app:flow_verticalGap="28dp"
+        app:flow_maxElementsWrap="2"
+        app:flow_verticalGap="20dp"
         app:flow_verticalStyle="packed"
         app:flow_wrapMode="chain"
         app:layout_constraintEnd_toEndOf="parent"
