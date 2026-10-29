@@ -44,8 +44,10 @@ object DispatchChangeParser {
         val successText = rootObj?.pick("isSuccess")
 
         val isSuccess = when {
+            // "NO_DATA" = request worked, there is just nothing new
             statusCode != null ->
-                statusCode.equals("SUCCESS", ignoreCase = true)
+                statusCode.equals("SUCCESS", ignoreCase = true) ||
+                        statusCode.equals("NO_DATA", ignoreCase = true)
 
             successText != null ->
                 successText.equals("true", ignoreCase = true)

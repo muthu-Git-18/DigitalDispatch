@@ -1,12 +1,16 @@
 package com.united.digitaldispatch.Dispatch
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
 import android.text.InputFilter
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -69,6 +73,9 @@ class DispatchDetails : AppCompatActivity() {
 
         const val MAX_HND_WEIGHT = 200f
         const val WEIGHT_LOSS_PERCENT = 1.5f
+
+        val COLOR_COUNT_OK = Color.parseColor("#2E7D32")       // green
+        val COLOR_COUNT_PENDING = Color.parseColor("#C0392B")  // red
     }
 
     private lateinit var sessionManager: SessionManager
@@ -175,7 +182,6 @@ class DispatchDetails : AppCompatActivity() {
         // leaving the shipment for good -> leave its group / stop the live connection
         if (isFinishing) DispatchSignalRService.stop(this, shipmentNo)
     }
-
     // -------------------------------------------------
     // VIEWS
     // -------------------------------------------------
@@ -375,16 +381,34 @@ class DispatchDetails : AppCompatActivity() {
 
                 launch {
                     viewModel.details.collect { list ->
-                        val pending = list.count {
-                            it.syncStatus != BaleDetail.SYNC_SUCCESS
+
+                        val pending = list.count { it.syncStatus != BaleDetail.SYNC_SUCCESS }
+
+                        val total = list.size.toString()
+
+                        val text = SpannableStringBuilder(total)
+
+                        // original count -> green
+                        text.setSpan(
+                            ForegroundColorSpan(COLOR_COUNT_OK),
+                            0,
+                            total.length,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+
+                        // pending -> red
+                        if (pending > 0) {
+                            val start = text.length
+                            text.append(" ($pending pending)")
+                            text.setSpan(
+                                ForegroundColorSpan(COLOR_COUNT_PENDING),
+                                start,
+                                text.length,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
                         }
 
-                        txtCount.text =
-                            if (pending > 0) {
-                                "${list.size} ($pending pending)"
-                            } else {
-                                list.size.toString()
-                            }
+                        txtCount.text = text
                     }
                 }
             }
@@ -483,14 +507,14 @@ class DispatchDetails : AppCompatActivity() {
     private fun onBaleAlreadyScanned(existing: BaleDetail) {
 
         // already on the server: there is no update API yet
-        if (existing.syncStatus == BaleDetail.SYNC_SUCCESS) {
+       /* if (existing.syncStatus == BaleDetail.SYNC_SUCCESS) {
             showError(
                 "Already Uploaded",
                 "This bale is already uploaded to the server.\nUpdate is not available yet."
             ) { clearFields() }
             return
         }
-
+*/
         AppAlertDialog(
             activity = this,
             title = "Bale Already Scanned",

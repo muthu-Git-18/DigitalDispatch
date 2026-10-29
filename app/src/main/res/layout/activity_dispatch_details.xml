@@ -28,13 +28,13 @@
 
 
     <!-- =========================================================
-         CHARCOAL HEADER
+         CHARCOAL HEADER (compact)
          ========================================================= -->
 
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="82dp"
+        android:layout_height="64dp"
         android:background="#2E353A"
         android:elevation="10dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -49,8 +49,8 @@
 
         <FrameLayout
             android:id="@+id/logoContainer"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
             android:background="@drawable/dashboard_logo_circle1"
@@ -59,8 +59,8 @@
 
             <ImageView
                 android:id="@+id/logo"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
                 android:layout_gravity="center"
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
@@ -83,7 +83,7 @@
                 android:fontFamily="serif"
                 android:text="Dispatch"
                 android:textColor="#FFF8E8"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -133,7 +133,7 @@
                 android:id="@+id/dateLLt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -160,322 +160,363 @@
 
 
     <!-- =========================================================
-         BODY (no scroll, fits one page)
+         BODY (compact, scrolls only if the screen is very small)
          ========================================================= -->
 
-    <LinearLayout
+    <ScrollView
         android:id="@+id/body"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
-        android:layout_marginTop="8dp"
-        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp"
+        android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toTopOf="@id/footer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-        <!-- =====================================================
-             SHIPMENT NO — COMPACT ROW
-             ===================================================== -->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Shipment No"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txt_shipmentNo"
-                android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/input_background1"
-                android:elevation="2dp"
-                android:gravity="center"
-                android:text="2026/G88/P72/00099"
-                android:textColor="#2E353A"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+            android:orientation="vertical">
 
 
-        <!-- =====================================================
-             CARD 1 : WEIGHT CHECKBOX + TRUCK NUMBER + BALE NUMBER
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <CheckBox
-                android:id="@+id/checkbox_weight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#A47C3C"
-                android:text="Weight"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+            <!-- =================================================
+                 SHIPMENT NO
+                 ================================================= -->
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="6dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
                 <TextView
-                    android:layout_width="110dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Truck Number"
+                    android:text="Shipment No"
                     android:textColor="@color/brown_font"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txt_truck_no"
-                    android:layout_width="0dp"
+                    android:id="@+id/txt_shipmentNo"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/input_background1"
+                    android:elevation="2dp"
+                    android:gravity="center"
+                    android:text="2026/G88/P72/00099"
+                    android:textColor="#2E353A"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 CARD 1 : WEIGHT CHECKBOX + TRUCK NUMBER + BALE NUMBER
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="6dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <CheckBox
+                    android:id="@+id/checkbox_weight"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="#A47C3C"
+                    android:buttonTint="#A47C3C"
+                    android:minHeight="32dp"
+                    android:text="Weight"
+                    android:textColor="@color/brown_font"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="110dp"
-                    android:layout_height="wrap_content"
-                    android:text="Bale Number"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edt_bale_no"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background1"
-                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-                    android:gravity="center_vertical"
-                    android:imeOptions="actionDone"
-                    android:inputType="textCapCharacters"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:singleLine="true"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <!-- =====================================================
-             CARD 2 : TB LOT NO / MARKED WEIGHT / GRADE / SUB_INV CODE
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TB Lot No :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_lot_no"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#A47C3C"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Marked Weight :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_mrkd_weight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#A47C3C"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Grade :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_grade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#A47C3C"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sub_Inv Code :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_sub_inv_code"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#C0392B"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <!-- =====================================================
-             CARD 3 : DISPATCH WEIGHT / BALES / RATE
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="110dp"
-                    android:layout_height="wrap_content"
-                    android:text="Dispatch Weight"
-                    android:textColor="@color/brown_font"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edt_weight"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_background1"
-                    android:gravity="center_vertical"
-                    android:imeOptions="actionDone"
-                    android:inputType="numberDecimal"
-                    android:maxLength="5"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:singleLine="true"
-                    android:textColor="#2E353A"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="112dp"
                         android:layout_height="wrap_content"
-                        android:text="Dispatch Bales : "
+                        android:text="Truck Number"
                         android:textColor="@color/brown_font"
-                        android:textSize="11sp"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_truck_no"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="#A47C3C"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Bale Number"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edt_bale_no"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                        android:gravity="center_vertical"
+                        android:imeOptions="actionDone"
+                        android:inputType="textCapCharacters"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 CARD 2 : DATA FROM STOCK (highlighted)
+                 TB LOT NO / MARKED WEIGHT / GRADE / SUB_INV CODE
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="6dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="TB Lot No :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_lot_no"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stock_value"
+                        android:gravity="center_vertical"
+                        android:minHeight="30dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="#5A3517"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Marked Weight :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_mrkd_weight"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stock_value"
+                        android:gravity="center_vertical"
+                        android:minHeight="30dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="#5A3517"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Grade :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_grade"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stock_value"
+                        android:gravity="center_vertical"
+                        android:minHeight="30dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="#5A3517"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sub_Inv Code :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_sub_inv_code"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stock_value"
+                        android:gravity="center_vertical"
+                        android:minHeight="30dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="#C0392B"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 CARD 3 : DISPATCH WEIGHT / BALES / RATE
+                 (one below the other)
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/dashboard_card_background"
+                android:elevation="6dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <!-- parent of edt_weight: shown / hidden by the Activity -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Dispatch Weight"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edt_weight"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:gravity="center_vertical"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
+                        android:maxLength="5"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <!-- Dispatch Bales -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="112dp"
+                        android:layout_height="wrap_content"
+                        android:text="Dispatch Bales :"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -484,7 +525,7 @@
                         android:layout_height="wrap_content"
                         android:text="0"
                         android:textColor="#A47C3C"
-                        android:textSize="13sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -492,134 +533,143 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#A47C3C"
-                        android:textSize="13sp"
+                        android:textSize="15sp"
                         android:textStyle="bold"
                         android:visibility="gone" />
 
                 </LinearLayout>
 
+                <!-- Rate (from stock, highlighted) -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="112dp"
                         android:layout_height="wrap_content"
-                        android:text="Rate : "
+                        android:text="Rate :"
                         android:textColor="@color/brown_font"
-                        android:textSize="11sp"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txt_rate"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stock_value"
+                        android:gravity="center_vertical"
+                        android:minHeight="30dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
                         android:text="0"
-                        android:textColor="#A47C3C"
-                        android:textSize="13sp"
+                        android:textColor="#5A3517"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
+
+            <!-- =================================================
+                 SAVE / CLEAR / DELETE BUTTONS
+                 ================================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSave"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/dashboard_proceed_button1"
+                    android:backgroundTint="@null"
+                    android:elevation="6dp"
+                    android:text="Save"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_clear"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/dashboard_create_button"
+                    android:backgroundTint="@null"
+                    android:elevation="6dp"
+                    android:text="Clear"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/dashboard_back_button1"
+                    android:backgroundTint="@null"
+                    android:elevation="6dp"
+                    android:text="Delete"
+                    android:textAllCaps="false"
+                    android:textColor="#C0392B"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+            <!-- =================================================
+                 NOTE TEXT
+                 ================================================= -->
+
+            <TextView
+                android:id="@+id/txt_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:textColor="#A47C3C"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="visible" />
+
         </LinearLayout>
 
-
-        <!-- =====================================================
-             SAVE / CLEAR / DELETE BUTTONS (moved into body)
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnSave"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/dashboard_proceed_button1"
-                android:backgroundTint="@null"
-                android:elevation="6dp"
-                android:text="Save"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_clear"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/dashboard_create_button"
-                android:backgroundTint="@null"
-                android:elevation="6dp"
-                android:text="Clear"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_delete"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                android:background="@drawable/dashboard_back_button1"
-                android:backgroundTint="@null"
-                android:elevation="6dp"
-                android:text="Delete"
-                android:textAllCaps="false"
-                android:textColor="#C0392B"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-
-        <!-- =====================================================
-             NOTE TEXT
-             ===================================================== -->
-
-        <TextView
-            android:id="@+id/txt_note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:gravity="center"
-            android:textColor="#A47C3C"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:visibility="visible" />
-
-    </LinearLayout>
+    </ScrollView>
 
 
     <!-- =========================================================
-         FOOTER : GRADEWISE / VIEW / BACK (same pattern as other screens)
+         FOOTER : GRADEWISE / VIEW / BACK (compact)
          ========================================================= -->
 
     <LinearLayout
         android:id="@+id/footer"
         android:layout_width="0dp"
-        android:layout_height="72dp"
+        android:layout_height="62dp"
         android:background="#2E353A"
         android:elevation="12dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="6dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -627,9 +677,9 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_gradewise"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="42dp"
             android:layout_weight="1"
-            android:layout_marginEnd="6dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/dashboard_proceed_button1"
             android:backgroundTint="@null"
             android:elevation="6dp"
@@ -642,10 +692,10 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_view"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="42dp"
             android:layout_weight="1"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/dashboard_create_button"
             android:backgroundTint="@null"
             android:elevation="6dp"
@@ -657,13 +707,13 @@
 
         <FrameLayout
             android:id="@+id/constraint_back_container"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="6dp">
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="5dp">
 
             <View
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:background="@drawable/dashboard_back_depth1"
                 android:translationX="2dp"
@@ -671,12 +721,12 @@
 
             <ImageView
                 android:id="@+id/btn_back"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:background="@drawable/dashboard_back_button1"
                 android:contentDescription="Back"
-                android:padding="10dp"
+                android:padding="9dp"
                 android:src="@drawable/arrow_back"
                 android:tint="#5A3517" />
 

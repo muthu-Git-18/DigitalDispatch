@@ -1085,7 +1085,6 @@ class MasterDataRepository(
                 stateDao.getLastChangeId(shipmentNo)
             } ?: 0L
 
-            // SignalR told us an id we already have -> nothing to do
             if (hintChangeId != null && hintChangeId <= lastId) {
                 return@withLock Result.success(0)
             }
@@ -1108,9 +1107,17 @@ class MasterDataRepository(
             val parsed = DispatchChangeParser.parse(raw)
 
             if (!parsed.isSuccess) {
-                if (parsed.message.contains("no changes", ignoreCase = true)) {
+                val msg = parsed.message.lowercase()
+
+                // "No new changes found.", "No changes", "No data" ... are not errors
+                if (msg.contains("no new changes") ||
+                    msg.contains("no changes") ||
+                    msg.contains("no data")
+                ) {
+                    android.util.Log.d("DispatchPull", "repo: server says nothing new")
                     return@withLock Result.success(0)
                 }
+
                 throw Exception(parsed.message.ifBlank { "Dispatch changes were not accepted" })
             }
 
@@ -1121,13 +1128,6 @@ class MasterDataRepository(
                 database.runInTransaction {
 
                     parsed.changes.sortedBy { it.changeId }.forEach { change ->
-
-                        if (change.changeId == 0L) {
-                            android.util.Log.w(
-                                "MasterDataRepository",
-                                "Change without a changeId (check the field name in the API response)"
-                            )
-                        }
 
                         if (applyDispatchChange(change, shipmentNo)) applied++
 
@@ -1165,20 +1165,14 @@ class MasterDataRepository(
 
         val bale = DispatchChangeParser.baleOf(payload) ?: return false
 
-        val dao = database.dispatchDetailDao()
+        // Use a shipment-specific lookup if your DAO supports it.
+        val existing = database.dispatchDetailDao()
+            .getByShipmentAndBale(shipmentNo, bale)
 
-        val existing = dao.getByShipmentAndBale(shipmentNo, bale)
-
-        val isDelete = change.processName.contains("DELETE", ignoreCase = true)
-
-        // a bale still waiting to upload on THIS device must not be overwritten / removed
-        if (existing != null && existing.syncStatus != BaleDetail.SYNC_SUCCESS) {
-            return false
-        }
-
-        if (isDelete) {
-            if (existing == null) return false
-            dao.deleteByShipmentAndBale(shipmentNo, bale)
+        // Handle deletion only after confirming the backend's delete convention.
+        if (change.processName.contains("DELETE", ignoreCase = true)) {
+            database.dispatchDetailDao()
+                .deleteByShipmentAndBale(shipmentNo, bale)
             return true
         }
 
@@ -1188,7 +1182,7 @@ class MasterDataRepository(
             existing = existing
         ) ?: return false
 
-        dao.insert(detail)
+        database.dispatchDetailDao().insert(detail)
 
         return true
     }

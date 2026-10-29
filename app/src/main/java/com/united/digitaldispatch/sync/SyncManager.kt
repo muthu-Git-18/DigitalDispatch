@@ -43,11 +43,15 @@ object SyncManager {
         // network turns from weak/none to strong -> send what is waiting, fetch what we missed
         NetworkMonitor.isHighQuality.observeForever { strong ->
 
+            android.util.Log.d("DispatchPull", "Network quality changed: strong=$strong (was=$lastWasStrong)")
+
             if (strong && !lastWasStrong) {
 
                 SyncScheduler.triggerImmediateSync(app)
 
-                activeShipmentNo?.let { pullChanges(app, it) }
+                activeShipmentNo?.let {
+                    pullChanges(app, it, source = "network-restored")
+                }
             }
 
             lastWasStrong = strong
@@ -79,9 +83,25 @@ object SyncManager {
      * [hintChangeId] = id announced by SignalR; skipped when we already have it.
      * Tells the open screen to reload when something changed.
      */
-    fun pullChanges(context: Context, shipmentNo: String, hintChangeId: Long? = null) {
+    fun pullChanges(
+        context: Context,
+        shipmentNo: String,
+        hintChangeId: Long? = null,
+        source: String = "unknown"
+    ) {
 
-        if (NetworkMonitor.isHighQuality.value != true) return
+        android.util.Log.d(
+            "DispatchPull",
+            "[$source] pull requested: shipment=$shipmentNo hint=$hintChangeId"
+        )
+
+        if (NetworkMonitor.isHighQuality.value != true) {
+            android.util.Log.w(
+                "DispatchPull",
+                "[$source] SKIPPED: network not good (shipment=$shipmentNo)"
+            )
+            return
+        }
 
         val appContext = context.applicationContext
 
@@ -92,12 +112,18 @@ object SyncManager {
                 AppDatabase.getInstance(appContext)
             )
 
-            val applied = repository
-                .pullDispatchChanges(shipmentNo, hintChangeId)
-                .getOrDefault(0)
+            val result = repository.pullDispatchChanges(shipmentNo, hintChangeId)
+
+            val applied = result.getOrDefault(0)
+
+            android.util.Log.d(
+                "DispatchPull",
+                "[$source] pull finished: shipment=$shipmentNo applied=$applied success=${result.isSuccess}"
+            )
 
             if (applied > 0) {
                 SyncEvents.detailsChanged.tryEmit(shipmentNo)
+                android.util.Log.d("DispatchPull", "[$source] screen reload event sent for $shipmentNo")
             }
         }
     }
