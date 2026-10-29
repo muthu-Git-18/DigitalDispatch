@@ -172,8 +172,8 @@ class DispatchDetails : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // leaving the shipment for good -> stop the live connection
-        if (isFinishing) DispatchSignalRService.stop(this)
+        // leaving the shipment for good -> leave its group / stop the live connection
+        if (isFinishing) DispatchSignalRService.stop(this, shipmentNo)
     }
 
     // -------------------------------------------------

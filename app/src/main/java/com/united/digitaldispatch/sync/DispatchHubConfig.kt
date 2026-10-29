@@ -14,15 +14,14 @@ package com.united.digitaldispatch.sync
  */
 object DispatchHubConfig {
 
-    /** e.g. "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/dispatchHub" */
     val HUB_URL: String = "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/dispatchHub"
 
-    /** server -> app: a change happened   (changeId: Long, shipmentNo: String) */
+    /** server -> app: a change happened (changeId: Long, shipmentNo: String) */
     const val EVENT_CHANGED = "DispatchUpdated"
 
-    /** app -> server: join / leave the group of one shipment */
-    const val METHOD_JOIN = "JoinShipment"
-    const val METHOD_LEAVE = "LeaveShipment"
+    /** app -> server: must match DispatchHub method names exactly */
+    const val METHOD_JOIN = "JoinShipmentGroup"
+    const val METHOD_LEAVE = "LeaveShipmentGroup"
 
     val enabled: Boolean
         get() = HUB_URL.isNotBlank()

@@ -10,6 +10,7 @@ import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.data.local.entity.DispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
+import com.united.digitaldispatch.sync.SyncEvents
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -233,13 +234,10 @@ class DispatchViewModel(
 
             val applied = repository.pullDispatchChanges(shipmentNo).getOrDefault(0)
 
-            if (applied > 0) {
-                // No manual reload needed.
-                // Room Flow emits the updated database rows automatically.
-            }
+            // the Details screen listens to this and reloads its list
+            if (applied > 0) SyncEvents.detailsChanged.tryEmit(shipmentNo)
         }
     }
-
     // -----------------------------
     // TRUCK MASTER
     // -----------------------------

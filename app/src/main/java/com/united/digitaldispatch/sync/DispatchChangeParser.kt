@@ -57,9 +57,7 @@ object DispatchChangeParser {
         if (!isSuccess) {
             return ParsedChanges(
                 isSuccess = false,
-                message = message.ifBlank {
-                    "Dispatch changes request was unsuccessful"
-                },
+                message = message.ifBlank { "Dispatch changes request was unsuccessful" },
                 changes = emptyList()
             )
         }
@@ -92,8 +90,9 @@ object DispatchChangeParser {
         val bale = baleOf(payload) ?: return null
 
         return BaleDetail(
-            detailId = payload.pick("detailId", "recordPrimaryKey")
-                ?: existing?.detailId
+            // keep the local key if the bale already exists -> no duplicate rows
+            detailId = existing?.detailId
+                ?: payload.pick("detailId", "recordPrimaryKey")
                 ?: "SRV$bale",
 
             shipmentNo = payload.pick("shipmentNo")
@@ -110,15 +109,11 @@ object DispatchChangeParser {
                 ?: existing?.dispatchWeight
                 ?: "0",
 
-            fromSubinventoryCode = payload.pick(
-                "fromSubinventoryCode",
-                "fromSubinventory"
-            ) ?: existing?.fromSubinventoryCode.orEmpty(),
+            fromSubinventoryCode = payload.pick("fromSubinventoryCode", "fromSubinventory")
+                ?: existing?.fromSubinventoryCode.orEmpty(),
 
-            toSubinventoryCode = payload.pick(
-                "toSubinventoryCode",
-                "toSubinventory"
-            ) ?: existing?.toSubinventoryCode.orEmpty(),
+            toSubinventoryCode = payload.pick("toSubinventoryCode", "toSubinventory")
+                ?: existing?.toSubinventoryCode.orEmpty(),
 
             status = payload.pick("status")
                 ?: existing?.status
@@ -140,11 +135,8 @@ object DispatchChangeParser {
                 ?: existing?.createdDate
                 ?: "",
 
-            senderOrgnCode = payload.pick(
-                "senderOrgnCode",
-                "senderOrgn",
-                "senderOrgCode"
-            ) ?: existing?.senderOrgnCode.orEmpty(),
+            senderOrgnCode = payload.pick("senderOrgnCode", "senderOrgn", "senderOrgCode")
+                ?: existing?.senderOrgnCode.orEmpty(),
 
             receiverOrgnCode = payload.pick(
                 "receiverOrgnCode",
@@ -165,19 +157,21 @@ object DispatchChangeParser {
                 ?: existing?.purchaseDate
                 ?: "",
 
-            dispatchWeighmentStatus = payload.pick(
-                "dispatchWeighmentStatus"
-            ) ?: existing?.dispatchWeighmentStatus ?: "N",
+            dispatchWeighmentStatus = payload.pick("dispatchWeighmentStatus")
+                ?: existing?.dispatchWeighmentStatus
+                ?: "N",
 
-            deviceId = payload.pick(
-                "DeviceId"
-            ) ?: existing?.dispatchWeighmentStatus ?: "",
+            // fixed: was falling back to dispatchWeighmentStatus
+            deviceId = payload.pick("deviceId")
+                ?: existing?.deviceId
+                ?: "",
 
             syncStatus = BaleDetail.SYNC_SUCCESS,
             serverMessage = "Synced from server",
             attemptCount = 0
         )
     }
+
     private fun parseChange(element: JsonElement): ParsedChange? {
         if (!element.isJsonObject) return null
 
@@ -190,10 +184,7 @@ object DispatchChangeParser {
                 ?.toLong()
             ?: 0L
 
-        val processName = obj.pick(
-            "processName",
-            "processType"
-        ).orEmpty()
+        val processName = obj.pick("processName", "processType").orEmpty()
 
         val payloadElement = obj.find("payload")
 

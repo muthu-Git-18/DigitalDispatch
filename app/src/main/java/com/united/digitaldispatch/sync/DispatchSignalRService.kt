@@ -21,21 +21,22 @@ import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Live "return sync" (same idea as SignalRService of the purchase app).
+ * Live "return sync" through SignalR.
  *
- * It runs only while a shipment is open on the Details screen:
- *   start(ctx, shipmentNo)  -> connects, joins the group of that shipment,
- *                              downloads the changes once
- *   server event            -> downloads the new changes (SyncManager.pullChanges)
- *   stop(ctx)               -> leaves the group and disconnects
- *
- * Needs DispatchHubConfig.HUB_URL to be filled (otherwise it does nothing).
+ * Runs only while a shipment is open on the Details screen:
+ *   start(ctx, shipmentNo)        -> connect, join the group of that shipment,
+ *                                    download the changes once
+ *   server event "DispatchUpdated"-> SyncManager.pullChanges(...)
+ *   start(ctx, otherShipmentNo)   -> leave the old group, join the new one
+ *   stop(ctx, shipmentNo)         -> leave the group and disconnect
+ *                                    (ignored if the service already moved to another shipment)
  */
 class DispatchSignalRService : Service() {
 
@@ -43,6 +44,7 @@ class DispatchSignalRService : Service() {
 
         private const val TAG = "DispatchSignalR"
         private const val EXTRA_SHIPMENT_NO = "extra_shipment_no"
+        private const val ACTION_STOP = "action_stop"
         private const val NOTIFICATION_ID = 2001
         private const val CHANNEL_ID = "dispatch_signalr_channel"
 
@@ -60,8 +62,18 @@ class DispatchSignalRService : Service() {
             }
         }
 
-        fun stop(context: Context) {
-            context.stopService(Intent(context, DispatchSignalRService::class.java))
+        /** Only stops the service if [shipmentNo] is still the shipment it is serving. */
+        fun stop(context: Context, shipmentNo: String) {
+
+            val intent = Intent(context, DispatchSignalRService::class.java)
+                .setAction(ACTION_STOP)
+                .putExtra(EXTRA_SHIPMENT_NO, shipmentNo)
+
+            try {
+                context.startService(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Could not send stop to the live sync service", e)
+            }
         }
     }
 
@@ -74,8 +86,13 @@ class DispatchSignalRService : Service() {
     private var currentShipmentNo: String? = null
     private var joinedShipmentNo: String? = null
 
+    private var reconnectJob: Job? = null
+
     @Volatile
     private var isConnecting = false
+
+    @Volatile
+    private var isStopping = false
 
     @Volatile
     private var reconnectAttempt = 0
@@ -95,6 +112,17 @@ class DispatchSignalRService : Service() {
 
         val shipmentNo = intent?.getStringExtra(EXTRA_SHIPMENT_NO)
 
+        // ---- stop request from a screen ----
+        if (intent?.action == ACTION_STOP) {
+            if (shipmentNo == currentShipmentNo) {
+                stopSelf()
+            } else {
+                Log.d(TAG, "Stop ignored, now serving $currentShipmentNo (asked by $shipmentNo)")
+            }
+            return START_NOT_STICKY
+        }
+
+        // ---- start / switch shipment ----
         if (!shipmentNo.isNullOrBlank() && shipmentNo != currentShipmentNo) {
 
             val old = joinedShipmentNo
@@ -106,6 +134,7 @@ class DispatchSignalRService : Service() {
 
             if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
                 joinGroup(shipmentNo)
+                SyncManager.pullChanges(applicationContext, shipmentNo)
             } else {
                 connect()
             }
@@ -121,7 +150,7 @@ class DispatchSignalRService : Service() {
     // ------------------------------------------------
     private fun connect() {
 
-        if (isConnecting || hubConnection != null) return
+        if (isStopping || isConnecting || hubConnection != null) return
         if (!DispatchHubConfig.enabled) return
 
         isConnecting = true
@@ -130,25 +159,37 @@ class DispatchSignalRService : Service() {
             .create(DispatchHubConfig.HUB_URL)
             .build()
 
+        // detect dead connections quickly (mobile networks drop silently)
+        hub.keepAliveInterval = 10_000L
+        hub.serverTimeout = 30_000L
+
         // server tells us a change happened
         hub.on(
             DispatchHubConfig.EVENT_CHANGED,
             { changeId: Long, shipmentNo: String ->
+                Log.d(TAG, "Signal received: shipment=$shipmentNo changeId=$changeId")
                 if (shipmentNo == currentShipmentNo) {
                     SyncManager.pullChanges(applicationContext, shipmentNo, changeId)
                 }
             },
-            Long::class.java,
+            Long::class.javaObjectType,
             String::class.java
         )
 
-        hub.onClosed {
-            // connection lost -> try again with a growing delay
+        hub.onClosed { error ->
+            // an old hub closing must not touch the new one
+            if (hubConnection !== hub) return@onClosed
+
+            Log.w(TAG, "Hub closed", error)
+
             hubConnection = null
             joinedShipmentNo = null
             isConnecting = false
-            updateNotification("Offline - reconnecting")
-            scheduleReconnect()
+
+            if (!isStopping) {
+                updateNotification("Offline - reconnecting")
+                scheduleReconnect()
+            }
         }
 
         hubConnection = hub
@@ -157,30 +198,47 @@ class DispatchSignalRService : Service() {
             try {
                 hub.start().blockingAwait()
 
+                // service moved on / stopped while we were connecting
+                if (hubConnection !== hub || isStopping) {
+                    try { hub.stop() } catch (_: Exception) {}
+                    return@launch
+                }
+
                 reconnectAttempt = 0
                 isConnecting = false
 
                 updateNotification("Listening for dispatch updates")
 
                 currentShipmentNo?.let { shipmentNo ->
+                    // join FIRST, then pull: nothing can be missed between the two
                     joinGroup(shipmentNo)
-                    // catch up on everything missed while we were not connected
                     SyncManager.pullChanges(applicationContext, shipmentNo)
                 }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Hub connect failed", e)
-                hubConnection = null
+
+                if (hubConnection === hub) hubConnection = null
                 isConnecting = false
-                scheduleReconnect()
+
+                if (!isStopping) scheduleReconnect()
             }
         }
     }
 
     private fun joinGroup(shipmentNo: String) {
         try {
-            hubConnection?.send(DispatchHubConfig.METHOD_JOIN, shipmentNo)
-            joinedShipmentNo = shipmentNo
+            hubConnection
+                ?.invoke(DispatchHubConfig.METHOD_JOIN, shipmentNo)
+                ?.subscribe(
+                    {
+                        joinedShipmentNo = shipmentNo
+                        Log.d(TAG, "Joined group $shipmentNo")
+                    },
+                    { error ->
+                        Log.e(TAG, "Join rejected by server for $shipmentNo", error)
+                    }
+                )
         } catch (e: Exception) {
             Log.e(TAG, "Join failed", e)
         }
@@ -189,6 +247,7 @@ class DispatchSignalRService : Service() {
     private fun leaveGroup(shipmentNo: String) {
         try {
             hubConnection?.send(DispatchHubConfig.METHOD_LEAVE, shipmentNo)
+            Log.d(TAG, "Left group $shipmentNo")
         } catch (e: Exception) {
             Log.e(TAG, "Leave failed", e)
         }
@@ -197,9 +256,10 @@ class DispatchSignalRService : Service() {
     // ------------------------------------------------
     private fun scheduleReconnect() {
 
-        if (currentShipmentNo == null) return
+        if (isStopping || currentShipmentNo == null) return
+        if (reconnectJob?.isActive == true) return   // one pending retry at a time
 
-        scope.launch {
+        reconnectJob = scope.launch {
 
             // 2s, 4s, 8s ... up to 60s
             val wait = minOf(60_000L, 2_000L shl minOf(reconnectAttempt, 5))
@@ -207,7 +267,7 @@ class DispatchSignalRService : Service() {
 
             delay(wait)
 
-            if (hubConnection == null && currentShipmentNo != null) connect()
+            if (!isStopping && hubConnection == null && currentShipmentNo != null) connect()
         }
     }
 
@@ -222,7 +282,10 @@ class DispatchSignalRService : Service() {
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             override fun onAvailable(network: Network) {
-                if (hubConnection == null) connect()
+                if (hubConnection == null) {
+                    reconnectAttempt = 0
+                    connect()
+                }
             }
 
             override fun onLost(network: Network) {
@@ -236,6 +299,9 @@ class DispatchSignalRService : Service() {
 
     // ------------------------------------------------
     override fun onDestroy() {
+
+        isStopping = true
+        reconnectJob?.cancel()
 
         currentShipmentNo?.let { leaveGroup(it) }
 

@@ -58,7 +58,7 @@ class MasterDataRepository(
             "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/api/Dispatch/sync-dispatch-changes"
 
         // one download at a time (screen open + SignalR + network-back can overlap)
-        val pullMutex = Mutex()
+        private val pullMutex = Mutex()
 
     }
 
@@ -1085,6 +1085,7 @@ class MasterDataRepository(
                 stateDao.getLastChangeId(shipmentNo)
             } ?: 0L
 
+            // SignalR told us an id we already have -> nothing to do
             if (hintChangeId != null && hintChangeId <= lastId) {
                 return@withLock Result.success(0)
             }
@@ -1120,6 +1121,13 @@ class MasterDataRepository(
                 database.runInTransaction {
 
                     parsed.changes.sortedBy { it.changeId }.forEach { change ->
+
+                        if (change.changeId == 0L) {
+                            android.util.Log.w(
+                                "MasterDataRepository",
+                                "Change without a changeId (check the field name in the API response)"
+                            )
+                        }
 
                         if (applyDispatchChange(change, shipmentNo)) applied++
 
@@ -1157,14 +1165,20 @@ class MasterDataRepository(
 
         val bale = DispatchChangeParser.baleOf(payload) ?: return false
 
-        // Use a shipment-specific lookup if your DAO supports it.
-        val existing = database.dispatchDetailDao()
-            .getByShipmentAndBale(shipmentNo, bale)
+        val dao = database.dispatchDetailDao()
 
-        // Handle deletion only after confirming the backend's delete convention.
-        if (change.processName.contains("DELETE", ignoreCase = true)) {
-            database.dispatchDetailDao()
-                .deleteByShipmentAndBale(shipmentNo, bale)
+        val existing = dao.getByShipmentAndBale(shipmentNo, bale)
+
+        val isDelete = change.processName.contains("DELETE", ignoreCase = true)
+
+        // a bale still waiting to upload on THIS device must not be overwritten / removed
+        if (existing != null && existing.syncStatus != BaleDetail.SYNC_SUCCESS) {
+            return false
+        }
+
+        if (isDelete) {
+            if (existing == null) return false
+            dao.deleteByShipmentAndBale(shipmentNo, bale)
             return true
         }
 
@@ -1174,7 +1188,7 @@ class MasterDataRepository(
             existing = existing
         ) ?: return false
 
-        database.dispatchDetailDao().insert(detail)
+        dao.insert(detail)
 
         return true
     }
