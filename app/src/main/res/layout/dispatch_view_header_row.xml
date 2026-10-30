@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="50dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="S.No" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="150dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center_vertical"
+        android:paddingStart="8dp" android:paddingEnd="8dp"
+        android:text="Bale No" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="90dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Marked Wt" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="90dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Disp. Wt" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="80dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Grade" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txt_created_date"
+        android:layout_width="110dp" android:layout_height="40dp"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Purchase Date" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+</LinearLayout>

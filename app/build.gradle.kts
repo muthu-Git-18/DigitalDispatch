@@ -67,4 +67,7 @@ dependencies {
     // build.gradle.kts
     implementation("com.microsoft.signalr:signalr:8.0.0")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    //scanner barcode --Qr
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 }

@@ -8,11 +8,7 @@
     android:fitsSystemWindows="true"
     android:background="#D9D8D5">
 
-
-    <!-- =========================================================
-         BACKGROUND
-         ========================================================= -->
-
+    <!-- BACKGROUND -->
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="280dp"
@@ -26,11 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <!-- =========================================================
-         CHARCOAL HEADER
-         ========================================================= -->
-
+    <!-- CHARCOAL HEADER -->
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -65,7 +57,6 @@
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
                 android:src="@drawable/logooo" />
-
         </FrameLayout>
 
         <LinearLayout
@@ -94,7 +85,6 @@
                 android:textColor="#DCB765"
                 android:textSize="11sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -114,7 +104,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -126,7 +116,6 @@
                     android:textColor="#FFF8E8"
                     android:textSize="10sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -139,7 +128,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 09-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -151,18 +140,11 @@
                     android:textColor="#FFF8E8"
                     android:textSize="10sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </RelativeLayout>
 
-
-    <!-- =========================================================
-         HEADER ID — COMPACT SINGLE ROW
-         ========================================================= -->
-
+    <!-- HEADER ID -->
     <LinearLayout
         android:id="@+id/cardHeaderId"
         android:layout_width="0dp"
@@ -197,18 +179,13 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:gravity="end"
-            android:text="P72R02260909122456"
+            android:text=""
             android:textColor="#2E353A"
             android:textSize="13sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         TABLE CARD (Header list + item list)
-         ========================================================= -->
-
+    <!-- TABLE CARD (scrolls left-right and up-down) -->
     <LinearLayout
         android:id="@+id/cardTable"
         android:layout_width="0dp"
@@ -244,48 +221,59 @@
                 android:textColor="#DCB765"
                 android:textSize="13sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
-        <!-- Header list -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        <!-- Item list (fills remaining space) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_item"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="4dp"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:layout_weight="1">
 
-        <!-- No data placeholder -->
-        <TextView
-            android:id="@+id/txt_no_data"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="No Data Found"
-            android:textColor="#85745E"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+            <HorizontalScrollView
+                android:id="@+id/hsv_table"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="horizontal">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <!-- Header row (stays on top, moves sideways with the table) -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+                    <!-- Item rows (scroll up and down) -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_item"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:clipToPadding="false"
+                        android:paddingBottom="4dp"
+                        android:scrollbars="vertical"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView
+                android:id="@+id/txt_no_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:text="No Data Found"
+                android:textColor="#85745E"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
-
-    <!-- =========================================================
-         STATS ROW : TOTAL GRADES / TOTAL BALES
-         ========================================================= -->
-
+    <!-- STATS ROW -->
     <LinearLayout
         android:id="@+id/statsRow"
         android:layout_width="0dp"
@@ -326,7 +314,6 @@
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -357,16 +344,10 @@
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         FOOTER ROW : TOTAL QUANTITY + BACK
-         ========================================================= -->
-
+    <!-- FOOTER ROW : TOTAL QUANTITY + BACK -->
     <LinearLayout
         android:id="@+id/footerRow"
         android:layout_width="0dp"
@@ -408,7 +389,6 @@
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <!-- Back (circular, gold) -->
@@ -437,16 +417,10 @@
                 android:padding="11dp"
                 android:src="@drawable/arrow_back"
                 android:tint="#5A3517" />
-
         </FrameLayout>
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         LOADER
-         ========================================================= -->
-
+    <!-- LOADER -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"

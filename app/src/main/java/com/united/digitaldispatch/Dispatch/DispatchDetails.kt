@@ -18,12 +18,16 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Apiservice.viewmodel.BaleLookupState
@@ -123,6 +127,19 @@ class DispatchDetails : AppCompatActivity() {
                 AppDatabase.getInstance(applicationContext)
             )
         )
+    }
+
+    // opens the View screen; a tapped row comes back as a bale number
+    private val viewLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val baleNo = result.data
+                ?.getStringExtra(DispatchView.EXTRA_BALE_NO)
+                .orEmpty()
+
+            if (baleNo.isNotBlank()) openBaleForUpdate(baleNo)
+        }
     }
 
     // -------------------------------------------------
@@ -261,11 +278,19 @@ class DispatchDetails : AppCompatActivity() {
             } else false
         }
 
+        // long press on the bale box -> open the camera scanner
+        /*edtBaleNo.setOnLongClickListener {
+            if (edtBaleNo.isEnabled) startBarcodeScan()
+            true   // consume, so the paste/select menu does not open
+        }
+*/
         // weight checkbox: shows / hides the dispatch weight row
         chkWeight.setOnCheckedChangeListener { _, checked ->
             setWeightRowVisible(checked)
             edtWeight.setText("")
         }
+
+
     }
 
     /** The "Dispatch Weight" label + box live in one row (the parent of edt_weight). */
@@ -311,9 +336,9 @@ class DispatchDetails : AppCompatActivity() {
             if (viewModel.details.value.isEmpty()) {
                 showError("No Bales Added", "No Bales Are Added Yet")
             } else {
-                startActivity(
+                viewLauncher.launch(
                     Intent(this, DispatchView::class.java)
-                        .putExtra(Dispatch.EXTRA_SHIPMENT_NO, shipmentNo)
+                        .putExtra(DispatchView.EXTRA_SHIPMENT_NO, shipmentNo)
                 )
             }
         }
@@ -501,6 +526,49 @@ class DispatchDetails : AppCompatActivity() {
 
         // this shipment -> other shipment -> stock table (answer comes in observeViewModel)
         viewModel.lookupBale(bale, shipmentNo)
+    }
+
+    private fun startBarcodeScan() {
+
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_CODE_128,
+                Barcode.FORMAT_CODE_39,
+                Barcode.FORMAT_CODE_93,
+                Barcode.FORMAT_QR_CODE
+            )
+            .enableAutoZoom()
+            .build()
+
+        GmsBarcodeScanning.getClient(this, options)
+            .startScan()
+            .addOnSuccessListener { barcode ->
+
+                // keep only A-Z / 0-9, capitals, max 14 (same rules as the box)
+                val baleNo = barcode.rawValue.orEmpty()
+                    .uppercase(Locale.US)
+                    .filter { it.isLetterOrDigit() }
+                    .take(14)
+
+                if (baleNo.isBlank()) {
+                    toast("Barcode is empty")
+                } else {
+                    openBaleForUpdate(baleNo)   // clears the screen, sets the text, TextWatcher does the lookup
+                }
+            }
+            .addOnCanceledListener { /* user closed the scanner */ }
+            .addOnFailureListener { e ->
+                toast("Scanner not available: ${e.message}")
+            }
+    }
+    /**
+     * A row was tapped in the View screen: load that bale exactly as if it was
+     * scanned. lookupBale finds it in this shipment -> "Bale Already Scanned"
+     * dialog -> Update -> enterUpdateMode, the same flow as the old app.
+     */
+    private fun openBaleForUpdate(baleNo: String) {
+        clearFields()                 // drop any half-entered bale first
+        edtBaleNo.setText(baleNo)     // the TextWatcher (13 / 14 chars) starts the lookup
     }
 
     /** bale is already in this shipment */
