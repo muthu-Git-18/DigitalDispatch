@@ -277,7 +277,6 @@ class DispatchDetails : AppCompatActivity() {
                 true
             } else false
         }
-
         // long press on the bale box -> open the camera scanner
         /*edtBaleNo.setOnLongClickListener {
             if (edtBaleNo.isEnabled) startBarcodeScan()

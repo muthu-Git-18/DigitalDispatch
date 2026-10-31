@@ -114,7 +114,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -139,7 +139,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 09-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -197,7 +197,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:gravity="end"
-            android:text="P72R02260909122456"
+            android:text=""
             android:textColor="#2E353A"
             android:textSize="13sp"
             android:textStyle="bold" />

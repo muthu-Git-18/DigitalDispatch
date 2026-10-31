@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1.4"
+        android:background="@drawable/table_cell_header" android:gravity="center_vertical"
+        android:paddingStart="8dp" android:paddingEnd="8dp"
+        android:text="Grade" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="0.8"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Bales" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Qty" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/hdr_rate"
+        android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Rate" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/hdr_value"
+        android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1.2"
+        android:background="@drawable/table_cell_header" android:gravity="center"
+        android:text="Value" android:textColor="#2E353A"
+        android:textSize="12sp" android:textStyle="bold" />
+</LinearLayout>
