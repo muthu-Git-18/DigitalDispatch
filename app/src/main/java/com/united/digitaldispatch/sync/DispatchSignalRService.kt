@@ -28,14 +28,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Live "return sync" through SignalR.
+ * Live "return sync" through SignalR (two hubs).
  *
- * Runs only while a shipment is open on the Details screen:
- *   start(ctx, shipmentNo)        -> connect, join the group of that shipment,
+ *  dispatchHub          -> "DispatchUpdated"   : bales changed on another device -> pull changes
+ *  dispatchCompleteHub  -> "DispatchCompleted" : shipment completed on another device
+ *                                                -> delete it locally + tell the open screens
+ *
+ * Runs only while a shipment is open on the Details / Summary screens:
+ *   start(ctx, shipmentNo)        -> connect both hubs, join the group of that shipment,
  *                                    download the changes once
- *   server event "DispatchUpdated"-> SyncManager.pullChanges(...)
- *   start(ctx, otherShipmentNo)   -> leave the old group, join the new one
- *   stop(ctx, shipmentNo)         -> leave the group and disconnect
+ *   start(ctx, otherShipmentNo)   -> leave the old group, join the new one (both hubs)
+ *   stop(ctx, shipmentNo)         -> leave the groups and disconnect
  *                                    (ignored if the service already moved to another shipment)
  */
 class DispatchSignalRService : Service() {
@@ -79,17 +82,26 @@ class DispatchSignalRService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // bale hub
     private var hubConnection: HubConnection? = null
+
+    // completion hub
+    private var completeHub: HubConnection? = null
+
     private lateinit var notificationManager: NotificationManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     private var currentShipmentNo: String? = null
     private var joinedShipmentNo: String? = null
+    private var joinedCompleteShipmentNo: String? = null
 
     private var reconnectJob: Job? = null
 
     @Volatile
     private var isConnecting = false
+
+    @Volatile
+    private var isConnectingComplete = false
 
     @Volatile
     private var isStopping = false
@@ -126,11 +138,14 @@ class DispatchSignalRService : Service() {
         if (!shipmentNo.isNullOrBlank() && shipmentNo != currentShipmentNo) {
 
             val old = joinedShipmentNo
+            val oldComplete = joinedCompleteShipmentNo
 
             currentShipmentNo = shipmentNo
             joinedShipmentNo = null
+            joinedCompleteShipmentNo = null
 
             if (old != null) leaveGroup(old)
+            if (oldComplete != null) leaveCompleteGroup(oldComplete)
 
             if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
                 joinGroup(shipmentNo)
@@ -139,15 +154,24 @@ class DispatchSignalRService : Service() {
                 connect()
             }
 
-        } else if (hubConnection == null) {
-            connect()
+            if (completeHub?.connectionState == HubConnectionState.CONNECTED) {
+                joinCompleteGroup(shipmentNo)
+            } else {
+                startCompleteHub()
+            }
+
+        } else {
+            if (hubConnection == null) connect()
+            if (completeHub == null) startCompleteHub()
         }
 
         // tied to the open screen -> do not restart on its own
         return START_NOT_STICKY
     }
 
-    // ------------------------------------------------
+    // ================================================
+    //  BALE HUB  (dispatchHub)
+    // ================================================
     private fun connect() {
 
         if (isStopping || isConnecting || hubConnection != null) return
@@ -253,6 +277,115 @@ class DispatchSignalRService : Service() {
         }
     }
 
+    // ================================================
+    //  COMPLETION HUB  (dispatchCompleteHub)
+    // ================================================
+    private fun startCompleteHub() {
+
+        if (isStopping || isConnectingComplete || completeHub != null) return
+        if (!DispatchCompleteHubConfig.enabled) return
+
+        isConnectingComplete = true
+
+        val hub = HubConnectionBuilder
+            .create(DispatchCompleteHubConfig.HUB_URL)
+            .build()
+
+        hub.keepAliveInterval = 10_000L
+        hub.serverTimeout = 30_000L
+
+        // server tells us a shipment was completed (on any device)
+        // server tells us a shipment was completed (on any device)
+// the server sends an OBJECT { ShipmentNo, MainShipmentNo, Result, ... }, not a string
+        hub.on(
+            DispatchCompleteHubConfig.EVENT_COMPLETED,
+            { raw: com.google.gson.JsonElement ->
+
+                Log.d(TAG, "Completed RAW: $raw")
+
+                val completed = try {
+                    raw.asJsonObject.entrySet()
+                        .firstOrNull { it.key.equals("shipmentNo", ignoreCase = true) }
+                        ?.value?.asString?.trim()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Completed payload could not be read", e)
+                    null
+                }
+
+                Log.d(TAG, "Completed signal: shipment=$completed current=$currentShipmentNo")
+
+                if (!completed.isNullOrEmpty() && completed == currentShipmentNo?.trim()) {
+                    SyncManager.onShipmentCompleted(applicationContext, completed)
+                }
+            },
+            com.google.gson.JsonElement::class.java
+        )
+
+        hub.onClosed { error ->
+            if (completeHub !== hub) return@onClosed
+
+            Log.w(TAG, "Complete hub closed", error)
+
+            completeHub = null
+            joinedCompleteShipmentNo = null
+            isConnectingComplete = false
+
+            if (!isStopping) scheduleReconnect()
+        }
+
+        completeHub = hub
+
+        scope.launch {
+            try {
+                hub.start().blockingAwait()
+
+                if (completeHub !== hub || isStopping) {
+                    try { hub.stop() } catch (_: Exception) {}
+                    return@launch
+                }
+
+                isConnectingComplete = false
+
+                currentShipmentNo?.let { joinCompleteGroup(it) }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Complete hub connect failed", e)
+
+                if (completeHub === hub) completeHub = null
+                isConnectingComplete = false
+
+                if (!isStopping) scheduleReconnect()
+            }
+        }
+    }
+
+    private fun joinCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub
+                ?.invoke(DispatchCompleteHubConfig.METHOD_JOIN, shipmentNo)
+                ?.subscribe(
+                    {
+                        joinedCompleteShipmentNo = shipmentNo
+                        Log.d(TAG, "Joined complete group $shipmentNo")
+                    },
+                    { error ->
+                        Log.e(TAG, "Complete join rejected by server for $shipmentNo", error)
+                    }
+                )
+        } catch (e: Exception) {
+            Log.e(TAG, "Complete join failed", e)
+        }
+    }
+
+    private fun leaveCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub?.send(DispatchCompleteHubConfig.METHOD_LEAVE, shipmentNo)
+            Log.d(TAG, "Left complete group $shipmentNo")
+        } catch (e: Exception) {
+            Log.e(TAG, "Complete leave failed", e)
+        }
+    }
+
     // ------------------------------------------------
     private fun scheduleReconnect() {
 
@@ -267,7 +400,11 @@ class DispatchSignalRService : Service() {
 
             delay(wait)
 
-            if (!isStopping && hubConnection == null && currentShipmentNo != null) connect()
+            if (isStopping || currentShipmentNo == null) return@launch
+
+            // bring back whichever hub is missing
+            if (hubConnection == null) connect()
+            if (completeHub == null) startCompleteHub()
         }
     }
 
@@ -282,9 +419,10 @@ class DispatchSignalRService : Service() {
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             override fun onAvailable(network: Network) {
-                if (hubConnection == null) {
+                if (hubConnection == null || completeHub == null) {
                     reconnectAttempt = 0
-                    connect()
+                    if (hubConnection == null) connect()
+                    if (completeHub == null) startCompleteHub()
                 }
             }
 
@@ -303,7 +441,10 @@ class DispatchSignalRService : Service() {
         isStopping = true
         reconnectJob?.cancel()
 
-        currentShipmentNo?.let { leaveGroup(it) }
+        currentShipmentNo?.let {
+            leaveGroup(it)
+            leaveCompleteGroup(it)
+        }
 
         try {
             networkCallback?.let {
@@ -318,7 +459,13 @@ class DispatchSignalRService : Service() {
         } catch (_: Exception) {
         }
 
+        try {
+            completeHub?.stop()
+        } catch (_: Exception) {
+        }
+
         hubConnection = null
+        completeHub = null
         scope.cancel()
 
         super.onDestroy()

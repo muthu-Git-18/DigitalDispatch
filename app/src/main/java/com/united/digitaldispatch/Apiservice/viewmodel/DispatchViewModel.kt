@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.Dispatch.models.BaleInfo
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchData
 import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.fold
 
 class DispatchViewModel(
     private val repository: MasterDataRepository
@@ -313,6 +315,35 @@ class DispatchViewModel(
                     )
             }
         }
+    }
+
+    // Complete Dispatch
+    private val _completeState = MutableStateFlow<CompleteState>(CompleteState.Idle)
+    val completeState: StateFlow<CompleteState> = _completeState
+
+    fun completeDispatch(shipmentNo: String, totalBales: Int) {
+        if (_completeState.value is CompleteState.Loading) return   // double-tap guard
+        viewModelScope.launch {
+            _completeState.value = CompleteState.Loading
+            _completeState.value = repository.completeDispatch(shipmentNo, totalBales).fold(
+                onSuccess = { CompleteState.Success(it) },
+                onFailure = { CompleteState.Error(it.message ?: "Complete dispatch failed") }
+            )
+        }
+    }
+
+    fun resetCompleteState() { _completeState.value = CompleteState.Idle }
+
+    /** called when another device completed this shipment */
+    fun removeCompletedShipment(shipmentNo: String) {
+        viewModelScope.launch { repository.removeShipmentLocally(shipmentNo) }
+    }
+
+    sealed class CompleteState {
+        object Idle : CompleteState()
+        object Loading : CompleteState()
+        data class Success(val data: CompleteDispatchData) : CompleteState()
+        data class Error(val message: String) : CompleteState()
     }
 }
 

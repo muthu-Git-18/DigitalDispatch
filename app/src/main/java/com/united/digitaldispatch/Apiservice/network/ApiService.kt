@@ -1,5 +1,7 @@
 package com.united.digitaldispatch.Apiservice.network
 
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchRequest
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchResponse
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Dispatch.models.DispatchHeaderListResponse
@@ -85,4 +87,10 @@ interface ApiService {
         @Query("shipmentNo") shipmentNo: String,
         @Query("fromChangeId") fromChangeId: Long
     ): Response<ResponseBody>
+
+    // ApiService
+    @POST("Dispatch/complete-dispatch")
+    suspend fun completeDispatch(
+        @Body request: CompleteDispatchRequest
+    ): Response<CompleteDispatchResponse>
 }

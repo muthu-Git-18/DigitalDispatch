@@ -3,6 +3,9 @@ package com.united.digitaldispatch.Apiservice.repository
 import com.united.digitaldispatch.Apiservice.network.ApiService
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.Dispatch.models.BaleInfo
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchData
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchRequest
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchResponse
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderRequest
 import com.united.digitaldispatch.Dispatch.models.CreateDispatchHeaderResponse
 import com.united.digitaldispatch.Dispatch.models.DispatchHeaderItem
@@ -1185,6 +1188,65 @@ class MasterDataRepository(
         database.dispatchDetailDao().insert(detail)
 
         return true
+    }
+
+
+    //Complete Dispatch
+
+    // MasterDataRepository
+    suspend fun completeDispatch(
+        shipmentNo: String,
+        totalBales: Int
+    ): Result<CompleteDispatchData> {
+        return try {
+
+            val pending = withContext(Dispatchers.IO) {
+                database.dispatchDetailDao().countUnsyncedByShipment(shipmentNo)
+            }
+            if (pending > 0) {
+                throw Exception("$pending bale(s) not uploaded yet. Connect to the network and try again.")
+            }
+
+            val response = apiService.completeDispatch(
+                CompleteDispatchRequest(shipmentNo, totalBales.toString())
+            )
+
+            // success and failure both come back as the same JSON shape
+            val body = response.body() ?: parseCompleteError(response.errorBody()?.string())
+
+            val data = body?.data
+            if (!response.isSuccessful || data == null || !data.isSuccess) {
+                throw Exception(
+                    data?.output?.takeIf { it.isNotBlank() }
+                        ?: body?.message?.takeIf { it.isNotBlank() }
+                        ?: "Complete dispatch failed: ${response.code()}"
+                )
+            }
+
+            // server accepted -> this shipment is finished on this device too
+            removeShipmentLocally(shipmentNo)
+
+            Result.success(data)
+
+        } catch (e: Exception) {
+            android.util.Log.e("MasterDataRepository", "Complete dispatch failed", e)
+            Result.failure(e)
+        }
+    }
+
+    private fun parseCompleteError(raw: String?): CompleteDispatchResponse? =
+        try { com.google.gson.Gson().fromJson(raw, CompleteDispatchResponse::class.java) }
+        catch (_: Exception) { null }
+
+    /** Used by both "I completed it" and "another device completed it". */
+    suspend fun removeShipmentLocally(shipmentNo: String) {
+        withContext(Dispatchers.IO) {
+            database.runInTransaction {
+                database.dispatchDetailDao().deleteByShipment(shipmentNo)
+                database.dispatchSyncStateDao().deleteByShipment(shipmentNo)
+                database.dispatchHeaderDao().deleteByShipmentNo(shipmentNo)
+            }
+        }
     }
 
 

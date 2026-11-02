@@ -1,5 +1,6 @@
 package com.united.digitaldispatch.Dispatch
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -47,7 +48,9 @@ import com.united.digitaldispatch.sync.DispatchSignalRService
 import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.sync.SyncEvents
 import com.united.digitaldispatch.sync.SyncManager
+import com.united.digitaldispatch.utils.CompletionDialog
 import com.united.digitaldispatch.utils.TimeUtils
+import com.united.digitaldispatch.utils.goBackToDispatchList
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -175,6 +178,21 @@ class DispatchDetails : AppCompatActivity() {
         // return sync: bring in what other devices did, and listen for live changes
         viewModel.pullChanges(shipmentNo)
         DispatchSignalRService.start(this, shipmentNo)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SyncEvents.shipmentCompleted.collect { completed ->
+                    if (completed == shipmentNo && !isFinishing) {
+                        CompletionDialog(
+                            activity = this@DispatchDetails,
+                            title = "Shipment Completed",
+                            message = "This shipment was completed on another device.",
+                            detail = completed
+                        ) { goBackToDispatchList() }.show()
+                    }
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -278,11 +296,10 @@ class DispatchDetails : AppCompatActivity() {
             } else false
         }
         // long press on the bale box -> open the camera scanner
-        /*edtBaleNo.setOnLongClickListener {
+        edtBaleNo.setOnLongClickListener {
             if (edtBaleNo.isEnabled) startBarcodeScan()
             true   // consume, so the paste/select menu does not open
         }
-*/
         // weight checkbox: shows / hides the dispatch weight row
         chkWeight.setOnCheckedChangeListener { _, checked ->
             setWeightRowVisible(checked)
