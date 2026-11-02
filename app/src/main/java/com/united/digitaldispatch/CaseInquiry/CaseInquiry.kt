@@ -34,6 +34,8 @@ class CaseInquiry : AppCompatActivity() {
     // Input
     private lateinit var edtBaleNo: EditText
 
+    private lateinit var txtBaleNo: TextView
+
     // Buttons
     private lateinit var btnClear: Button
     private lateinit var btnBack: ImageView
@@ -75,6 +77,7 @@ class CaseInquiry : AppCompatActivity() {
     private fun initializeViews() {
 
         edtBaleNo = findViewById(R.id.edt_bale_no)
+        txtBaleNo = findViewById(R.id.txtBaleNo)
 
         btnClear = findViewById(R.id.btn_clear)
         btnBack = findViewById(R.id.back_fab)
@@ -175,17 +178,31 @@ class CaseInquiry : AppCompatActivity() {
     // Display Room database result
     private fun displayBaleDetails(baleInfo: BaleInfo) {
 
+
+        txtBaleNo.text=baleInfo.baleNumber
         txtGrade.text = baleInfo.grade
         txtWeight.text = baleInfo.markedWeight
         txtRate.text = baleInfo.price
-        txtStatus.text = baleInfo.status
+
         txtPurchaseDate.text = baleInfo.purchaseDate
+
+       if(baleInfo.status == "Y" && baleInfo.processStatus=="N")
+       {
+           txtStatus.text = "Bale Available In Stock"
+       }
+        else if(baleInfo.status == "INT" && baleInfo.processStatus=="Y"){
+           txtStatus.text = "Bale In Transaction"
+        }
+        else{
+            txtStatus.text= "Bale Not Available...."
+        }
+
     }
 
     private fun clearFields() {
 
         edtBaleNo.text.clear()
-
+        txtBaleNo.text=""
         txtGrade.text = ""
         txtWeight.text = ""
         txtRate.text = ""

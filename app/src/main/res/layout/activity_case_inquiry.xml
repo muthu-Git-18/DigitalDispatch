@@ -263,13 +263,13 @@
                     <TextView
                         android:layout_width="110dp"
                         android:layout_height="wrap_content"
-                        android:text="Truck No"
+                        android:text="Bale No"
                         android:textColor="@color/brown_font"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <EditText
-                        android:id="@+id/edtTruckNo"
+                    <TextView
+                        android:id="@+id/txtBaleNo"
                         android:layout_width="0dp"
                         android:layout_height="42dp"
                         android:layout_weight="1"
@@ -315,6 +315,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:visibility="gone"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
