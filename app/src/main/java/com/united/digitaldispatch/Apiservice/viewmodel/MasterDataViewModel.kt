@@ -6,6 +6,7 @@ import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.data.local.entity.StockEntity
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.ViewModelProvider
+import com.united.digitaldispatch.Dispatch.models.BaleInfo
 import com.united.digitaldispatch.Login.models.MasterDataResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,60 @@ class MasterDataViewModel(
 
     private val _stockError = MutableStateFlow<String?>(null)
     val stockError: StateFlow<String?> = _stockError.asStateFlow()
+
+    private val _baleInfo = MutableStateFlow<BaleInfo?>(null)
+    val baleInfo: StateFlow<BaleInfo?> = _baleInfo.asStateFlow()
+
+    private val _baleLoading = MutableStateFlow(false)
+    val baleLoading: StateFlow<Boolean> = _baleLoading.asStateFlow()
+
+    private val _baleError = MutableStateFlow<String?>(null)
+    val baleError: StateFlow<String?> = _baleError.asStateFlow()
+
+    fun searchBale(baleNo: String) {
+
+        val number = baleNo.trim()
+
+        if (number.isEmpty()) {
+            _baleInfo.value = null
+            _baleError.value = "Please enter Bale Number"
+            return
+        }
+
+        viewModelScope.launch {
+
+            _baleLoading.value = true
+            _baleInfo.value = null
+            _baleError.value = null
+
+            try {
+
+                val result = repository.findBaleInStock(number)
+
+                if (result != null) {
+                    _baleInfo.value = result
+                } else {
+                    _baleError.value = "Bale Number Not Found"
+                }
+
+            } catch (e: Exception) {
+
+                _baleError.value =
+                    e.message ?: "Unable to search Bale Number"
+
+            } finally {
+                _baleLoading.value = false
+            }
+        }
+    }
+
+
+    fun clearBaleSearch() {
+
+        _baleInfo.value = null
+        _baleError.value = null
+        _baleLoading.value = false
+    }
 
 
     // Load crops, varieties, and all locally stored stock

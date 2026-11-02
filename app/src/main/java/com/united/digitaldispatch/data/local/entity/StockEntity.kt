@@ -18,7 +18,7 @@ data class StockEntity(
     val markeD_WT: Double?,
     val curR_WT: Double?,
     val origN_LOCN: String?,
-    val origN_ORGN_CODE: String?,
+    val origN_ORGN_CODE: String?,   
     val curR_LOCN: String?,
     val curR_ORGN_CODE: String?,
     val crop: String?,

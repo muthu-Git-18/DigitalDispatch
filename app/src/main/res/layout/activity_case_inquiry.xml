@@ -372,27 +372,31 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="110dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Grade"
-                        android:textColor="#2E353A"
+                        android:textColor="@color/brown_font"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txt_tb_grade"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1.2"
-                        android:gravity="end"
-                        android:textColor="#A87818"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp"  />
                 </LinearLayout>
                 <!--  Buyer grade, hidden in old screen  -->
                 <LinearLayout
@@ -435,18 +439,20 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
                             android:layout_height="wrap_content"
                             android:text="Weight"
-                            android:textColor="#2E353A"
+                            android:textColor="@color/brown_font"
                             android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"/>
 
                         <TextView
                             android:id="@+id/txt_weight"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_background1"
                             android:layout_marginTop="3dp"
+                            android:layout_marginRight="2dp"
                             android:textColor="#A87818"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -459,18 +465,21 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="110dp"
                             android:layout_height="wrap_content"
                             android:text="Rate"
-                            android:textColor="#2E353A"
+                            android:layout_marginLeft="2dp"
+                            android:textColor="@color/brown_font"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/txt_rate"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_background1"
                             android:layout_marginTop="3dp"
+                            android:layout_marginLeft="2dp"
                             android:textColor="#A87818"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -480,53 +489,61 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="110dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Status"
-                        android:textColor="#2E353A"
+                        android:textColor="@color/brown_font"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txt_status"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1.2"
-                        android:gravity="end"
-                        android:textColor="#A87818"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
                 </LinearLayout>
                 <!--  Purchase date  -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="110dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Purchase Date"
-                        android:textColor="#2E353A"
+                        android:textColor="@color/brown_font"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txt_purchase_date"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1.2"
-                        android:gravity="end"
-                        android:textColor="#A87818"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_background1"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:singleLine="true"
+                        android:textColor="#2E353A"
+                        android:textColorHint="#85745E"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
 
@@ -535,39 +552,56 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginRight="80dp"
-                android:layout_marginLeft="80dp"
+                android:layout_marginStart="80dp"
+                android:layout_marginEnd="80dp"
+                android:padding="3dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_clear"
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
                     android:background="@drawable/dashboard_create_button"
                     android:backgroundTint="@null"
                     android:elevation="6dp"
                     android:text="Clear"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/back_fab"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:contentDescription="Back"
-                    android:src="@drawable/arrow_back"
-                    android:visibility="visible"
-                    app:backgroundTint="#DCB765"
-                    app:fabSize="normal"
-                    app:tint="#5A3517" />
 
-            </LinearLayout>
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="6dp">
 
-        </LinearLayout>
+                    <View
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/dashboard_back_depth1"
+                        android:translationX="2dp"
+                        android:translationY="2dp" />
+
+                    <ImageView
+                        android:id="@+id/back_fab"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/dashboard_back_button1"
+                        android:contentDescription="Back"
+                        android:padding="11dp"
+                        android:src="@drawable/arrow_back"
+                        android:scaleType="centerInside"
+                        android:tint="#5A3517" />
+
+                </FrameLayout>
+
+            </LinearLayout>        </LinearLayout>
 
     </ScrollView>
     <!--  Charcoal footer  -->
