@@ -35,6 +35,8 @@ class CaseInquiry : AppCompatActivity() {
     private lateinit var edtBaleNo: EditText
 
     private lateinit var txtBaleNo: TextView
+    private lateinit var txtcrop: TextView
+    private lateinit var txtvariety: TextView
 
     // Buttons
     private lateinit var btnClear: Button
@@ -78,6 +80,8 @@ class CaseInquiry : AppCompatActivity() {
 
         edtBaleNo = findViewById(R.id.edt_bale_no)
         txtBaleNo = findViewById(R.id.txtBaleNo)
+        txtvariety = findViewById(R.id.txt_variety)
+        txtcrop = findViewById(R.id.txt_crop)
 
         btnClear = findViewById(R.id.btn_clear)
         btnBack = findViewById(R.id.back_fab)
@@ -183,8 +187,9 @@ class CaseInquiry : AppCompatActivity() {
         txtGrade.text = baleInfo.grade
         txtWeight.text = baleInfo.markedWeight
         txtRate.text = baleInfo.price
-
-        txtPurchaseDate.text = baleInfo.purchaseDate
+        txtvariety.text = baleInfo.variety
+        txtcrop.text=baleInfo.crop
+        txtPurchaseDate.text = baleInfo.purchaseDate.substringBefore("T")
 
        if(baleInfo.status == "Y" && baleInfo.processStatus=="N")
        {

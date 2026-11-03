@@ -61,5 +61,8 @@ data class BaleInfo(
     val status: String,
     val processStatus: String,
     val currentOrgnCode: String,
-    val purchaseDate: String
+    val purchaseDate: String,
+    val crop :String,
+    val variety : String
+
 )

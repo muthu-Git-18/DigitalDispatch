@@ -369,6 +369,67 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="5dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="wrap_content"
+                            android:text="Crop"
+                            android:textColor="@color/brown_font"
+                            android:textSize="12sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/txt_crop"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_background1"
+                            android:layout_marginTop="3dp"
+                            android:layout_marginRight="3dp"
+                            android:textColor="#A87818"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="wrap_content"
+                            android:text="Variety"
+                            android:layout_marginLeft="3dp"
+                            android:textColor="@color/brown_font"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txt_variety"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_background1"
+                            android:layout_marginTop="3dp"
+                            android:layout_marginLeft="3dp"
+                            android:textColor="#A87818"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
                 <!--  Grade  -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -453,7 +514,7 @@
                             android:layout_height="42dp"
                             android:background="@drawable/input_background1"
                             android:layout_marginTop="3dp"
-                            android:layout_marginRight="2dp"
+                            android:layout_marginRight="3dp"
                             android:textColor="#A87818"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -469,7 +530,7 @@
                             android:layout_width="110dp"
                             android:layout_height="wrap_content"
                             android:text="Rate"
-                            android:layout_marginLeft="2dp"
+                            android:layout_marginLeft="3dp"
                             android:textColor="@color/brown_font"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -480,7 +541,7 @@
                             android:layout_height="42dp"
                             android:background="@drawable/input_background1"
                             android:layout_marginTop="3dp"
-                            android:layout_marginLeft="2dp"
+                            android:layout_marginLeft="3dp"
                             android:textColor="#A87818"
                             android:textSize="14sp"
                             android:textStyle="bold" />

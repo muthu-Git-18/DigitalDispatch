@@ -95,6 +95,8 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
     private lateinit var edtRcNo: EditText
     private lateinit var edtDriverName: EditText
     private lateinit var edtDriverLicense: EditText
+
+    private lateinit var edtMobileNumber: EditText
     private lateinit var edtFreightCharges: EditText
 
     // -------------------------------------------------
@@ -207,6 +209,7 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
         edtRcNo = findViewById(R.id.edtRcNo)
         edtDriverName = findViewById(R.id.edtDriverName)
         edtDriverLicense = findViewById(R.id.edtDriverLicense)
+        edtMobileNumber= findViewById(R.id.edtMobileNum)
         edtFreightCharges = findViewById(R.id.edtFreightCharges)
 
         /*
@@ -256,70 +259,52 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
 
     private fun setupFieldFlow() {
 
-        edtTruckNo.imeOptions =
-            EditorInfo.IME_ACTION_NEXT
-
-        edtRcNo.imeOptions =
-            EditorInfo.IME_ACTION_NEXT
-
-        edtDriverName.imeOptions =
-            EditorInfo.IME_ACTION_NEXT
-
-        edtDriverLicense.imeOptions =
-            EditorInfo.IME_ACTION_DONE
+        edtTruckNo.imeOptions = EditorInfo.IME_ACTION_NEXT
+        edtRcNo.imeOptions = EditorInfo.IME_ACTION_NEXT
+        edtDriverName.imeOptions = EditorInfo.IME_ACTION_NEXT
+        edtDriverLicense.imeOptions = EditorInfo.IME_ACTION_DONE
+        edtMobileNumber.imeOptions = EditorInfo.IME_ACTION_DONE
 
         edtTruckNo.setOnEditorActionListener { _, actionId, _ ->
-
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
-
                 edtRcNo.requestFocus()
-
                 true
-
             } else {
                 false
             }
         }
-
         edtRcNo.setOnEditorActionListener { _, actionId, _ ->
-
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
-
                 edtDriverName.requestFocus()
-
                 true
-
             } else {
                 false
             }
         }
-
         edtDriverName.setOnEditorActionListener { _, actionId, _ ->
-
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
-
                 edtDriverLicense.requestFocus()
-
                 true
-
             } else {
                 false
             }
         }
-
         edtDriverLicense.setOnEditorActionListener { view, actionId, _ ->
 
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-
                 hideKeyboard(view)
-
                 showTransporterDialog()
-
                 true
-
             } else {
                 false
             }
+        }
+        edtMobileNumber.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard(v)
+                showTransporterDialog()
+                true
+            } else false
         }
     }
 
@@ -331,6 +316,7 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
         edtRcNo.isEnabled = enabled
         edtDriverName.isEnabled = enabled
         edtDriverLicense.isEnabled = enabled
+        edtMobileNumber.isEnabled=enabled
     }
 
     private fun focusAndShowKeyboard(
@@ -1111,61 +1097,17 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
          * -------------------------------------------
          */
 
-        val truckNo =
-            edtTruckNo.text
-                .toString()
-                .trim()
-                .uppercase()
+        val truckNo = edtTruckNo.text.toString().trim().uppercase()
+        val rcNo = edtRcNo.text.toString().trim().uppercase()
+        val driverName = edtDriverName.text.toString().trim().uppercase()
+        val license = edtDriverLicense.text.toString().trim().uppercase()
+        val mobileNumber = edtMobileNumber.text.toString()
 
-        val rcNo =
-            edtRcNo.text
-                .toString()
-                .trim()
-                .uppercase()
-
-        val driverName =
-            edtDriverName.text
-                .toString()
-                .trim()
-                .uppercase()
-
-        val license =
-            edtDriverLicense.text
-                .toString()
-                .trim()
-                .uppercase()
-
-        if (truckNo.isEmpty()) {
-
-            return fieldError(
-                edtTruckNo,
-                "Enter the truck number"
-            )
-        }
-
-        if (rcNo.isEmpty()) {
-
-            return fieldError(
-                edtRcNo,
-                "Enter the RC number"
-            )
-        }
-
-        if (driverName.isEmpty()) {
-
-            return fieldError(
-                edtDriverName,
-                "Enter the driver name"
-            )
-        }
-
-        if (license.isEmpty()) {
-
-            return fieldError(
-                edtDriverLicense,
-                "Enter the driver license"
-            )
-        }
+        if (truckNo.isEmpty()) { return fieldError(edtTruckNo, "Enter the truck number") }
+        if (rcNo.isEmpty()) { return fieldError(edtRcNo, "Enter the RC number") }
+        if (driverName.isEmpty()) { return fieldError(edtDriverName, "Enter the driver name") }
+        if (license.isEmpty()) { return fieldError(edtDriverLicense, "Enter the driver license") }
+        if (mobileNumber.isEmpty()) { return fieldError(edtDriverLicense, "Enter Mobile Number") }
 
         /*
          * -------------------------------------------
@@ -1173,30 +1115,15 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
          * -------------------------------------------
          */
 
-        val transporter =
-            selectedTransporter
-                ?: return showToast(
-                    "Please select transporter"
-                )
-
-        if (transporter.transporterCode.isBlank()) {
-
-            return showToast(
-                "Please select transporter"
-            )
-        }
+        val transporter = selectedTransporter ?: return showToast("Please select transporter")
+        if (transporter.transporterCode.isBlank()) { return showToast("Please select transporter") }
 
         /*
          * -------------------------------------------
          * TRUCK TYPE
          * -------------------------------------------
          */
-
-        val truckType =
-            selectedTruckType
-                ?: return showToast(
-                    "Please select type of truck"
-                )
+        val truckType = selectedTruckType ?: return showToast("Please select type of truck")
 
         /*
          * -------------------------------------------
@@ -1204,11 +1131,9 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
          * -------------------------------------------
          */
 
-        val others =
-            isOthers(truckType)
+        val others = isOthers(truckType)
 
         val freight: Double? =
-
             if (others) {
 
                 /*
@@ -1359,70 +1284,31 @@ class CreateHeaderPSWDispatch : AppCompatActivity() {
         val request =
             CreatePSWDispatchHeaderRequest(
 
-                shipmentNo =
-                    generateShipmentNo(
-                        senderCode,
-                        receiverCode
-                    ),
-
-                senderOrgnCode =
-                    senderCode,
-
-                receiverOrgnCode =
-                    receiverCode,
-
-                senderDate =
-                    TimeUtils.senderDate(),
-
-                sentBy =
-                    userId,
-
-                senderTruckNo =
-                    truckNo,
-
-                rcNo =
-                    rcNo,
-
-                driverName =
-                    driverName,
-
-                drivingLicenceNo =
-                    license,
-
+                shipmentNo = generateShipmentNo(senderCode, receiverCode),
+                senderOrgnCode = senderCode,
+                receiverOrgnCode = receiverCode,
+                senderDate = TimeUtils.senderDate(),
+                sentBy = userId,
+                senderTruckNo = truckNo,
+                rcNo = rcNo,
+                driverName = driverName,
+                drivingLicenceNo = license,
+                phone_Number = mobileNumber,
                 /*
                  * Same as normal Dispatch:
                  * transporter CODE is sent,
                  * not transporter name.
                  */
-                transportName =
-                    transporter.transporterCode,
-
-                typeOfTruck =
-                    truckType,
-
-                frieghtCharges =
-                    freight,
-
-                uom =
-                    uom,
-
-                status =
-                    "INT",
-
-                attribute2 =
-                    senderCode,
-
-                attribute3 =
-                    receiverCode,
-
-                isWmsShipment =
-                    isWms,
-
-                attribute4 =
-                    "",
-
-                weighmentType =
-                    weighmentType
+                transportName = transporter.transporterCode,
+                typeOfTruck = truckType,
+                frieghtCharges = freight,
+                uom = uom,
+                status = "INT",
+                attribute2 = senderCode,
+                attribute3 = receiverCode,
+                isWmsShipment = isWms,
+                attribute4 = "",
+                weighmentType = weighmentType
             )
 
         /*

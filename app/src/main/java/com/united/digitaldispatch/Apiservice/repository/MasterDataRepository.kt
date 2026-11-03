@@ -586,7 +586,7 @@ class MasterDataRepository(
     }
 
 
-    suspend fun syncDispatchHeaders(orgnCode: String): Result<Int> {
+    suspend fun  syncDispatchHeaders(orgnCode: String): Result<Int> {
         return try {
 
             val response = apiService.getDispatchHeaders(orgnCode)
@@ -750,6 +750,7 @@ class MasterDataRepository(
                     rcNo = request.rcNo,
                     driverName = request.driverName,
                     drivingLicenceNo = request.drivingLicenceNo,
+                    phone_Number = request.phone_Number,
                     transportName = request.transportName,
                     typeOfTruck = request.typeOfTruck,
                     frieghtCharges = request.frieghtCharges,
@@ -811,6 +812,7 @@ class MasterDataRepository(
             rcNo = rcNo,
             driverName = driverName,
             drivingLicenceNo = drivingLicenceNo,
+            phone_Number=phone_Number,
             transportName = transportName,
             typeOfTruck = typeOfTruck,
             frieghtCharges = frieghtCharges,
@@ -872,7 +874,10 @@ class MasterDataRepository(
                     status = s.status?.toString().orEmpty(),
                     processStatus = s.procesS_STATUS?.toString().orEmpty(),
                     currentOrgnCode = s.curR_ORGN_CODE?.toString().orEmpty(),
-                    purchaseDate = s.createD_DATE?.toString().orEmpty()
+                    purchaseDate = s.createD_DATE?.toString().orEmpty(),
+                    crop = s.crop?.toString().orEmpty(),
+                    variety = s.variety.toString().orEmpty()
+
                 )
             }
         }

@@ -654,10 +654,8 @@ class Dashboard : AppCompatActivity() {
                     "Dashboard",
                     "Truck master sync completed successfully"
                 )
-
-                fetchStockData()
-
-            } else {
+            }
+            else {
             val errorMessage = result.exceptionOrNull()
                 ?.message
                 ?.takeIf { it.isNotBlank() }
@@ -665,6 +663,7 @@ class Dashboard : AppCompatActivity() {
 
             handleStockSyncFailure(errorMessage)
         }
+            fetchStockData()
         }
     }
 
