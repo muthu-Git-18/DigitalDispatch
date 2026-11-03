@@ -14,4 +14,8 @@ interface DispatchSyncStateDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun save(state: DispatchSyncState)
+
+    // DispatchSyncStateDao
+    @Query("DELETE FROM dispatch_sync_state WHERE shipmentNo = :shipmentNo")
+    fun deleteByShipment(shipmentNo: String)
 }

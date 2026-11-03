@@ -73,4 +73,11 @@ interface DispatchDetailDao {
     /** manual "send again" for bales that stopped after too many failures */
     @Query("UPDATE dispatch_detail SET attemptCount = 0 WHERE syncStatus = 'FAILED'")
     fun resetFailedAttempts()
+
+    // DispatchDetailDao
+    @Query("SELECT COUNT(*) FROM dispatch_detail WHERE shipmentNo = :shipmentNo AND syncStatus != 'SUCCESS'")
+    fun countUnsyncedByShipment(shipmentNo: String): Int
+
+    @Query("DELETE FROM dispatch_detail WHERE shipmentNo = :shipmentNo")
+    fun deleteByShipment(shipmentNo: String)
 }

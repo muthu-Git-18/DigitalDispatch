@@ -1,5 +1,7 @@
 package com.united.digitaldispatch.Dispatch
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -22,6 +24,9 @@ import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.Dispatch.models.DispatchSummaryCalc
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
+import com.united.digitaldispatch.sync.SyncEvents
+import com.united.digitaldispatch.utils.CompleteConfirmDialog
+import com.united.digitaldispatch.utils.CompletionDialog
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -79,6 +84,21 @@ class DispatchSummary : AppCompatActivity() {
         setContentData()
         setupLists()
         observeData()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SyncEvents.shipmentCompleted.collect { completed ->
+                    if (completed == shipmentNo && !isFinishing) {
+                        CompletionDialog(
+                            activity = this@DispatchSummary,
+                            title = "Shipment Completed",
+                            message = "Shipment Completed Successfully.",
+                            detail = completed
+                        ) { goBackToDispatchList() }.show()
+                    }
+                }
+            }
+        }
     }
 
     private fun bindViews() {
@@ -102,7 +122,24 @@ class DispatchSummary : AppCompatActivity() {
 
         // Complete is done in the next step
         txtComplete.setOnClickListener {
-            Toast.makeText(this, "Complete will be added next", Toast.LENGTH_SHORT).show()
+            val total = viewModel.details.value.size
+            if (total == 0) {
+                Toast.makeText(this, "No bales to complete", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            CompleteConfirmDialog(
+                activity = this,
+                title = "Complete Dispatch?",
+                message = "Once completed, this shipment cannot be changed.",
+                detail = "SHIPMENT  $shipmentNo",
+                stats = listOf(
+                    "Bales" to total.toString(),
+                    "Qty" to txtTotQty.text.toString()
+                )
+            ) {
+                viewModel.completeDispatch(shipmentNo, total)
+            }.show()
         }
     }
 
@@ -137,8 +174,40 @@ class DispatchSummary : AppCompatActivity() {
                         }
                     }
                 }
+                launch {
+                    viewModel.completeState.collect { state ->
+                        when (state) {
+                            is DispatchViewModel.CompleteState.Loading -> { txtComplete.isEnabled = false /* show your loader: "Completing Dispatch" */ }
+                            is DispatchViewModel.CompleteState.Success -> {
+                                txtComplete.isEnabled = true
+                                viewModel.resetCompleteState()
+                                // show your success dialog "Dispatch Completed", then:
+                              /*  CompletionDialog(
+                                    activity = this@DispatchSummary,
+                                    title = "Dispatch Completed",
+                                    message = "Shipment completed successfully",
+                                    detail = state.data.mainShipmentNo?.takeIf { it.isNotBlank() } ?: shipmentNo
+                                ) { goBackToDispatchList() }.show()*/
+                            }
+                            is DispatchViewModel.CompleteState.Error -> {
+                                txtComplete.isEnabled = true
+                                Toast.makeText(this@DispatchSummary, state.message, Toast.LENGTH_LONG).show()
+                                viewModel.resetCompleteState()
+                            }
+                            else -> txtComplete.isEnabled = true
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun goBackToDispatchList() {
+        startActivity(
+            Intent(this, Dispatch::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
+        finish()
     }
 
     private fun render(bales: List<BaleDetail>) {

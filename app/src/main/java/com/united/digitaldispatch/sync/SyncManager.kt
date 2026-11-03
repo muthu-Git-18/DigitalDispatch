@@ -127,4 +127,15 @@ object SyncManager {
             }
         }
     }
+
+    fun onShipmentCompleted(context: Context, shipmentNo: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val repo = MasterDataRepository(
+                ApiClient.instance,
+                AppDatabase.getInstance(context.applicationContext)
+            )
+            repo.removeShipmentLocally(shipmentNo)
+            SyncEvents.shipmentCompleted.tryEmit(shipmentNo)
+        }
+    }
 }

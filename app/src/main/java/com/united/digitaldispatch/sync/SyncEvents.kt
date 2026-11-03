@@ -9,4 +9,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 object SyncEvents {
 
     val detailsChanged = MutableSharedFlow<String>(extraBufferCapacity = 16)
+
+    val shipmentCompleted = MutableSharedFlow<String>(extraBufferCapacity = 8)
 }
