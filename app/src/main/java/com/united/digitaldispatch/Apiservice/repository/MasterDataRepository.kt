@@ -25,6 +25,7 @@ import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequ
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
 import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderItem
 import com.united.digitaldispatch.data.local.entity.DispatchSyncState
+import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import com.united.digitaldispatch.sync.DispatchChangeParser
 import kotlinx.coroutines.Dispatchers
@@ -1254,5 +1255,52 @@ class MasterDataRepository(
         }
     }
 
+
+    ///////////////////Dispatch over ---- Next Psw dispatch here starts -----//////////////
+
+    // ------------------------------
+    // PSW DISPATCH DETAILS (local table)
+    // ------------------------------
+
+    /** One PSW header from the local table (weighment type, sender, receiver ...). */
+    suspend fun getLocalPswDispatchHeader(shipmentNo: String): PswDispatchHeaderEntity? {
+        return withContext(Dispatchers.IO) {
+            database.pswDispatchHeaderDao().getByShipmentNo(shipmentNo)
+        }
+    }
+
+    /** the bale in any PSW shipment, or null */
+    suspend fun findPswDetailByBale(baleNo: String): PSWDispatchDetailEntity? {
+        return withContext(Dispatchers.IO) {
+            database.pswDispatchDetailDao().getByBale(baleNo)
+        }
+    }
+
+    fun observePswDetails(shipmentNo: String): Flow<List<PSWDispatchDetailEntity>> =
+        database.pswDispatchDetailDao().observeByShipment(shipmentNo)
+
+    /**
+     * Insert, or update when the bale is already in this shipment.
+     * Returns true when it was an update. Either way the bale goes back to PENDING.
+     */
+    suspend fun savePswDispatchDetail(detail: PSWDispatchDetailEntity): Boolean {
+        return withContext(Dispatchers.IO) {
+            val dao = database.pswDispatchDetailDao()
+            val old = dao.getBale(detail.shipmentNo, detail.baleNumber)
+            if (old != null) {
+                dao.update(detail.copy(id = old.id))
+                true
+            } else {
+                dao.insert(detail)
+                false
+            }
+        }
+    }
+
+    suspend fun deletePswDetailByBale(shipmentNo: String, baleNo: String) {
+        withContext(Dispatchers.IO) {
+            database.pswDispatchDetailDao().deleteBale(shipmentNo, baleNo)
+        }
+    }
 
 }

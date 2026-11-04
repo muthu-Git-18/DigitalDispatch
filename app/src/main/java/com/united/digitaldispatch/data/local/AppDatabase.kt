@@ -10,6 +10,7 @@ import com.united.digitaldispatch.data.local.dao.DispatchHeaderDao
 import com.united.digitaldispatch.data.local.dao.DispatchSyncStateDao
 import com.united.digitaldispatch.data.local.dao.ItemMasterDao
 import com.united.digitaldispatch.data.local.dao.OrganizationDao
+import com.united.digitaldispatch.data.local.dao.PswDispatchDetailDao
 import com.united.digitaldispatch.data.local.dao.StockDao
 import com.united.digitaldispatch.data.local.dao.TransporterDao
 import com.united.digitaldispatch.data.local.dao.UserDao
@@ -56,6 +57,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun dispatchDetailDao(): DispatchDetailDao
 
     abstract fun dispatchSyncStateDao(): DispatchSyncStateDao
+
+    abstract fun pswDispatchDetailDao(): PswDispatchDetailDao
 
     companion object {
         @Volatile

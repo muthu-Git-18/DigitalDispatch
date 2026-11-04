@@ -18,6 +18,9 @@ interface PswDispatchHeaderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: PswDispatchHeaderEntity)
 
+    @Query("SELECT * FROM psw_dispatch_header WHERE shipmentNo = :shipmentNo LIMIT 1")
+    fun getByShipmentNo(shipmentNo: String): PswDispatchHeaderEntity?
+
     @Query("DELETE FROM psw_dispatch_header")
     fun deleteAll()
 
