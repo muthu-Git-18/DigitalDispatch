@@ -33,6 +33,9 @@ object SyncManager {
     @Volatile
     private var activeShipmentNo: String? = null
 
+    @Volatile
+    private var activeIsPsw = false
+
     fun start(app: Application) {
 
         if (started) return
@@ -50,7 +53,8 @@ object SyncManager {
                 SyncScheduler.triggerImmediateSync(app)
 
                 activeShipmentNo?.let {
-                    pullChanges(app, it, source = "network-restored")
+                    if (activeIsPsw) pullPswChanges(app, it, source = "network-restored")
+                    else pullChanges(app, it, source = "network-restored")
                 }
             }
 
@@ -74,8 +78,9 @@ object SyncManager {
 
     // ---------------- download ----------------
 
-    fun setActiveShipment(shipmentNo: String?) {
+    fun setActiveShipment(shipmentNo: String?, psw: Boolean = false) {
         activeShipmentNo = shipmentNo
+        activeIsPsw = psw && shipmentNo != null
     }
 
     /**
@@ -125,6 +130,43 @@ object SyncManager {
                 SyncEvents.detailsChanged.tryEmit(shipmentNo)
                 android.util.Log.d("DispatchPull", "[$source] screen reload event sent for $shipmentNo")
             }
+        }
+    }
+
+
+    /** Same as pullChanges, for a PSW shipment (the list is a live Room Flow, so no reload event is needed). */
+    fun pullPswChanges(
+        context: Context,
+        shipmentNo: String,
+        hintChangeId: Long? = null,
+        source: String = "unknown"
+    ) {
+
+        android.util.Log.d(
+            "DispatchPull",
+            "[$source] PSW pull requested: shipment=$shipmentNo hint=$hintChangeId"
+        )
+
+        if (NetworkMonitor.isHighQuality.value != true) {
+            android.util.Log.w("DispatchPull", "[$source] PSW pull SKIPPED: network not good")
+            return
+        }
+
+        val appContext = context.applicationContext
+
+        scope.launch {
+
+            val repository = MasterDataRepository(
+                ApiClient.instance,
+                AppDatabase.getInstance(appContext)
+            )
+
+            val result = repository.pullPswDispatchChanges(shipmentNo, hintChangeId)
+
+            android.util.Log.d(
+                "DispatchPull",
+                "[$source] PSW pull finished: shipment=$shipmentNo applied=${result.getOrDefault(0)} success=${result.isSuccess}"
+            )
         }
     }
 

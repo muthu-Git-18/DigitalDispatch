@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<!-- Same theme as before. Changes vs your version:
+     * bale EditText: letters+digits, caps, maxLength 14
+     * ed_weight: numberDecimal
+     * new ids: ll_weightContainer, ll_weightedBales, txt_weightedBales, btn_save
+     * cards sit in a ScrollView so the extra rows never push Clear/Save off small screens -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,11 +11,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="#D9D8D5">
-
-
-    <!-- =========================================================
-         BACKGROUND
-         ========================================================= -->
 
     <ImageView
         android:id="@+id/imgBackground"
@@ -26,13 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-
-
-    <!-- =========================================================
-         NORMAL CHARCOAL HEADER
-         ========================================================= -->
-
+    <!-- HEADER -->
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -43,14 +36,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Gold bottom border -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_alignParentBottom="true"
             android:background="#DCB765" />
 
-        <!-- LOGO -->
         <FrameLayout
             android:id="@+id/logoContainer"
             android:layout_width="62dp"
@@ -69,10 +60,8 @@
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
                 android:src="@drawable/logooo" />
-
         </FrameLayout>
 
-        <!-- TITLE + SUBTITLE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -104,10 +93,8 @@
                 android:textColor="#DCB765"
                 android:textSize="12sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
-        <!-- ORG + DATE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -125,7 +112,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -137,7 +124,6 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -150,7 +136,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 08-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -162,18 +148,11 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </RelativeLayout>
 
-
-    <!-- =========================================================
-         BODY (card-styled, fits one page, no scroll)
-         ========================================================= -->
-
+    <!-- BODY -->
     <LinearLayout
         android:id="@+id/body"
         android:layout_width="0dp"
@@ -187,282 +166,327 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-        <!-- =====================================================
-             CARD 1 : SHIPMENT NO
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Shipment No"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txt_shipmentNo"
-                android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/input_background1"
-                android:elevation="2dp"
-                android:gravity="center"
-                android:text="2026/G88/P72/00099"
-                android:textColor="#2E353A"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-
-        <!-- =====================================================
-             CARD 2 : WEIGHMENT + WEIGHT + BALE NUMBER
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <RadioGroup
-                android:id="@+id/rg_weighment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rb_twentyPercent"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#A47C3C"
-                    android:text="20% Weighment"
-                    android:textColor="@color/brown_font"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <RadioButton
-                    android:id="@+id/rb_hundredPercent"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#A47C3C"
-                    android:text="100% Weighment"
-                    android:textColor="@color/brown_font"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-            </RadioGroup>
-
-            <CheckBox
-                android:id="@+id/chk_weight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:buttonTint="#A47C3C"
-                android:text="Weight"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Bale Number"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="6dp">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:background="@drawable/input_border_depth1"
-                    android:translationX="2dp"
-                    android:translationY="2dp" />
-
-                <EditText
-                    android:id="@+id/edt_baleNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:background="@drawable/input_background1"
-                    android:elevation="3dp"
-                    android:gravity="center_vertical"
-                    android:hint="Enter Bale Number"
-                    android:imeOptions="actionDone"
-                    android:inputType="number"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:singleLine="true"
-                    android:textColor="#2E353A"
-                    android:textColorHint="#85745E"
-                    android:textSize="13sp" />
-
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content"
-                    android:text="Grade :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_grade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#2E353A"
-                    android:text="AK47"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-
-        <!-- =====================================================
-             CARD 3 : MARKED WEIGHT / GRADE / RECEIVED BALES
-             ===================================================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/dashboard_card_background"
-            android:elevation="8dp"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="170dp"
-                    android:layout_height="wrap_content"
-
-                    android:text="Marked Weight :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_markedWeight"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#2E353A"
-                    android:text="122"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Weight :"
-                android:textColor="@color/brown_font"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="6dp">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:background="@drawable/input_border_depth1"
-                    android:translationX="2dp"
-                    android:translationY="2dp" />
-
-                <EditText
-                    android:id="@+id/ed_weight"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:background="@drawable/input_background1"
-                    android:elevation="3dp"
-                    android:gravity="center_vertical"
-                    android:hint="Enter Weight"
-                    android:imeOptions="actionDone"
-                    android:inputType="number"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:singleLine="true"
-                    android:textColor="#2E353A"
-                    android:textColorHint="#85745E"
-                    android:textSize="13sp" />
-
-            </FrameLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Received Bales :"
-                    android:textColor="@color/brown_font"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txt_receivedBales"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 / 126"
-                    android:textColor="#A47C3C"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <!-- Clear (fills remaining space, bottom-right) -->
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="bottom|end"
+            android:clipToPadding="false"
+            android:paddingBottom="6dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- CARD 1 : SHIPMENT NO -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/dashboard_card_background"
+                    android:elevation="8dp"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Shipment No"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_shipmentNo"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/input_background1"
+                        android:elevation="2dp"
+                        android:gravity="center"
+                        android:textColor="#2E353A"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- CARD 2 : WEIGHMENT TYPE + WEIGHT CHECK + BALE -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/dashboard_card_background"
+                    android:elevation="8dp"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <RadioGroup
+                        android:id="@+id/rg_weighment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rb_twentyPercent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:buttonTint="#A47C3C"
+                            android:text="20% Weighment"
+                            android:textColor="@color/brown_font"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <RadioButton
+                            android:id="@+id/rb_hundredPercent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:buttonTint="#A47C3C"
+                            android:text="100% Weighment"
+                            android:textColor="@color/brown_font"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </RadioGroup>
+
+                    <CheckBox
+                        android:id="@+id/chk_weight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:buttonTint="#A47C3C"
+                        android:text="Weight"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Bale Number"
+                        android:textColor="@color/brown_font"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="6dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_border_depth1"
+                            android:translationX="2dp"
+                            android:translationY="2dp" />
+
+                        <EditText
+                            android:id="@+id/edt_baleNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/input_background1"
+                            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                            android:elevation="3dp"
+                            android:gravity="center_vertical"
+                            android:hint="Scan / Enter Bale Number"
+                            android:imeOptions="actionDone"
+                            android:inputType="textCapCharacters"
+                            android:maxLength="14"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:singleLine="true"
+                            android:textColor="#2E353A"
+                            android:textColorHint="#85745E"
+                            android:textSize="13sp" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="170dp"
+                            android:layout_height="wrap_content"
+                            android:text="Grade :"
+                            android:textColor="@color/brown_font"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txt_grade"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#2E353A"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- CARD 3 : MARKED WEIGHT / WEIGHT / COUNTS -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/dashboard_card_background"
+                    android:elevation="8dp"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="170dp"
+                            android:layout_height="wrap_content"
+                            android:text="Marked Weight :"
+                            android:textColor="@color/brown_font"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txt_markedWeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#2E353A"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- shown only when the Weight check box is ticked -->
+                    <LinearLayout
+                        android:id="@+id/ll_weightContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Weight :"
+                            android:textColor="@color/brown_font"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:layout_marginTop="6dp">
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="42dp"
+                                android:background="@drawable/input_border_depth1"
+                                android:translationX="2dp"
+                                android:translationY="2dp" />
+
+                            <EditText
+                                android:id="@+id/ed_weight"
+                                android:layout_width="match_parent"
+                                android:layout_height="42dp"
+                                android:background="@drawable/input_background1"
+                                android:elevation="3dp"
+                                android:gravity="center_vertical"
+                                android:hint="Enter Weight"
+                                android:imeOptions="actionDone"
+                                android:inputType="numberDecimal"
+                                android:maxLength="5"
+                                android:paddingStart="14dp"
+                                android:paddingEnd="14dp"
+                                android:singleLine="true"
+                                android:textColor="#2E353A"
+                                android:textColorHint="#85745E"
+                                android:textSize="13sp" />
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Received Bales :"
+                            android:textColor="@color/brown_font"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txt_receivedBales"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 / 0"
+                            android:textColor="#A47C3C"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- 20 % mode only -->
+                    <LinearLayout
+                        android:id="@+id/ll_weightedBales"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Weighted Bales :"
+                            android:textColor="@color/brown_font"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txt_weightedBales"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 / 0"
+                            android:textColor="#A47C3C"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Save (only when Weight is ticked) + Clear -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal"
             android:paddingTop="8dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_save"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:minWidth="110dp"
+                android:background="@drawable/dashboard_proceed_button1"
+                android:backgroundTint="@null"
+                android:elevation="6dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:text="Save"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_clear"
@@ -479,16 +503,10 @@
                 android:textColor="@color/red"
                 android:textSize="13sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         FOOTER (same fixed-height pattern as other screens)
-         ========================================================= -->
-
+    <!-- FOOTER -->
     <LinearLayout
         android:id="@+id/footer"
         android:layout_width="0dp"
@@ -503,8 +521,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Summary -->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_summary"
@@ -521,8 +537,6 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- View -->
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_view"
             android:layout_width="0dp"
@@ -538,8 +552,6 @@
             android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:textStyle="bold" />
-
-        <!-- Back -->
 
         <FrameLayout
             android:layout_width="52dp"
@@ -564,9 +576,7 @@
                 android:padding="11dp"
                 android:src="@drawable/arrow_back"
                 android:tint="#5A3517" />
-
         </FrameLayout>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

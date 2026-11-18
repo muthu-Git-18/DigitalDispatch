@@ -33,7 +33,8 @@ data class PSWDispatchDetailEntity(
     val purchaseDate: String? = null,
     // sync
     val syncStatus: String = "PENDING",     // PENDING / SYNCED / FAILED
-    val serverMessage: String? = null
+    val serverMessage: String? = null,
+    val attemptCount: Int = 0
 )
 {
     companion object {

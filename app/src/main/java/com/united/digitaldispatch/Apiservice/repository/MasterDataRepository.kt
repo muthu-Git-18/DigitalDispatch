@@ -55,14 +55,20 @@ class MasterDataRepository(
         // TODO: confirm with the backend. Chosen by the same pattern as the
         // purchase app (P2 = purchase upload, W2 = weighment upload).
         const val DISPATCH_PROCESS_TYPE = "DISPATCH"
+        // one download at a time (screen open + SignalR + network-back can overlap)
+        private val pullMutex = Mutex()
+
+        // TODO: confirm with the backend (same open point as DISPATCH_PROCESS_TYPE)
+        const val PSW_PROCESS_TYPE = "PSW-DISPATCH"
+
+        private val pswPullMutex = Mutex()
 
         // Return-sync endpoint, exactly as given (note: port 85).
         // If it is really on the same server as the other APIs, change the port here.
         const val DISPATCH_CHANGES_URL =
             "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish/api/Dispatch/sync-dispatch-changes"
 
-        // one download at a time (screen open + SignalR + network-back can overlap)
-        private val pullMutex = Mutex()
+
 
     }
 
@@ -1012,6 +1018,35 @@ class MasterDataRepository(
                         val bale = item.baleNumber ?: return@forEach
 
                         when {
+                            item.status.equals("Duplicate", ignoreCase = true) -> {
+
+                                dao.deleteByBaleNumber(bale)
+                            }
+
+                            item.status.equals("Success", ignoreCase = true) -> {
+
+                                dao.markSynced(bale, item.reason ?: "Uploaded successfully")
+                                uploaded++
+                            }
+
+                            else -> {
+
+                                dao.markFailed(bale, item.reason ?: "Upload failed")
+                                failed++
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    items.forEach { item ->
+
+                        val bale = item.baleNumber ?: return@forEach
+
+                        when {
                             item.status.equals("Success", ignoreCase = true) ||
                                     item.status.equals("Duplicate", ignoreCase = true) -> {
 
@@ -1027,7 +1062,7 @@ class MasterDataRepository(
                         }
                     }
                 }
-            }
+            }*/
 
             val remaining = withContext(Dispatchers.IO) { dao.countUnsynced() }
 
@@ -1303,4 +1338,278 @@ class MasterDataRepository(
         }
     }
 
+
+    // ------------------------------
+    // PSW DETAILS UPLOAD (offline-first)
+    // ------------------------------
+
+    suspend fun countUnsyncedPswDetails(): Int {
+        return withContext(Dispatchers.IO) {
+            database.pswDispatchDetailDao().countUnsynced()
+        }
+    }
+
+    /**
+     * Same rules as the Dispatch upload:
+     *  - "Success" / "Duplicate" -> SUCCESS
+     *  - "Failed"                -> FAILED (+1 attempt, reason saved)
+     *  - network / HTTP error    -> Result.failure, nothing changes, the worker retries later
+     */
+    suspend fun uploadPendingPswDetails(): Result<UploadSummary> {
+
+        return try {
+
+            val dao = database.pswDispatchDetailDao()
+
+            val pending = withContext(Dispatchers.IO) {
+                dao.getUnsynced(MAX_UPLOAD_ATTEMPTS, UPLOAD_BATCH_SIZE)
+            }
+
+            if (pending.isEmpty()) {
+                return Result.success(UploadSummary(0, 0, 0))
+            }
+
+            val request = DispatchUploadRequest(
+                records = pending.map { it.toUploadRecord() }
+            )
+
+            val response = apiService.uploadPswDispatchBales(request)
+
+            if (!response.isSuccessful) {
+                throw Exception("PSW dispatch upload failed: ${response.code()}")
+            }
+
+            val body = response.body()
+                ?: throw Exception("PSW dispatch upload response is empty")
+
+            val items = body.dispatchDetailsResponse.orEmpty()
+
+            if (!body.isSuccess && items.isEmpty()) {
+                throw Exception("PSW dispatch upload was not accepted by the server")
+            }
+
+            var uploaded = 0
+            var failed = 0
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    items.forEach { item ->
+
+                        val bale = item.baleNumber ?: return@forEach
+
+                        when {
+                            item.status.equals("Duplicate", ignoreCase = true) -> {
+
+                                dao.deleteByBaleNumber(bale)
+                            }
+
+                            item.status.equals("Success", ignoreCase = true) -> {
+
+                                dao.markSynced(
+                                    bale,
+                                    item.reason ?: "Uploaded successfully"
+                                )
+                                uploaded++
+                            }
+
+                            else -> {
+
+                                dao.markFailed(
+                                    bale,
+                                    item.reason ?: "Upload failed"
+                                )
+                                failed++
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    items.forEach { item ->
+
+                        val bale = item.baleNumber ?: return@forEach
+
+                        when {
+                            item.status.equals("Success", ignoreCase = true) ||
+                                    item.status.equals("Duplicate", ignoreCase = true) -> {
+
+                                dao.markSynced(bale, item.reason ?: "Uploaded successfully")
+                                uploaded++
+                            }
+
+                            else -> {
+
+                                dao.markFailed(bale, item.reason ?: "Upload failed")
+                                failed++
+                            }
+                        }
+                    }
+                }
+            }*/
+
+            val remaining = withContext(Dispatchers.IO) { dao.countUnsynced() }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "PSW upload: $uploaded uploaded, $failed failed, $remaining remaining"
+            )
+
+            Result.success(UploadSummary(uploaded, failed, remaining))
+
+        } catch (e: Exception) {
+
+            android.util.Log.e("MasterDataRepository", "PSW dispatch upload failed", e)
+
+            Result.failure(e)
+        }
+    }
+
+    private fun PSWDispatchDetailEntity.toUploadRecord() = DispatchUploadRecord(
+        shipmenT_NO = shipmentNo,
+        detaiL_ID = detailId,
+        gpiL_BALE_NUMBER = baleNumber,
+        grade = grade.orEmpty(),
+        markeD_WT = markedWt,
+        dispatcH_WEIGHT = dispatchWeight,
+        froM_SUBINVENTORY_CODE = fromSubinventoryCode.orEmpty(),
+        tO_SUBINVENTORY_CODE = toSubinventoryCode.orEmpty(),
+        status = status,
+        headeR_STATUS = headerStatus,
+        createD_BY = createdBy.orEmpty(),
+        createD_DATE = createdDate.orEmpty(),
+        sendeR_ORGN_CODE = senderOrgnCode.orEmpty(),
+        receiveR_ORGN_CODE = receiverOrgnCode.orEmpty(),
+        dispatcH_WEIGHMENT_STATUS = dispatchWeighmentStatus.orEmpty(),
+        processType = PSW_PROCESS_TYPE,
+        devicE_ID = deviceId.orEmpty()
+    )
+
+    // ------------------------------
+    // PSW DETAILS DOWNLOAD (return sync)
+    // ------------------------------
+
+    /** PSW and Dispatch share the sync-state table, so PSW keys get a prefix. */
+    private fun pswStateKey(shipmentNo: String) = "PSW:$shipmentNo"
+
+    /**
+     * Downloads the changes of ONE PSW shipment after the last change id we applied,
+     * applies them to psw_dispatch_detail and moves the bookmark forward.
+     * [hintChangeId] = id announced by SignalR; nothing is downloaded when we already have it.
+     */
+    suspend fun pullPswDispatchChanges(
+        shipmentNo: String,
+        hintChangeId: Long? = null
+    ): Result<Int> = pswPullMutex.withLock {
+
+        try {
+
+            val stateDao = database.dispatchSyncStateDao()
+            val stateKey = pswStateKey(shipmentNo)
+
+            val lastId = withContext(Dispatchers.IO) {
+                stateDao.getLastChangeId(stateKey)
+            } ?: 0L
+
+            if (hintChangeId != null && hintChangeId <= lastId) {
+                return@withLock Result.success(0)
+            }
+
+            val response = apiService.getPswDispatchChanges(
+                shipmentNo = shipmentNo,
+                fromChangeId = lastId
+            )
+
+            if (!response.isSuccessful) {
+                throw Exception("PSW dispatch changes API failed: ${response.code()}")
+            }
+
+            val raw = withContext(Dispatchers.IO) {
+                response.body()?.string().orEmpty()
+            }
+
+            android.util.Log.d("MasterDataRepository", "PSW changes raw: ${raw.take(500)}")
+
+            val parsed = DispatchChangeParser.parse(raw)
+
+            if (!parsed.isSuccess) {
+                val msg = parsed.message.lowercase()
+
+                // "No new changes found.", "No changes", "No data" ... are not errors
+                if (msg.contains("no new changes") ||
+                    msg.contains("no changes") ||
+                    msg.contains("no data")
+                ) {
+                    return@withLock Result.success(0)
+                }
+
+                throw Exception(parsed.message.ifBlank { "PSW dispatch changes were not accepted" })
+            }
+
+            var applied = 0
+            var maxId = lastId
+
+            withContext(Dispatchers.IO) {
+                database.runInTransaction {
+
+                    parsed.changes.sortedBy { it.changeId }.forEach { change ->
+
+                        if (applyPswDispatchChange(change, shipmentNo)) applied++
+
+                        if (change.changeId > maxId) maxId = change.changeId
+                    }
+
+                    if (maxId > lastId) {
+                        stateDao.save(DispatchSyncState(stateKey, maxId))
+                    }
+                }
+            }
+
+            android.util.Log.d(
+                "MasterDataRepository",
+                "PSW changes: $applied applied, last change id $maxId"
+            )
+
+            Result.success(applied)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e("MasterDataRepository", "PSW dispatch changes failed", e)
+
+            Result.failure(e)
+        }
+    }
+
+    /** one server change -> local PSW table. Returns true when a bale was added / updated / removed */
+    private fun applyPswDispatchChange(
+        change: DispatchChangeParser.ParsedChange,
+        shipmentNo: String
+    ): Boolean {
+
+        val payload = change.payload ?: return false
+
+        val bale = DispatchChangeParser.baleOf(payload) ?: return false
+
+        val dao = database.pswDispatchDetailDao()
+
+        val existing = dao.getBale(shipmentNo, bale)
+
+        if (change.processName.contains("DELETE", ignoreCase = true)) {
+            dao.deleteBale(shipmentNo, bale)
+            return true
+        }
+
+        val detail = DispatchChangeParser.toPswDetail(
+            payload = payload,
+            shipmentNo = shipmentNo,
+            existing = existing
+        ) ?: return false
+
+        dao.insert(detail)
+
+        return true
+    }
 }

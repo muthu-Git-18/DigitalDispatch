@@ -9,6 +9,7 @@ import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequ
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
 import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
+import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.utils.TimeUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -279,6 +280,15 @@ class PswDispatchViewModel(
         viewModelScope.launch {
             repository.deletePswDetailByBale(detail.shipmentNo, detail.baleNumber)
             onDeleted()
+        }
+    }
+
+    //PSW Dispatch Details Pull
+    /** return sync: bring in what other devices did (only on a good network) */
+    fun pullPswChanges(shipmentNo: String) {
+        viewModelScope.launch {
+            if (NetworkMonitor.isHighQuality.value != true) return@launch
+            repository.pullPswDispatchChanges(shipmentNo)
         }
     }
 }

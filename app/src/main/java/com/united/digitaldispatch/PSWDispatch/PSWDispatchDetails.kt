@@ -38,6 +38,9 @@ import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
+import com.united.digitaldispatch.sync.NetworkMonitor
+import com.united.digitaldispatch.sync.PswDispatchSignalRService
+import com.united.digitaldispatch.sync.SyncManager
 import com.united.digitaldispatch.utils.AppAlertDialog
 import com.united.digitaldispatch.utils.DecimalInputFilter
 import com.united.digitaldispatch.utils.DeleteConfirmDialog
@@ -69,7 +72,9 @@ class PSWDispatchDetails : AppCompatActivity() {
         const val TWT = "TWT"
         const val HND = "HND"
 
-        const val BALE_LENGTH = 31
+        //const val BALE_LENGTH = 31
+
+        const val BALE_LENGTH = 13
         const val MAX_WEIGHT = 300.0
         const val WEIGHT_LOSS_PERCENT = 1.5
 
@@ -151,11 +156,28 @@ class PSWDispatchDetails : AppCompatActivity() {
 
         viewModel.loadPswHeader(shipmentNo)
         viewModel.loadPswDetails(shipmentNo)
+
+        // return sync: bring in what other devices did, and listen for live changes
+        viewModel.pullPswChanges(shipmentNo)
+        PswDispatchSignalRService.start(this, shipmentNo)
     }
+
 
     override fun onStart() {
         super.onStart()
+        SyncManager.setActiveShipment(shipmentNo, psw = true)
         if (edtBaleNo.isEnabled) edtBaleNo.requestFocus()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        SyncManager.setActiveShipment(null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // leaving the shipment for good -> leave its group / stop the live connection
+        if (isFinishing) PswDispatchSignalRService.stop(this, shipmentNo)
     }
 
     // -------------------------------------------------
@@ -281,6 +303,7 @@ class PSWDispatchDetails : AppCompatActivity() {
             if (viewModel.details.value.isEmpty()) {
                 showError("No Bales Added", "No Bales Are Added Yet")
             } else {
+                SyncManager.requestSync(applicationContext)
                 startActivity(
                     Intent(this, PSWDispatchSummary::class.java)
                         .putExtra(PswDispatch.EXTRA_SHIPMENT_NO, shipmentNo)
@@ -724,6 +747,9 @@ class PSWDispatchDetails : AppCompatActivity() {
             Settings.Secure.ANDROID_ID
         ).orEmpty()
 
+        val appContext = applicationContext
+        val online = NetworkMonitor.isHighQuality.value == true
+
         val detail = PSWDispatchDetailEntity(
             shipmentNo = shipmentNo,
             detailId = base?.detailId
@@ -747,8 +773,18 @@ class PSWDispatchDetails : AppCompatActivity() {
             purchaseDate = info?.purchaseDate ?: base?.purchaseDate.orEmpty()
         )
 
+        // 1) save on the device  2) upload now if the network is good, else it waits
         viewModel.savePswDetail(detail) { wasUpdate ->
-            toast(if (wasUpdate) "Bale updated" else "Bale saved")
+            SyncManager.requestSync(appContext)
+
+            toast(
+                when {
+                    !online -> "Bale saved on the device - it will upload when the network is available"
+                    wasUpdate -> "Bale updated - uploading"
+                    else -> "Bale saved - uploading"
+                }
+            )
+
             clearFields()
         }
     }

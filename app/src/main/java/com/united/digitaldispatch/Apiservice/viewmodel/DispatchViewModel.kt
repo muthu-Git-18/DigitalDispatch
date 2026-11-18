@@ -230,9 +230,10 @@ class DispatchViewModel(
         }
     }
 
+    //Dispatch Details Sync Pull
     fun pullChanges(shipmentNo: String) {
         viewModelScope.launch {
-            if (NetworkMonitor.isHighQuality.value != true) return@launch
+           /* if (NetworkMonitor.isHighQuality.value != true) return@launch*/
 
             val applied = repository.pullDispatchChanges(shipmentNo).getOrDefault(0)
 
@@ -240,6 +241,8 @@ class DispatchViewModel(
             if (applied > 0) SyncEvents.detailsChanged.tryEmit(shipmentNo)
         }
     }
+
+
     // -----------------------------
     // TRUCK MASTER
     // -----------------------------
