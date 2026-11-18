@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
+import com.united.digitaldispatch.PSWDispatch.PSWDispatchDetails
 import com.united.digitaldispatch.data.local.dao.DispatchDetailDao
 import com.united.digitaldispatch.data.local.dao.DispatchHeaderDao
 import com.united.digitaldispatch.data.local.dao.DispatchSyncStateDao
@@ -22,9 +23,13 @@ import com.united.digitaldispatch.data.local.entity.TransporterEntity
 import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import com.united.digitaldispatch.data.local.dao.PswDispatchHeaderDao
+import com.united.digitaldispatch.data.local.dao.ReceiptDetailDao
+import com.united.digitaldispatch.data.local.dao.ReceiptHeaderDao
 import com.united.digitaldispatch.data.local.entity.DispatchSyncState
 import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
+import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
+import com.united.digitaldispatch.data.local.entity.ReceiptHeaderEntity
 
 @Database(
     entities = [OrganizationEntity::class,
@@ -37,7 +42,9 @@ import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
                 PswDispatchHeaderEntity::class,
                 BaleDetail::class,
                 DispatchSyncState::class,
-                PSWDispatchDetailEntity::class
+                PSWDispatchDetailEntity::class,
+                ReceiptHeaderEntity::class,
+                ReceiptDetailEntity::class
                ],
     version = 4,
     exportSchema = false
@@ -61,6 +68,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun dispatchSyncStateDao(): DispatchSyncStateDao
 
     abstract fun pswDispatchDetailDao(): PswDispatchDetailDao
+
+    abstract fun receiptHeaderDao(): ReceiptHeaderDao
+
+    abstract fun receiptDetailDao(): ReceiptDetailDao
 
     companion object {
         @Volatile

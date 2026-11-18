@@ -1,7 +1,6 @@
 package com.united.digitaldispatch.sync
 
 import android.content.Context
-import android.provider.Settings
 import android.widget.Toast
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -12,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Uploads the dispatch bales that are still PENDING / FAILED.
+ * Uploads the Dispatch and PSW Dispatch bales that are still PENDING / FAILED.
  * Runs only when WorkManager says there is a network.
  */
 class DispatchSyncWorker(
@@ -27,27 +26,24 @@ class DispatchSyncWorker(
             AppDatabase.getInstance(ctx)
         )
 
-       /* val deviceId = Settings.Secure.getString(
-            ctx.contentResolver,
-            Settings.Secure.ANDROID_ID
-        ).orEmpty()*/
+        val dispatch = repository.uploadPendingDispatchDetails().getOrNull()
+        val psw = repository.uploadPendingPswDetails().getOrNull()
 
-        val result = repository.uploadPendingDispatchDetails()
-
-        val summary = result.getOrNull()
-
-        if (summary == null) {
+        if (dispatch == null || psw == null) {
             // network / server problem -> try again later (give up this round after 5 tries,
             // the periodic sync picks it up again)
             return@withContext if (runAttemptCount >= 5) Result.success() else Result.retry()
         }
 
-        if (summary.uploaded > 0) {
-            showToast("Dispatch bales uploaded: ${summary.uploaded}")
+        val uploaded = dispatch.uploaded + psw.uploaded
+        val remaining = dispatch.remaining + psw.remaining
+
+        if (uploaded > 0) {
+            showToast("Dispatch bales uploaded: $uploaded")
         }
 
         // keep going only while the server is accepting bales (no endless loop on failures)
-        if (summary.remaining > 0 && summary.uploaded > 0) {
+        if (remaining > 0 && uploaded > 0) {
             SyncScheduler.triggerImmediateSync(ctx)
         }
 

@@ -31,13 +31,13 @@ object NetworkMonitor {
 
     /** server used for the "can we really reach it" test */
 
-    //Pmi Server
-/*    var probeHost: String = "103.165.4.170"
-    var probePort: Int = 81*/
+    //PMI server
+  /*  var probeHost: String = "103.165.4.170"
+    var probePort: Int = 81
+*/
 
     var probeHost: String = "leafapiuat.godfreyphillips.co.in"
     var probePort: Int = 443
-
     private var started = false
 
     @Volatile

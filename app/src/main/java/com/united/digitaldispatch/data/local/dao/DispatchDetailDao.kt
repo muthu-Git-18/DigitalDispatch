@@ -80,4 +80,7 @@ interface DispatchDetailDao {
 
     @Query("DELETE FROM dispatch_detail WHERE shipmentNo = :shipmentNo")
     fun deleteByShipment(shipmentNo: String)
+
+    @Query("DELETE FROM dispatch_detail WHERE gpilBaleNumber = :bale")
+    fun deleteByBaleNumber(bale: String)
 }

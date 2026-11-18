@@ -5,6 +5,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
+import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 
 object DispatchChangeParser {
 
@@ -174,6 +175,78 @@ object DispatchChangeParser {
         )
     }
 
+
+    //PSW Details
+    /** Server payload -> local PSW detail. Local values are kept when the server omits a field. */
+    fun toPswDetail(
+        payload: JsonObject,
+        shipmentNo: String,
+        existing: PSWDispatchDetailEntity?
+    ): PSWDispatchDetailEntity? {
+
+        val bale = baleOf(payload) ?: return null
+
+        return PSWDispatchDetailEntity(
+            // same row if the bale already exists -> no duplicates
+            id = existing?.id ?: 0,
+
+            shipmentNo = payload.pick("shipmentNo") ?: existing?.shipmentNo ?: shipmentNo,
+
+            detailId = existing?.detailId
+                ?: payload.pick("detailId", "recordPrimaryKey")
+                ?: "SRV$bale",
+
+            baleNumber = bale,
+
+            grade = payload.pick("grade") ?: existing?.grade,
+
+            markedWt = payload.pick("markedWt", "markedWeight")?.toDoubleOrNull()
+                ?: existing?.markedWt
+                ?: 0.0,
+
+            dispatchWeight = payload.pick("dispatchWeight")?.toDoubleOrNull()
+                ?: existing?.dispatchWeight
+                ?: 0.0,
+
+            fromSubinventoryCode = payload.pick("fromSubinventoryCode", "fromSubinventory")
+                ?: existing?.fromSubinventoryCode,
+
+            toSubinventoryCode = payload.pick("toSubinventoryCode", "toSubinventory")
+                ?: existing?.toSubinventoryCode,
+
+            status = payload.pick("status") ?: existing?.status ?: "INT",
+
+            headerStatus = payload.pick("headerStatus") ?: existing?.headerStatus ?: "Y",
+
+            createdBy = payload.pick("createdBy") ?: existing?.createdBy,
+
+            createdDate = payload.pick("createdDate") ?: existing?.createdDate,
+
+            senderOrgnCode = payload.pick("senderOrgnCode", "senderOrgn", "senderOrgCode")
+                ?: existing?.senderOrgnCode,
+
+            receiverOrgnCode = payload.pick(
+                "receiverOrgnCode", "recOrgnCode", "receiverOrgn", "receiverOrgCode"
+            ) ?: existing?.receiverOrgnCode,
+
+            dispatchWeighmentStatus = payload.pick("dispatchWeighmentStatus")
+                ?: existing?.dispatchWeighmentStatus
+                ?: "N",
+
+            processType = payload.pick("processType") ?: existing?.processType,
+
+            deviceId = payload.pick("deviceId") ?: existing?.deviceId,
+
+            // local-only fields: keep what the device already has
+            price = payload.pick("price", "rate") ?: existing?.price,
+            tbLotNumber = payload.pick("tbLotNo", "tbLotNumber") ?: existing?.tbLotNumber,
+            purchaseDate = payload.pick("purchaseDate") ?: existing?.purchaseDate,
+
+            syncStatus = PSWDispatchDetailEntity.SYNC_SUCCESS,
+            serverMessage = "Synced from server",
+            attemptCount = 0
+        )
+    }
     private fun parseChange(element: JsonElement): ParsedChange? {
         if (!element.isJsonObject) return null
 

@@ -9,11 +9,9 @@ package com.united.digitaldispatch.sync
 /*private const val HUB_BASE_URL =
     "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish"*/
 
+
 private const val HUB_BASE_URL =
     "https://leafapiuat.godfreyphillips.co.in/LorryHireAndroidApplicationApiPublishTest"
-
-
-
 
 /** Live return sync of bales (one group per shipment). */
 object DispatchHubConfig {
@@ -43,6 +41,24 @@ object DispatchCompleteHubConfig {
     const val METHOD_JOIN = "JoinShipmentGroup"         // confirm with backend
     const val METHOD_LEAVE = "LeaveShipmentGroup"       // confirm with backend
 
+    val enabled: Boolean
+        get() = HUB_URL.isNotBlank()
+}
+
+/** Live return sync of PSW bales (one group per shipment). */
+object PswDispatchHubConfig {
+
+    // TODO: confirm the hub path, event and method names with the backend
+    val HUB_URL: String = "$HUB_BASE_URL/pswDispatchHub"
+
+    /** server -> app: a change happened (changeId: Long, shipmentNo: String) */
+    const val EVENT_CHANGED = "PSW_DispatchUpdated"
+
+    /** app -> server: must match the hub's method names exactly */
+    const val METHOD_JOIN = "JoinShipmentGroup"
+    const val METHOD_LEAVE = "LeaveShipmentGroup"
+
+    /** blank url = live connection off, pull-only sync keeps working */
     val enabled: Boolean
         get() = HUB_URL.isNotBlank()
 }
