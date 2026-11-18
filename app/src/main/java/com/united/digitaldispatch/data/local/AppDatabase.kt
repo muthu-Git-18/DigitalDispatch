@@ -23,6 +23,7 @@ import com.united.digitaldispatch.data.local.entity.TruckMasterEntity
 import com.united.digitaldispatch.data.local.entity.UserMasterEntity
 import com.united.digitaldispatch.data.local.dao.PswDispatchHeaderDao
 import com.united.digitaldispatch.data.local.entity.DispatchSyncState
+import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 
 @Database(
@@ -35,7 +36,8 @@ import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
                 DispatchHeaderEntity::class,
                 PswDispatchHeaderEntity::class,
                 BaleDetail::class,
-                DispatchSyncState::class
+                DispatchSyncState::class,
+                PSWDispatchDetailEntity::class
                ],
     version = 4,
     exportSchema = false

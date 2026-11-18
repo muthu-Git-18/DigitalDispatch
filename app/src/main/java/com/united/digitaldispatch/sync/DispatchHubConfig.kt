@@ -6,8 +6,14 @@ package com.united.digitaldispatch.sync
  * While HUB_URL is blank the live connection is switched OFF and the app uses
  * pull-only sync (screen opens, network comes back, ...) - nothing breaks.
  */
+/*private const val HUB_BASE_URL =
+    "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish"*/
+
 private const val HUB_BASE_URL =
-    "http://103.165.4.170:85/LorryHireAndroidApplicationApiPublish"
+    "https://leafapiuat.godfreyphillips.co.in/LorryHireAndroidApplicationApiPublishTest"
+
+
+
 
 /** Live return sync of bales (one group per shipment). */
 object DispatchHubConfig {

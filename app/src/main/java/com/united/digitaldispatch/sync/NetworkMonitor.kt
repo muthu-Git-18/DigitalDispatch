@@ -30,8 +30,13 @@ object NetworkMonitor {
     val isHighQuality: LiveData<Boolean> get() = _isHighQuality
 
     /** server used for the "can we really reach it" test */
-    var probeHost: String = "103.165.4.170"
-    var probePort: Int = 81
+
+    //Pmi Server
+/*    var probeHost: String = "103.165.4.170"
+    var probePort: Int = 81*/
+
+    var probeHost: String = "leafapiuat.godfreyphillips.co.in"
+    var probePort: Int = 443
 
     private var started = false
 
