@@ -62,3 +62,15 @@ object PswDispatchHubConfig {
     val enabled: Boolean
         get() = HUB_URL.isNotBlank()
 }
+
+
+object ReceiptHubConfig {
+    val HUB_URL: String = "$HUB_BASE_URL/receiptHub"          // TODO confirm hub path
+
+    const val EVENT_CHANGED = "ReceiptUpdated"                // TODO confirm event name
+
+    const val METHOD_JOIN = "JoinShipmentGroup"
+    const val METHOD_LEAVE = "LeaveShipmentGroup"
+    val enabled: Boolean get() = HUB_URL.isNotBlank()
+
+}

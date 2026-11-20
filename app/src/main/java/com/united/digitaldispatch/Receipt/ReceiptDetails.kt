@@ -1,13 +1,18 @@
 package com.united.digitaldispatch.Receipt
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.Editable
 import android.text.InputFilter
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -33,6 +38,9 @@ import com.united.digitaldispatch.Apiservice.viewmodel.ReceiptViewModelFactory
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
+import com.united.digitaldispatch.sync.NetworkMonitor
+import com.united.digitaldispatch.sync.ReceiptSignalRService        // NEW
+import com.united.digitaldispatch.sync.SyncManager                  // NEW
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -47,6 +55,9 @@ class ReceiptDetails : AppCompatActivity() {
         private const val SCAN_DEBOUNCE_MS = 300L
         private const val MAX_WEIGHT = 200.0
     }
+
+    private val COLOR_COUNT_OK = Color.parseColor("#2E7D32")       // green
+    private val COLOR_COUNT_PENDING = Color.parseColor("#C0392B")  // red
 
     private lateinit var sessionManager: SessionManager
     private lateinit var shipmentNo: String
@@ -81,7 +92,13 @@ class ReceiptDetails : AppCompatActivity() {
     private var receivedBales = 0
     private var weighedBales = 0
 
+    private var pendingBales = 0
+
     private var balesLoading = false
+
+    // NEW: live sync must start only AFTER the bales are downloaded, otherwise a change
+    // could be applied to a row that does not exist yet and the bookmark would move past it
+    private var liveSyncStarted = false
 
     private val viewModel: ReceiptViewModel by viewModels {
         ReceiptViewModelFactory(
@@ -117,9 +134,32 @@ class ReceiptDetails : AppCompatActivity() {
         viewModel.downloadBales(shipmentNo)
     }
 
+    // NEW
+    override fun onStart() {
+        super.onStart()
+        SyncManager.setActiveShipment(shipmentNo, SyncManager.SyncModule.RECEIPT)
+    }
+
+    // NEW
+    override fun onStop() {
+        super.onStop()
+        SyncManager.setActiveShipment(null)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scanRunnable?.let { handler.removeCallbacks(it) }
+        // NEW: leaving the shipment for good -> leave its group / stop the live connection
+        if (isFinishing) ReceiptSignalRService.stop(this, shipmentNo)
+    }
+
+    // NEW
+    /** return sync: pull what other devices did once, then listen for live changes */
+    private fun startLiveSync() {
+        if (liveSyncStarted) return
+        liveSyncStarted = true
+        SyncManager.pullReceiptChanges(applicationContext, shipmentNo, source = "receipt-open")
+        ReceiptSignalRService.start(this, shipmentNo)
     }
 
     private fun initViews() {
@@ -247,6 +287,7 @@ class ReceiptDetails : AppCompatActivity() {
                 launch { viewModel.totalBales.collect { totalBales = it; refreshCounts() } }
                 launch { viewModel.receivedBales.collect { receivedBales = it; refreshCounts() } }
                 launch { viewModel.weighedBales.collect { weighedBales = it; refreshCounts() } }
+                launch { viewModel.pendingBales.collect { pendingBales = it; refreshCounts() } }
                 launch { viewModel.events.collect { handleEvent(it) } }
 
                 launch {
@@ -256,11 +297,16 @@ class ReceiptDetails : AppCompatActivity() {
                             is ReceiptSyncState.Success -> {
                                 balesLoading = false
                                 viewModel.resolveSavedWeighType()   // header/bale type may now be known
+                                startLiveSync()                     // NEW
                             }
                             is ReceiptSyncState.Error -> {
                                 balesLoading = false
-                                if (totalBales == 0) openErrorDialog("Unable to load bales: ${state.message}")
-                                else Toast.makeText(this@ReceiptDetails, "Showing saved bales (offline)", Toast.LENGTH_SHORT).show()
+                                if (totalBales == 0) {
+                                    openErrorDialog("Unable to load bales: ${state.message}")
+                                } else {
+                                    Toast.makeText(this@ReceiptDetails, "Showing saved bales (offline)", Toast.LENGTH_SHORT).show()
+                                    startLiveSync()                 // NEW: saved bales exist, sync can start
+                                }
                             }
                             else -> Unit
                         }
@@ -271,10 +317,22 @@ class ReceiptDetails : AppCompatActivity() {
     }
 
     private fun refreshCounts() {
-        txtReceived.text = "$receivedBales / $totalBales"
+        val base = "$receivedBales / $totalBales"
+        val text = SpannableStringBuilder(base)
+
+        // received count -> green
+        text.setSpan(ForegroundColorSpan(COLOR_COUNT_OK), 0, base.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        // not uploaded yet -> red
+        if (pendingBales > 0) {
+            val start = text.length
+            text.append(" ($pendingBales pending)")
+            text.setSpan(ForegroundColorSpan(COLOR_COUNT_PENDING), start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        txtReceived.text = text
         txtWeighted.text = "$weighedBales / ${weightTarget(totalBales)}"
     }
-
     // 20 % of the bales (min 1 when 5 bales or fewer) -- same as the old screen
     private fun weightTarget(total: Int): Int =
         if (total > 5) Math.round(total / 100.0 * 20).toInt() else 1
@@ -518,18 +576,37 @@ class ReceiptDetails : AppCompatActivity() {
     private fun saveBale() {
         val bale = currentBale ?: return
 
+        val deviceId = Settings.Secure.getString(
+            applicationContext.contentResolver,
+            Settings.Secure.ANDROID_ID
+        ).orEmpty()
+
+
+
         viewModel.saveBale(
             baleNo = bale.baleNumber,
             receiptWeight = currWt,
             weightStatus = if (chkWeight.isChecked) "Y" else "N",
             weighType = weighType,
             userId = userId(),
-            deviceId = deviceId()
+            deviceId = deviceId
         )
     }
 
     private fun onSaved(isFirstBale: Boolean) {
         clearTheFields()
+
+
+        // NEW: saved on the device first -> upload now if the network is good, else it waits
+        SyncManager.requestSync(applicationContext)
+
+        val online = NetworkMonitor.isHighQuality.value == true
+        Toast.makeText(
+            this,
+            if (online) "Bale saved - uploading"
+            else "Bale saved on the device - it will upload when the network is available",
+            Toast.LENGTH_SHORT
+        ).show()
 
         if (isFirstBale) {
             // fix the radio now; then re-check the header from the server (another device may have set it)

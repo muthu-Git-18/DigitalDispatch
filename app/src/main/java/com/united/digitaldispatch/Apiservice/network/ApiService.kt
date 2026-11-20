@@ -16,6 +16,8 @@ import com.united.digitaldispatch.PSWDispatch.models.PSWDispatchHeaderListRespon
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
 import com.united.digitaldispatch.Receipt.models.ReceiptBaleListResponse
 import com.united.digitaldispatch.Receipt.models.ReceiptHeaderListResponse
+import com.united.digitaldispatch.Receipt.models.ReceiptUploadRequest
+import com.united.digitaldispatch.Receipt.models.ReceiptUploadResponse
 import okhttp3.ResponseBody
 
 
@@ -132,6 +134,15 @@ interface ApiService {
     suspend fun getReceiptBales(
         @Query("shipmentNo") shipmentNo: String      // Retrofit encodes 2025/P27/... to %2F for you
     ): Response<ReceiptBaleListResponse>
+
+    @POST("Receipt/Insert_ReceiptBales")
+    suspend fun uploadReceiptBales(@Body request: ReceiptUploadRequest): Response<ReceiptUploadResponse>
+
+    @GET("Receipt/sync-receipt-changes")
+    suspend fun getReceiptChanges(
+        @Query("shipmentNo") shipmentNo: String,
+        @Query("fromChangeId") fromChangeId: Long
+    ): Response<ResponseBody>
 
 
 }

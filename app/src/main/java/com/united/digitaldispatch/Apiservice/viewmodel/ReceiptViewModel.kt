@@ -96,6 +96,8 @@ class ReceiptViewModel(
     val receivedBales: StateFlow<Int> = perShipment { repository.observeReceivedBales(it) }
     val weighedBales: StateFlow<Int> = perShipment { repository.observeWeighedBales(it) }
 
+    val pendingBales: StateFlow<Int> = perShipment { repository.observePendingBales(it) }
+
     // Channel = events are queued, never lost while the screen is in background
     private val _events = Channel<ReceiptDetailEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()

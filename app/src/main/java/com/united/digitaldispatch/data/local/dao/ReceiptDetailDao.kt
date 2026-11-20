@@ -56,4 +56,37 @@ interface ReceiptDetailDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllIgnore(list: List<ReceiptDetailEntity>): List<Long>
+
+
+
+    @Query("""SELECT * FROM receipt_detail
+          WHERE status = 'RCV'
+            AND (syncStatus = 'PENDING' OR (syncStatus = 'FAILED' AND attemptCount < :maxAttempts))
+          LIMIT :limit""")
+    suspend fun getUnsynced(maxAttempts: Int, limit: Int): List<ReceiptDetailEntity>
+
+    @Query("SELECT COUNT(*) FROM receipt_detail WHERE status = 'RCV' AND syncStatus IN ('PENDING','FAILED')")
+    suspend fun countUnsynced(): Int
+
+    @Query("UPDATE receipt_detail SET syncStatus = 'SUCCESS', serverMessage = :msg WHERE baleNumber = :bale AND status = 'RCV'")
+    suspend fun markSynced(bale: String, msg: String)
+
+    @Query("UPDATE receipt_detail SET syncStatus = 'FAILED', serverMessage = :msg, attemptCount = attemptCount + 1 WHERE baleNumber = :bale AND status = 'RCV'")
+    suspend fun markFailed(bale: String, msg: String)
+
+
+    // another device received this bale -> mirror it here (already on the server, so SUCCESS)
+    @Query("""UPDATE receipt_detail
+          SET receiptWeight = :receiptWeight, status = :status, weightStatus = :weightStatus,
+              recevWeighType = :weighType, unloadingDatetime = :unloading,
+              syncStatus = 'SUCCESS', serverMessage = 'Synced from server', attemptCount = 0,processType= :processType,deviceId= :deviceId
+          WHERE shipmentNo = :shipmentNo AND baleNumber = :bale""")
+    suspend fun applyRemoteReceipt(
+        shipmentNo: String, bale: String, receiptWeight: Double?, status: String,
+        weightStatus: String?, weighType: String?, unloading: String?,processType: String?,deviceId: String?
+    )
+
+    // for the red "(n pending)" on the screen
+    @Query("SELECT COUNT(*) FROM receipt_detail WHERE shipmentNo = :shipmentNo AND status = 'RCV' AND syncStatus != 'SUCCESS'")
+    fun observePending(shipmentNo: String): Flow<Int>
 }

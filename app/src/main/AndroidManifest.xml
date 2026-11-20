@@ -181,6 +181,10 @@
             android:name=".sync.PswDispatchSignalRService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <service android:name=".sync.ReceiptSignalRService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

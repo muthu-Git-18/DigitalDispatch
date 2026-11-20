@@ -162,10 +162,9 @@ class PSWDispatchDetails : AppCompatActivity() {
         PswDispatchSignalRService.start(this, shipmentNo)
     }
 
-
     override fun onStart() {
         super.onStart()
-        SyncManager.setActiveShipment(shipmentNo, psw = true)
+        SyncManager.setActiveShipment(shipmentNo, SyncManager.SyncModule.PSW)
         if (edtBaleNo.isEnabled) edtBaleNo.requestFocus()
     }
 
@@ -179,7 +178,6 @@ class PSWDispatchDetails : AppCompatActivity() {
         // leaving the shipment for good -> leave its group / stop the live connection
         if (isFinishing) PswDispatchSignalRService.stop(this, shipmentNo)
     }
-
     // -------------------------------------------------
     // VIEWS
     // -------------------------------------------------

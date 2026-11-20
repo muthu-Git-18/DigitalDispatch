@@ -35,6 +35,14 @@ data class ReceiptDetailEntity(
     val weightStatus: String? = null,       // weighT_STATUS     Y weighed / N not weighed
     val processType: String? = null,        // filled in the upload step
     val deviceId: String? = null,
+
+    val toSubinventoryCode: String? = null,
+    val remarks: String? = null,
+    val loadingDatetime: String? = null,
+    val unloadingDatetime: String? = null,
+    val createdBy: String? = null,
+    val createdDate: String? = null,
+    val dispatchWeighmentStatus: String? = null,
     // sync
     val syncStatus: String = SYNC_PENDING,
     val serverMessage: String? = null,

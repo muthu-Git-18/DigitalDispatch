@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
+import com.united.digitaldispatch.Apiservice.repository.ReceiptRepository
 import com.united.digitaldispatch.data.local.AppDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +34,9 @@ object SyncManager {
     @Volatile
     private var activeShipmentNo: String? = null
 
-    @Volatile
-    private var activeIsPsw = false
+    enum class SyncModule { DISPATCH, PSW, RECEIPT }
+
+    @Volatile private var activeModule = SyncModule.DISPATCH
 
     fun start(app: Application) {
 
@@ -53,8 +55,11 @@ object SyncManager {
                 SyncScheduler.triggerImmediateSync(app)
 
                 activeShipmentNo?.let {
-                    if (activeIsPsw) pullPswChanges(app, it, source = "network-restored")
-                    else pullChanges(app, it, source = "network-restored")
+                    when (activeModule) {
+                        SyncModule.DISPATCH -> pullChanges(app, it, source = "network-restored")
+                        SyncModule.PSW -> pullPswChanges(app, it, source = "network-restored")
+                        SyncModule.RECEIPT -> pullReceiptChanges(app, it, source = "network-restored")
+                    }
                 }
             }
 
@@ -78,11 +83,10 @@ object SyncManager {
 
     // ---------------- download ----------------
 
-    fun setActiveShipment(shipmentNo: String?, psw: Boolean = false) {
+    fun setActiveShipment(shipmentNo: String?, module: SyncModule = SyncModule.DISPATCH) {
         activeShipmentNo = shipmentNo
-        activeIsPsw = psw && shipmentNo != null
+        activeModule = module
     }
-
     /**
      * Downloads the changes of one shipment (only when the network is good).
      * [hintChangeId] = id announced by SignalR; skipped when we already have it.
@@ -166,6 +170,31 @@ object SyncManager {
             android.util.Log.d(
                 "DispatchPull",
                 "[$source] PSW pull finished: shipment=$shipmentNo applied=${result.getOrDefault(0)} success=${result.isSuccess}"
+            )
+        }
+    }
+
+
+    fun pullReceiptChanges(
+        context: Context,
+        shipmentNo: String,
+        hintChangeId: Long? = null,
+        source: String = "unknown"
+    ) {
+        android.util.Log.d("ReceiptPull", "[$source] Receipt pull requested: shipment=$shipmentNo hint=$hintChangeId")
+
+        if (NetworkMonitor.isHighQuality.value != true) {
+            android.util.Log.w("ReceiptPull", "[$source] Receipt pull SKIPPED: network not good")
+            return
+        }
+
+        val appContext = context.applicationContext
+        scope.launch {
+            val repo = ReceiptRepository(ApiClient.instance, AppDatabase.getInstance(appContext))
+            val result = repo.pullReceiptChanges(shipmentNo, hintChangeId)
+            android.util.Log.d(
+                "ReceiptPull",
+                "[$source] Receipt pull finished: shipment=$shipmentNo applied=${result.getOrDefault(0)} success=${result.isSuccess}"
             )
         }
     }
