@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
 import com.united.digitaldispatch.Dispatch.models.BaleInfo
+import com.united.digitaldispatch.PSWDispatch.Adaptor.PSWGradeSummary
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderRequest
 import com.united.digitaldispatch.PSWDispatch.models.CreatePSWDispatchHeaderResponse
 import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
@@ -195,6 +196,23 @@ class PswDispatchViewModel(
         }
     }
 
+
+    private fun buildGradeSummary(
+        details: List<PSWDispatchDetailEntity>
+    ): List<PSWGradeSummary> {
+
+        return details
+            .groupBy { it.grade.orEmpty().trim() }
+            .filterKeys { it.isNotBlank() }
+            .map { (grade, items) ->
+                PSWGradeSummary(
+                    grade = grade,
+                    bales = items.size,
+                    qty = items.sumOf { it.markedWt }
+                )
+            }
+            .sortedBy { it.grade }
+    }
 
     fun resetSyncPswHeadersState() {
 

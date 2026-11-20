@@ -1,37 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#D9D8D5">
-
-    <!-- BACKGROUND -->
+    android:background="#D9D8D5"
+    android:fitsSystemWindows="true">
+    <!--    BACKGROUND    -->
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="280dp"
         android:layout_height="500dp"
         android:alpha="0.13"
         android:contentDescription="Background"
-        android:src="@drawable/dashbg3"
         android:scaleType="fitXY"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/dashbg3"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- CHARCOAL HEADER -->
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--    CHARCOAL HEADER    -->
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="82dp"
         android:background="#2E353A"
         android:elevation="10dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <View
             android:layout_width="match_parent"
@@ -143,26 +138,25 @@
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-
-    <!-- HEADER ID -->
+    <!--    HEADER ID    -->
     <LinearLayout
         android:id="@+id/cardHeaderId"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="18dp"
         android:background="@drawable/dashboard_card_background"
         android:elevation="6dp"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingStart="14dp"
-        android:paddingEnd="14dp"
         android:paddingTop="8dp"
+        android:paddingEnd="14dp"
         android:paddingBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <TextView
             android:layout_width="wrap_content"
@@ -176,42 +170,46 @@
             android:id="@+id/txt_header_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:gravity="end"
             android:text=""
             android:textColor="#2E353A"
             android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
-
-    <!-- TABLE CARD (scrolls left-right and up-down) -->
+    <!--    TABLE CARD (scrolls left-right and up-down)    -->
     <LinearLayout
         android:id="@+id/cardTable"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="18dp"
         android:background="@drawable/dashboard_card_background"
+        android:clipChildren="true"
+        android:clipToOutline="true"
+        android:clipToPadding="true"
         android:elevation="8dp"
         android:orientation="vertical"
-        android:clipChildren="true"
-        app:layout_constraintTop_toBottomOf="@id/cardHeaderId"
+        android:paddingStart="1dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="1dp"
+        android:paddingBottom="3dp"
         app:layout_constraintBottom_toTopOf="@id/statsRow"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Table title bar -->
+        app:layout_constraintTop_toBottomOf="@id/cardHeaderId">
+        <!--    Table title bar    -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#2E353A"
             android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
             android:paddingStart="14dp"
-            android:paddingEnd="14dp">
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="10dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -226,27 +224,30 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:clipChildren="true"
+            android:clipToPadding="true">
 
             <HorizontalScrollView
                 android:id="@+id/hsv_table"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                android:fillViewport="false"
                 android:scrollbars="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
-
-                    <!-- Header row (stays on top, moves sideways with the table) -->
+                    <!--    Header row (stays on top, moves sideways with the table)    -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_header"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                    <!-- Item rows (scroll up and down) -->
+                    <!--    Item rows (scroll up and down)    -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_item"
                         android:layout_width="wrap_content"
@@ -272,25 +273,24 @@
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
-
-    <!-- STATS ROW -->
+    <!--    STATS ROW    -->
     <LinearLayout
         android:id="@+id/statsRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="18dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/footerRow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginEnd="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_card_background"
             android:elevation="6dp"
             android:orientation="vertical"
@@ -319,8 +319,8 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_card_background"
             android:elevation="6dp"
             android:orientation="vertical"
@@ -346,21 +346,20 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
-
-    <!-- FOOTER ROW : TOTAL QUANTITY + BACK -->
+    <!--    FOOTER ROW : TOTAL QUANTITY + BACK    -->
     <LinearLayout
         android:id="@+id/footerRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="18dp"
-        android:layout_marginEnd="18dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="18dp"
         android:layout_marginBottom="14dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -390,8 +389,7 @@
                 android:textSize="17sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
-        <!-- Back (circular, gold) -->
+        <!--    Back (circular, gold)    -->
         <FrameLayout
             android:id="@+id/constraint_back_container"
             android:layout_width="52dp"
@@ -419,8 +417,7 @@
                 android:tint="#5A3517" />
         </FrameLayout>
     </LinearLayout>
-
-    <!-- LOADER -->
+    <!--    LOADER    -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"
@@ -432,5 +429,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

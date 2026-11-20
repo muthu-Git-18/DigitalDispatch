@@ -10,6 +10,7 @@ import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextWatcher
+import androidx.activity.result.contract.ActivityResultContracts
 import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -310,12 +311,22 @@ class PSWDispatchDetails : AppCompatActivity() {
         }
 
         btnView.setOnClickListener {
+
             if (viewModel.details.value.isEmpty()) {
-                showError("No Bales Added", "No Bales Are Added Yet")
+
+                showError(
+                    "No Bales Added",
+                    "No Bales Are Added Yet"
+                )
+
             } else {
-                startActivity(
+
+                pswViewLauncher.launch(
                     Intent(this, PSWDispatchView::class.java)
-                        .putExtra(PswDispatch.EXTRA_SHIPMENT_NO, shipmentNo)
+                        .putExtra(
+                            PswDispatch.EXTRA_SHIPMENT_NO,
+                            shipmentNo
+                        )
                 )
             }
         }
@@ -787,6 +798,22 @@ class PSWDispatchDetails : AppCompatActivity() {
         }
     }
 
+    private val pswViewLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+
+        if (result.resultCode == RESULT_OK) {
+
+            val baleNo = result.data
+                ?.getStringExtra(PSWDispatchView.EXTRA_BALE_NO)
+                .orEmpty()
+
+            if (baleNo.isNotBlank()) {
+                openPswBaleForUpdate(baleNo)
+            }
+        }
+    }
+
     // -------------------------------------------------
     // DELETE
     // -------------------------------------------------
@@ -878,6 +905,14 @@ class PSWDispatchDetails : AppCompatActivity() {
         ) {
             onOk()
         }.show()
+    }
+
+    private fun openPswBaleForUpdate(baleNo: String) {
+
+        clearFields()
+
+        // Your existing TextWatcher will trigger lookupPswBale().
+        edtBaleNo.setText(baleNo)
     }
 
     private fun showKeyboard(view: EditText) {
