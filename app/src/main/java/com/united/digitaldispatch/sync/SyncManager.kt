@@ -209,4 +209,37 @@ object SyncManager {
             SyncEvents.shipmentCompleted.tryEmit(shipmentNo)
         }
     }
+
+    fun onPswShipmentCompleted(
+        context: Context,
+        shipmentNo: String
+    ) {
+        scope.launch {
+
+            try {
+                val repo = MasterDataRepository(
+                    ApiClient.instance,
+                    AppDatabase.getInstance(context.applicationContext)
+                )
+
+                // Remove PSW details, sync state and header
+                repo.removePswShipmentLocally(shipmentNo)
+
+                // Notify the open PSW screen
+                SyncEvents.pswShipmentCompleted.tryEmit(shipmentNo)
+
+                android.util.Log.d(
+                    "PswDispatchSignalR",
+                    "PSW shipment completed and removed locally: $shipmentNo"
+                )
+
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "PswDispatchSignalR",
+                    "PSW completion cleanup failed: $shipmentNo",
+                    e
+                )
+            }
+        }
+    }
 }

@@ -11,4 +11,7 @@ object SyncEvents {
     val detailsChanged = MutableSharedFlow<String>(extraBufferCapacity = 16)
 
     val shipmentCompleted = MutableSharedFlow<String>(extraBufferCapacity = 8)
+
+    val pswShipmentCompleted =
+        MutableSharedFlow<String>(extraBufferCapacity = 8)
 }

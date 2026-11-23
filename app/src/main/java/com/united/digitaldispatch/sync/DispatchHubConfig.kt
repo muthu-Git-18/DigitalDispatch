@@ -63,6 +63,21 @@ object PswDispatchHubConfig {
         get() = HUB_URL.isNotBlank()
 }
 
+object PswDispatchCompleteHubConfig  {
+
+    val HUB_URL: String = "$HUB_BASE_URL/pswDispatchCompleteHub"
+
+    /** server -> app: a shipment was completed (shipmentNo: String) */
+    const val EVENT_COMPLETED = "PSW_DispatchCompleted"
+
+    /** app -> server: must match the complete hub's method names exactly */
+    const val METHOD_JOIN = "JoinShipmentGroup"
+    const val METHOD_LEAVE = "LeaveShipmentGroup"
+
+    val enabled: Boolean
+        get() = HUB_URL.isNotBlank()
+}
+
 
 object ReceiptHubConfig {
     val HUB_URL: String = "$HUB_BASE_URL/receiptHub"          // TODO confirm hub path

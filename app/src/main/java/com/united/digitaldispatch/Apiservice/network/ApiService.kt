@@ -116,11 +116,16 @@ interface ApiService {
     ): Response<DispatchUploadResponse>
 
     // PSW return sync
-    @GET("PSW_Dispatch/sync-PSW_dispatch-changes?")
+    @GET("PSW_Dispatch/sync-PSW_dispatch-changes")
     suspend fun getPswDispatchChanges(
         @Query("shipmentNo") shipmentNo: String,
         @Query("fromChangeId") fromChangeId: Long
     ): Response<ResponseBody>
+
+    @POST("PSW_Dispatch/complete-PSW-dispatch")
+    suspend fun completePswDispatch(
+        @Body request: CompleteDispatchRequest
+    ): Response<CompleteDispatchResponse>
 
     ////////////////////////////////PSW Dispatch Over ----Receipt Starts Here-----/////////////////////////
 

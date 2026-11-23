@@ -46,7 +46,8 @@ class PswDispatchSignalRService : Service() {
 
         fun start(context: Context, shipmentNo: String) {
 
-            if (!PswDispatchHubConfig.enabled) return
+            if (!PswDispatchHubConfig.enabled && !PswDispatchCompleteHubConfig.enabled)
+                return
 
             val intent = Intent(context, PswDispatchSignalRService::class.java)
                 .putExtra(EXTRA_SHIPMENT_NO, shipmentNo)
@@ -75,7 +76,13 @@ class PswDispatchSignalRService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // PSW bale-update hub
     private var hubConnection: HubConnection? = null
+
+    // PSW completion hub
+    private var completeHub: HubConnection? = null
+
+    private var joinedCompleteShipmentNo: String? = null
 
     private lateinit var notificationManager: NotificationManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
@@ -90,6 +97,9 @@ class PswDispatchSignalRService : Service() {
 
     @Volatile
     private var isStopping = false
+
+    @Volatile
+    private var isConnectingComplete = false
 
     @Volatile
     private var reconnectAttempt = 0
@@ -120,24 +130,48 @@ class PswDispatchSignalRService : Service() {
         }
 
         // ---- start / switch shipment ----
+// ---- start / switch shipment ----
         if (!shipmentNo.isNullOrBlank() && shipmentNo != currentShipmentNo) {
 
             val old = joinedShipmentNo
+            val oldComplete = joinedCompleteShipmentNo
 
             currentShipmentNo = shipmentNo
             joinedShipmentNo = null
+            joinedCompleteShipmentNo = null
 
+            // Leave old shipment groups
             if (old != null) leaveGroup(old)
+            if (oldComplete != null) leaveCompleteGroup(oldComplete)
 
+            // Connect / join PSW bale-update hub
             if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
                 joinGroup(shipmentNo)
-                SyncManager.pullPswChanges(applicationContext, shipmentNo, source = "psw-switch")
+                SyncManager.pullPswChanges(
+                    applicationContext,
+                    shipmentNo,
+                    source = "psw-switch"
+                )
             } else {
                 connect()
             }
 
+            // Connect / join PSW completion hub
+            if (completeHub?.connectionState == HubConnectionState.CONNECTED) {
+                joinCompleteGroup(shipmentNo)
+            } else {
+                connectCompleteHub()
+            }
+
         } else {
-            if (hubConnection == null) connect()
+            // Ensure both hubs are connected
+            if (hubConnection == null) {
+                connect()
+            }
+
+            if (completeHub == null) {
+                connectCompleteHub()
+            }
         }
 
         // tied to the open screen -> do not restart on its own
@@ -245,6 +279,119 @@ class PswDispatchSignalRService : Service() {
         }
     }
 
+
+    // ================================================
+// PSW COMPLETION HUB
+// ================================================
+    private fun connectCompleteHub() {
+
+        if (isStopping || isConnectingComplete || completeHub != null) return
+        if (!PswDispatchCompleteHubConfig.enabled) return
+
+        isConnectingComplete = true
+
+        val hub = HubConnectionBuilder
+            .create(PswDispatchCompleteHubConfig.HUB_URL)
+            .build()
+
+        hub.keepAliveInterval = 10_000L
+        hub.serverTimeout = 30_000L
+
+        // Listen for PSW shipment completion
+        hub.on(
+            PswDispatchCompleteHubConfig.EVENT_COMPLETED,
+            { raw: com.google.gson.JsonElement ->
+
+                Log.d(TAG, "PSW Completed RAW: $raw")
+
+                val completedShipmentNo = try {
+                    raw.asJsonObject.entrySet()
+                        .firstOrNull {
+                            it.key.equals("shipmentNo", ignoreCase = true)
+                        }
+                        ?.value
+                        ?.asString
+                        ?.trim()
+                } catch (e: Exception) {
+                    Log.e(TAG, "PSW completion payload could not be read", e)
+                    null
+                }
+
+                Log.d(
+                    TAG,
+                    "PSW completion signal: shipment=$completedShipmentNo current=$currentShipmentNo"
+                )
+
+                if (
+                    !completedShipmentNo.isNullOrBlank() &&
+                    completedShipmentNo == currentShipmentNo?.trim()
+                ) {
+                    SyncManager.onPswShipmentCompleted(
+                        applicationContext,
+                        completedShipmentNo
+                    )
+                }
+            },
+            com.google.gson.JsonElement::class.java
+        )
+
+        hub.onClosed { error ->
+
+            // Ignore callbacks from an old connection
+            if (completeHub !== hub) return@onClosed
+
+            Log.w(TAG, "PSW completion hub closed", error)
+
+            completeHub = null
+            joinedCompleteShipmentNo = null
+            isConnectingComplete = false
+
+            if (!isStopping) {
+                updateNotification("PSW completion hub offline - reconnecting")
+                scheduleReconnect()
+            }
+        }
+
+        completeHub = hub
+
+        scope.launch {
+            try {
+                hub.start().blockingAwait()
+
+                if (completeHub !== hub || isStopping) {
+                    try {
+                        hub.stop()
+                    } catch (_: Exception) {
+                    }
+                    return@launch
+                }
+
+                isConnectingComplete = false
+
+                Log.d(TAG, "PSW completion hub connected")
+
+                currentShipmentNo?.let { shipmentNo ->
+                    joinCompleteGroup(shipmentNo)
+                }
+
+            } catch (e: Exception) {
+
+                Log.e(TAG, "PSW completion hub connection failed", e)
+
+                if (completeHub === hub) {
+                    completeHub = null
+                }
+
+                isConnectingComplete = false
+
+                if (!isStopping) {
+                    scheduleReconnect()
+                }
+            }
+        }
+    }
+
+
     private fun leaveGroup(shipmentNo: String) {
         try {
             hubConnection?.send(PswDispatchHubConfig.METHOD_LEAVE, shipmentNo)
@@ -254,11 +401,52 @@ class PswDispatchSignalRService : Service() {
         }
     }
 
+
+    private fun joinCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub
+                ?.invoke(
+                    PswDispatchCompleteHubConfig.METHOD_JOIN,
+                    shipmentNo
+                )
+                ?.subscribe(
+                    {
+                        joinedCompleteShipmentNo = shipmentNo
+                        Log.d(TAG, "Joined PSW completion group $shipmentNo")
+                    },
+                    { error ->
+                        Log.e(
+                            TAG,
+                            "PSW completion group join failed for $shipmentNo",
+                            error
+                        )
+                    }
+                )
+        } catch (e: Exception) {
+            Log.e(TAG, "PSW completion group join failed", e)
+        }
+    }
+
+    private fun leaveCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub?.send(
+                PswDispatchCompleteHubConfig.METHOD_LEAVE,
+                shipmentNo
+            )
+
+            Log.d(TAG, "Left PSW completion group $shipmentNo")
+        } catch (e: Exception) {
+            Log.e(TAG, "PSW completion group leave failed", e)
+        }
+    }
+
+
     // ------------------------------------------------
+
     private fun scheduleReconnect() {
 
         if (isStopping || currentShipmentNo == null) return
-        if (reconnectJob?.isActive == true) return   // one pending retry at a time
+        if (reconnectJob?.isActive == true) return
 
         reconnectJob = scope.launch {
 
@@ -270,9 +458,18 @@ class PswDispatchSignalRService : Service() {
 
             if (isStopping || currentShipmentNo == null) return@launch
 
-            if (hubConnection == null) connect()
+            // Reconnect bale-update hub independently
+            if (hubConnection == null) {
+                connect()
+            }
+
+            // Reconnect completion hub independently
+            if (completeHub == null) {
+                connectCompleteHub()
+            }
         }
     }
+
 
     private fun registerNetworkCallback() {
 
@@ -285,9 +482,15 @@ class PswDispatchSignalRService : Service() {
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             override fun onAvailable(network: Network) {
+
+                reconnectAttempt = 0
+
                 if (hubConnection == null) {
-                    reconnectAttempt = 0
                     connect()
+                }
+
+                if (completeHub == null) {
+                    connectCompleteHub()
                 }
             }
 
@@ -301,31 +504,56 @@ class PswDispatchSignalRService : Service() {
     }
 
     // ------------------------------------------------
+
     override fun onDestroy() {
 
         isStopping = true
         reconnectJob?.cancel()
 
-        currentShipmentNo?.let { leaveGroup(it) }
+        // Leave PSW bale-update group
+        joinedShipmentNo?.let {
+            leaveGroup(it)
+        }
+
+        // Leave PSW completion group
+        joinedCompleteShipmentNo?.let {
+            leaveCompleteGroup(it)
+        }
 
         try {
             networkCallback?.let {
                 (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
                     .unregisterNetworkCallback(it)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Network callback unregister failed", e)
         }
 
+        // Stop bale-update hub
         try {
             hubConnection?.stop()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "PSW bale hub stop failed", e)
+        }
+
+        // Stop completion hub
+        try {
+            completeHub?.stop()
+        } catch (e: Exception) {
+            Log.w(TAG, "PSW completion hub stop failed", e)
         }
 
         hubConnection = null
+        completeHub = null
+
+        joinedShipmentNo = null
+        joinedCompleteShipmentNo = null
+
         scope.cancel()
 
         super.onDestroy()
     }
+
 
     override fun onBind(intent: Intent?): IBinder? = null
 

@@ -5,14 +5,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
+import com.united.digitaldispatch.sync.SyncEvents
+import com.united.digitaldispatch.utils.CompletionDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.activity.viewModels
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
+import android.content.Intent
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.MasterDataRepository
+import com.united.digitaldispatch.Apiservice.viewmodel.CompletePswState
 import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.PswDispatchViewModelFactory
 import com.united.digitaldispatch.Apiservice.viewmodel.PswHeaderState
@@ -22,6 +27,7 @@ import com.united.digitaldispatch.PSWDispatch.Adaptor.PSWGradeSummary
 import com.united.digitaldispatch.R
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
+import com.united.digitaldispatch.utils.CompleteConfirmDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -46,6 +52,7 @@ class PSWDispatchSummary : AppCompatActivity() {
     private lateinit var txtTotBales: TextView
     private lateinit var txtTotQty: TextView
     private lateinit var txtNoData: TextView
+    private lateinit var txtComplete: TextView
 
     private lateinit var rvHeader: RecyclerView
     private lateinit var rvItem: RecyclerView
@@ -71,9 +78,11 @@ class PSWDispatchSummary : AppCompatActivity() {
         setContentData()
         setupLists()
         observeData()
+        observeCompleteState()
     }
 
     private fun bindViews() {
+
         txtTitle = findViewById(R.id.txt_title)
         txtOrgCode = findViewById(R.id.txt_org_code)
         txtDate = findViewById(R.id.txt_date)
@@ -88,6 +97,40 @@ class PSWDispatchSummary : AppCompatActivity() {
         rvHeader = findViewById(R.id.rv_header)
         rvItem = findViewById(R.id.rv_item)
 
+        txtComplete = findViewById(R.id.txt_complete)
+
+        // Complete PSW Dispatch
+        txtComplete.setOnClickListener {
+
+            val total = viewModel.details.value.size
+
+            if (total == 0) {
+                Toast.makeText(
+                    this,
+                    "No bales to complete",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                return@setOnClickListener
+            }
+
+            CompleteConfirmDialog(
+                activity = this,
+                title = "Complete PSW Dispatch?",
+                message = "Once completed, this shipment cannot be changed.",
+                detail = "SHIPMENT  $shipmentNo",
+                stats = listOf(
+                    "Bales" to total.toString(),
+                    "Qty" to txtTotQty.text.toString()
+                )
+            ) {
+                viewModel.completePswDispatch(
+                    shipmentNo = shipmentNo,
+                    totalBales = total
+                )
+            }.show()
+        }
+
         findViewById<FrameLayout>(R.id.constraint_back_container)
             .setOnClickListener {
                 finish()
@@ -95,7 +138,9 @@ class PSWDispatchSummary : AppCompatActivity() {
     }
 
     private fun setContentData() {
+
         txtTitle.text = "PSW Dispatch"
+
         txtDate.text = SimpleDateFormat(
             "dd-MM-yyyy",
             Locale.getDefault()
@@ -108,16 +153,18 @@ class PSWDispatchSummary : AppCompatActivity() {
     }
 
     private fun setupLists() {
+
         adapter = PSWDispatchSummaryAdapter()
 
-        // Reuse the normal Dispatch header.
-        // false hides the Rate and Value columns.
+        // Reuse normal Dispatch header.
+        // false hides Rate and Value columns.
         rvHeader.adapter = DispatchSummaryHeaderAdapter(showValue = false)
 
         rvItem.adapter = adapter
     }
 
     private fun observeData() {
+
         viewModel.loadPswDetails(shipmentNo)
         viewModel.loadPswHeader(shipmentNo)
 
@@ -131,10 +178,82 @@ class PSWDispatchSummary : AppCompatActivity() {
                 }
 
                 launch {
+                    SyncEvents.pswShipmentCompleted.collect { completed ->
+
+                        if (
+                            completed == shipmentNo &&
+                            !isFinishing
+                        ) {
+                            CompletionDialog(
+                                activity = this@PSWDispatchSummary,
+                                title = "PSW Dispatch Completed",
+                                message = "This PSW shipment was completed on another device.",
+                                detail = completed
+                            ) {
+                                goBackToPswDispatchList()
+                            }.show()
+                        }
+                    }
+                }
+
+                launch {
                     viewModel.header.collect { state ->
+
                         if (state is PswHeaderState.Loaded) {
                             txtOrgCode.text =
                                 state.header.senderOrgnCode.orEmpty()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeCompleteState() {
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModel.completePswState.collect { state ->
+
+                    when (state) {
+
+                        is CompletePswState.Idle -> {
+                            txtComplete.isEnabled = true
+                            txtComplete.text = "Complete"
+                        }
+
+                        is CompletePswState.Loading -> {
+                            txtComplete.isEnabled = false
+                            txtComplete.text = "Completing..."
+                        }
+
+                        is CompletePswState.Success -> {
+
+                            viewModel.resetCompletePswState()
+
+                            CompletionDialog(
+                                activity = this@PSWDispatchSummary,
+                                title = "PSW Dispatch Completed",
+                                message = "PSW Dispatch completed successfully.",
+                                detail = shipmentNo
+                            ) {
+                                goBackToPswDispatchList()
+                            }.show()
+                        }
+
+                        is CompletePswState.Error -> {
+
+                            txtComplete.isEnabled = true
+                            txtComplete.text = "Complete"
+
+                            Toast.makeText(
+                                this@PSWDispatchSummary,
+                                state.message,
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            viewModel.resetCompletePswState()
                         }
                     }
                 }
@@ -150,14 +269,32 @@ class PSWDispatchSummary : AppCompatActivity() {
 
         val hasData = gradeSummary.isNotEmpty()
 
-        rvItem.visibility = if (hasData) View.VISIBLE else View.GONE
-        txtNoData.visibility = if (hasData) View.GONE else View.VISIBLE
+        rvItem.visibility =
+            if (hasData) View.VISIBLE else View.GONE
+
+        txtNoData.visibility =
+            if (hasData) View.GONE else View.VISIBLE
 
         val totalQty = gradeSummary.sumOf { it.qty }
 
         txtTotGrade.text = gradeSummary.size.toString()
         txtTotBales.text = details.size.toString()
-        txtTotQty.text = String.format(Locale.US, "%.1f", totalQty)
+
+        txtTotQty.text = String.format(
+            Locale.US,
+            "%.1f",
+            totalQty
+        )
+    }
+
+    private fun goBackToPswDispatchList() {
+        startActivity(
+            Intent(this, PswDispatch::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+        )
+        finish()
     }
 
     private fun buildGradeSummary(
@@ -166,6 +303,7 @@ class PSWDispatchSummary : AppCompatActivity() {
 
         return details
             .mapNotNull { detail ->
+
                 detail.grade
                     ?.trim()
                     ?.takeIf { it.isNotEmpty() }
@@ -176,6 +314,7 @@ class PSWDispatchSummary : AppCompatActivity() {
                 valueTransform = { it.second }
             )
             .map { (grade, items) ->
+
                 PSWGradeSummary(
                     grade = grade,
                     bales = items.size,

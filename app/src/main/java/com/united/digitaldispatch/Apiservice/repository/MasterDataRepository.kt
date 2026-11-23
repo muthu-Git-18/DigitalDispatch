@@ -1612,4 +1612,85 @@ class MasterDataRepository(
 
         return true
     }
+
+
+    // ------------------------------
+// COMPLETE PSW DISPATCH
+// ------------------------------
+
+    suspend fun completePswDispatch(
+        shipmentNo: String,
+        totalBales: Int
+    ): Result<CompleteDispatchData> {
+
+        return try {
+
+            // Step 1: Check pending PSW bales for this shipment
+            val pending = withContext(Dispatchers.IO) {
+                database.pswDispatchDetailDao()
+                    .countUnsyncedByShipment(shipmentNo)
+            }
+
+            if (pending > 0) {
+                throw Exception(
+                    "$pending bale(s) not uploaded yet. Connect to the network and try again."
+                )
+            }
+
+            // Step 2: Call PSW completion API
+            val response = apiService.completePswDispatch(
+                CompleteDispatchRequest(
+                    shipmentNo,
+                    totalBales.toString()
+                )
+            )
+
+            // Step 3: Read response
+            val body = response.body()
+                ?: parseCompleteError(response.errorBody()?.string())
+
+            val data = body?.data
+
+            if (!response.isSuccessful || data == null || !data.isSuccess) {
+                throw Exception(
+                    data?.output?.takeIf { it.isNotBlank() }
+                        ?: body?.message?.takeIf { it.isNotBlank() }
+                        ?: "Complete PSW dispatch failed: ${response.code()}"
+                )
+            }
+
+            // Step 4: Remove local PSW shipment after successful completion
+            removePswShipmentLocally(shipmentNo)
+
+            Result.success(data)
+
+        } catch (e: Exception) {
+
+            android.util.Log.e(
+                "MasterDataRepository",
+                "Complete PSW dispatch failed",
+                e
+            )
+
+            Result.failure(e)
+        }
+    }
+
+    suspend fun removePswShipmentLocally(shipmentNo: String) {
+        withContext(Dispatchers.IO) {
+            database.runInTransaction {
+                // Delete PSW bale details
+                database.pswDispatchDetailDao()
+                    .deleteByShipmentNo(shipmentNo)
+
+                // Delete PSW sync state using its prefixed key
+                database.dispatchSyncStateDao()
+                    .deleteByShipment(pswStateKey(shipmentNo))
+
+                // Delete PSW header
+                database.pswDispatchHeaderDao()
+                    .deleteByShipmentNo(shipmentNo)
+            }
+        }
+    }
 }

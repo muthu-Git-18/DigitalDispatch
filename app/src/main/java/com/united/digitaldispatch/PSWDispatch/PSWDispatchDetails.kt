@@ -13,6 +13,8 @@ import android.text.TextWatcher
 import androidx.activity.result.contract.ActivityResultContracts
 import android.text.style.ForegroundColorSpan
 import android.view.View
+import com.united.digitaldispatch.sync.SyncEvents
+import com.united.digitaldispatch.utils.CompletionDialog
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
@@ -381,6 +383,25 @@ class PSWDispatchDetails : AppCompatActivity() {
                                     clearFields()
                                 }
                             }
+                        }
+                    }
+                }
+
+                launch {
+                    SyncEvents.pswShipmentCompleted.collect { completed ->
+
+                        if (
+                            completed == shipmentNo &&
+                            !isFinishing
+                        ) {
+                            CompletionDialog(
+                                activity = this@PSWDispatchDetails,
+                                title = "PSW Dispatch Completed",
+                                message = "This PSW shipment was completed on another device.",
+                                detail = completed
+                            ) {
+                                goBackToPswDispatchList()
+                            }.show()
                         }
                     }
                 }
@@ -913,6 +934,16 @@ class PSWDispatchDetails : AppCompatActivity() {
 
         // Your existing TextWatcher will trigger lookupPswBale().
         edtBaleNo.setText(baleNo)
+    }
+
+    private fun goBackToPswDispatchList() {
+        val intent = Intent(this, PswDispatch::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+
+        startActivity(intent)
+        finish()
     }
 
     private fun showKeyboard(view: EditText) {

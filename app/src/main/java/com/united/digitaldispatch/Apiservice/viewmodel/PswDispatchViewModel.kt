@@ -13,6 +13,7 @@ import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.utils.TimeUtils
 import kotlinx.coroutines.Job
+import com.united.digitaldispatch.Dispatch.models.CompleteDispatchData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -309,6 +310,45 @@ class PswDispatchViewModel(
             repository.pullPswDispatchChanges(shipmentNo)
         }
     }
+
+    // ---------------------------------
+// COMPLETE PSW DISPATCH
+// ---------------------------------
+
+    private val _completePswState =
+        MutableStateFlow<CompletePswState>(CompletePswState.Idle)
+
+    val completePswState: StateFlow<CompletePswState> =
+        _completePswState
+
+    fun completePswDispatch(shipmentNo: String, totalBales: Int) {
+
+        // Prevent double tap
+        if (_completePswState.value is CompletePswState.Loading) return
+
+        viewModelScope.launch {
+
+            _completePswState.value = CompletePswState.Loading
+
+            _completePswState.value =
+                repository.completePswDispatch(shipmentNo, totalBales).fold(
+
+                    onSuccess = {
+                        CompletePswState.Success(it)
+                    },
+
+                    onFailure = { exception ->
+                        CompletePswState.Error(
+                            exception.message ?: "Complete PSW dispatch failed"
+                        )
+                    }
+                )
+        }
+    }
+
+    fun resetCompletePswState() {
+        _completePswState.value = CompletePswState.Idle
+    }
 }
 
 
@@ -374,6 +414,19 @@ sealed class SyncPswHeadersState {
 }
 
 
+
+sealed class CompletePswState {
+    object Idle : CompletePswState()
+    object Loading : CompletePswState()
+
+    data class Success(
+        val data: CompleteDispatchData
+    ) : CompletePswState()
+
+    data class Error(
+        val message: String
+    ) : CompletePswState()
+}
 // ---------------------------------
 // PSW DETAILS STATES
 // ---------------------------------
