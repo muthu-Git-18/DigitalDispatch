@@ -1,54 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#D9D8D5">
+    android:background="#D9D8D5"
+    android:fitsSystemWindows="true">
 
-
-    <!-- =========================================================
-         BACKGROUND
-         ========================================================= -->
-
+    <!-- BACKGROUND -->
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="280dp"
         android:layout_height="500dp"
         android:alpha="0.13"
         android:contentDescription="Background"
-        android:src="@drawable/dashbg3"
         android:scaleType="fitXY"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/dashbg3"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-
-    <!-- =========================================================
-         NORMAL CHARCOAL HEADER
-         ========================================================= -->
-
+    <!-- CHARCOAL HEADER -->
     <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="90dp"
         android:background="#2E353A"
         android:elevation="10dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Gold bottom border -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_alignParentBottom="true"
             android:background="#DCB765" />
 
-        <!-- LOGO -->
         <FrameLayout
             android:id="@+id/logoContainer"
             android:layout_width="62dp"
@@ -67,10 +55,8 @@
                 android:contentDescription="GPIL Logo"
                 android:scaleType="centerInside"
                 android:src="@drawable/logooo" />
-
         </FrameLayout>
 
-        <!-- TITLE + SUBTITLE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,14 +70,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="Receipt"
-                android:textColor="#FFF8E8"
-                android:textSize="21sp"
-                android:textStyle="bold"
                 android:shadowColor="#80000000"
                 android:shadowDx="2"
                 android:shadowDy="2"
-                android:shadowRadius="2" />
+                android:shadowRadius="2"
+                android:text="Receipt"
+                android:textColor="#FFF8E8"
+                android:textSize="21sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/sub_tittle"
@@ -102,10 +88,8 @@
                 android:textColor="#DCB765"
                 android:textSize="12sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
-        <!-- ORG + DATE -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -123,7 +107,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -135,7 +119,6 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -148,7 +131,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 08-09-2026"
+                    android:text="Date : "
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -160,36 +143,29 @@
                     android:textColor="#FFF8E8"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </RelativeLayout>
 
-
-    <!-- =========================================================
-          HEADER ID — COMPACT SINGLE ROW
-          ========================================================= -->
-
+    <!-- HEADER ID -->
     <LinearLayout
         android:id="@+id/cardHeaderId"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/dashboard_card_background"
         android:elevation="6dp"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingStart="14dp"
-        android:paddingEnd="14dp"
         android:paddingTop="8dp"
+        android:paddingEnd="14dp"
         android:paddingBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <TextView
             android:layout_width="wrap_content"
@@ -203,38 +179,33 @@
             android:id="@+id/txt_header_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:gravity="end"
-            android:text="2026/G88/P72/00099"
+            android:text=""
             android:textColor="#2E353A"
             android:textSize="14sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         TABLE CARD (Sl No / Bale Number)
-         ========================================================= -->
-
+    <!-- TABLE CARD -->
     <LinearLayout
         android:id="@+id/cardTable"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/dashboard_card_background"
+        android:clipChildren="true"
         android:elevation="8dp"
         android:orientation="vertical"
-        android:clipChildren="true"
-        app:layout_constraintTop_toBottomOf="@id/cardHeaderId"
         app:layout_constraintBottom_toTopOf="@id/statsRow"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/cardHeaderId">
 
-        <!-- Table header row -->
+        <!-- Table header row (4 columns, widths match item_receipt_view.xml) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -244,18 +215,13 @@
             android:paddingBottom="10dp">
 
             <TextView
-                android:layout_width="70dp"
+                android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Sl No"
                 android:textColor="#DCB765"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="#4A525A" />
 
             <TextView
                 android:layout_width="0dp"
@@ -264,60 +230,74 @@
                 android:gravity="center"
                 android:text="Bale Number"
                 android:textColor="#DCB765"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Status"
+                android:textColor="#DCB765"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Rcv Wt"
+                android:textColor="#DCB765"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_item"
+        <!-- List + empty message share the remaining space -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="4dp"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:layout_weight="1">
 
-        <!-- No data placeholder -->
-        <TextView
-            android:id="@+id/txt_no_data"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="No Data Found"
-            android:textColor="#85745E"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_item"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:paddingBottom="4dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+            <TextView
+                android:id="@+id/txt_no_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="No Data Found"
+                android:textColor="#85745E"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
-
-    <!-- =========================================================
-         STATS ROW 1 : RECEIVED COUNT / TOTAL BALES
-         ========================================================= -->
-
+    <!-- STATS ROW: RECEIVED COUNT / TOTAL BALES (no top constraint to cardTable) -->
     <LinearLayout
         android:id="@+id/statsRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/cardTable"
         app:layout_constraintBottom_toTopOf="@id/footerRow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginEnd="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_card_background"
             android:elevation="6dp"
             android:orientation="vertical"
@@ -341,14 +321,13 @@
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="6dp"
+            android:layout_weight="1"
             android:background="@drawable/dashboard_card_background"
             android:elevation="6dp"
             android:orientation="vertical"
@@ -368,33 +347,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="126"
+                android:text="0"
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         FOOTER ROW : TOTAL QUANTITY + BACK
-         ========================================================= -->
-
+    <!-- FOOTER ROW: TOTAL QUANTITY + BACK -->
     <LinearLayout
         android:id="@+id/footerRow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="16dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -419,11 +392,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="8382.70"
+                android:text="0.00"
                 android:textColor="#2E353A"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <!-- Back (circular, gold) -->
@@ -452,16 +424,10 @@
                 android:padding="11dp"
                 android:src="@drawable/arrow_back"
                 android:tint="#5A3517" />
-
         </FrameLayout>
-
     </LinearLayout>
 
-
-    <!-- =========================================================
-         LOADER
-         ========================================================= -->
-
+    <!-- LOADER -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"

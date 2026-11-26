@@ -230,7 +230,7 @@ class ReceiptDetails : AppCompatActivity() {
         btnView.setOnClickListener {
             startActivity(
                 Intent(this, ReceiptView::class.java)
-                    .putExtra(Receipt.EXTRA_SHIPMENT_NO, shipmentNo)
+                    .putExtra(ReceiptView.EXTRA_SHIPMENT_NO, shipmentNo)
             )
         }
 

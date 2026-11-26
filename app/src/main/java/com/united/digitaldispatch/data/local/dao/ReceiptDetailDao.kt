@@ -89,4 +89,8 @@ interface ReceiptDetailDao {
     // for the red "(n pending)" on the screen
     @Query("SELECT COUNT(*) FROM receipt_detail WHERE shipmentNo = :shipmentNo AND status = 'RCV' AND syncStatus != 'SUCCESS'")
     fun observePending(shipmentNo: String): Flow<Int>
+
+    // ReceiptDetailDao
+    @Query("SELECT * FROM receipt_detail WHERE shipmentNo = :shipmentNo ORDER BY id")
+    fun observeByShipment(shipmentNo: String): Flow<List<ReceiptDetailEntity>>
 }

@@ -422,4 +422,8 @@ class ReceiptRepository(
 
         return true
     }
+
+
+    fun observeReceiptDetails(shipmentNo: String): Flow<List<ReceiptDetailEntity>> =
+        detailDao.observeByShipment(shipmentNo)
 }

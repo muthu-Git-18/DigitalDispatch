@@ -7,6 +7,7 @@ import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
 import com.united.digitaldispatch.data.local.entity.ReceiptHeaderEntity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -192,6 +193,19 @@ class ReceiptViewModel(
                     baleDownloadStarted = false          // allow retry next time the screen opens
                     _baleSyncState.value = ReceiptSyncState.Error(it.message ?: "Download failed")
                 }
+        }
+    }
+
+
+    // in ReceiptViewModel
+    private val _details = MutableStateFlow<List<ReceiptDetailEntity>>(emptyList())
+    val details: StateFlow<List<ReceiptDetailEntity>> = _details
+
+    private var detailsJob: Job? = null
+    fun loadDetails(shipmentNo: String) {
+        detailsJob?.cancel()
+        detailsJob = viewModelScope.launch {
+            repository.observeReceiptDetails(shipmentNo).collect { _details.value = it }
         }
     }
 }
