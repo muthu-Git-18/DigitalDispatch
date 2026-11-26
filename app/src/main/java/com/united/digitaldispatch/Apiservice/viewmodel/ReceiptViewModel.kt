@@ -3,6 +3,7 @@ package com.united.digitaldispatch.Apiservice.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.united.digitaldispatch.Apiservice.repository.ReceiptRepository
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteData
 import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
 import com.united.digitaldispatch.data.local.entity.ReceiptHeaderEntity
 import kotlinx.coroutines.CancellationException
@@ -40,6 +41,13 @@ sealed class ReceiptDetailEvent {
     /** result of the header re-check after the first bale */
     data class WeighTypeResolved(val type: String, val changed: Boolean) : ReceiptDetailEvent()
     data class Error(val message: String) : ReceiptDetailEvent()
+}
+
+sealed class ReceiptCompleteState {
+    object Idle : ReceiptCompleteState()
+    object Loading : ReceiptCompleteState()
+    data class Success(val data: ReceiptCompleteData) : ReceiptCompleteState()
+    data class Error(val message: String) : ReceiptCompleteState()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -208,4 +216,22 @@ class ReceiptViewModel(
             repository.observeReceiptDetails(shipmentNo).collect { _details.value = it }
         }
     }
+
+
+    // ---------------- COMPLETE RECEIPT ----------------
+    private val _completeState = MutableStateFlow<ReceiptCompleteState>(ReceiptCompleteState.Idle)
+    val completeState: StateFlow<ReceiptCompleteState> = _completeState.asStateFlow()
+
+    fun completeReceipt(shipmentNo: String) {
+        if (_completeState.value is ReceiptCompleteState.Loading) return   // double-tap guard
+        viewModelScope.launch {
+            _completeState.value = ReceiptCompleteState.Loading
+            _completeState.value = repository.completeReceipt(shipmentNo).fold(
+                onSuccess = { ReceiptCompleteState.Success(it) },
+                onFailure = { ReceiptCompleteState.Error(it.message ?: "Complete receipt failed") }
+            )
+        }
+    }
+
+    fun resetCompleteState() { _completeState.value = ReceiptCompleteState.Idle }
 }

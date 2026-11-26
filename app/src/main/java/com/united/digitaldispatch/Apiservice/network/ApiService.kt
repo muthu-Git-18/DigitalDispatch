@@ -20,6 +20,8 @@ import com.united.digitaldispatch.Receipt.models.ReceiptUploadRequest
 import com.united.digitaldispatch.Receipt.models.ReceiptUploadResponse
 import com.united.digitaldispatch.PSWReceipt.models.PswReceiptHeaderListResponse
 import com.united.digitaldispatch.PSWReceipt.models.PswReceiptBaleListResponse
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteRequest
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteResponse
 import okhttp3.ResponseBody
 
 
@@ -163,5 +165,11 @@ interface ApiService {
     suspend fun getPswReceiptBales(
         @Query("shipmentNo") shipmentNo: String
     ): Response<PswReceiptBaleListResponse>
+
+
+    @POST("Receipt/complete-receipt")
+    suspend fun completeReceipt(
+        @Body request: ReceiptCompleteRequest
+    ): Response<ReceiptCompleteResponse>
 
 }

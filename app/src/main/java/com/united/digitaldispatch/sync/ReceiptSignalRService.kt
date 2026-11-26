@@ -16,6 +16,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.JsonElement
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
@@ -28,11 +29,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Live "return sync" of Receipt bales through SignalR (ReceiptHubConfig).
- * Runs only while a shipment is open on the Receipt Details screen:
- *   start(ctx, shipmentNo) -> connect, join the shipment group, download the changes once
- *   stop(ctx, shipmentNo)  -> leave the group and disconnect
- *                             (ignored if the service already moved to another shipment)
+ * Live "return sync" of Receipt through SignalR (two hubs).
+ *
+ *  receiptHub          -> "ReceiptUpdated"   : bales received on another device -> pull changes
+ *  receiptCompleteHub  -> "ReceiptCompleted" : receipt completed on another device
+ *                                              -> delete it locally + tell the open screens
  */
 class ReceiptSignalRService : Service() {
 
@@ -75,24 +76,25 @@ class ReceiptSignalRService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // bale hub
     private var hubConnection: HubConnection? = null
+
+    // completion hub
+    private var completeHub: HubConnection? = null
 
     private lateinit var notificationManager: NotificationManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     private var currentShipmentNo: String? = null
     private var joinedShipmentNo: String? = null
+    private var joinedCompleteShipmentNo: String? = null
 
     private var reconnectJob: Job? = null
 
-    @Volatile
-    private var isConnecting = false
-
-    @Volatile
-    private var isStopping = false
-
-    @Volatile
-    private var reconnectAttempt = 0
+    @Volatile private var isConnecting = false
+    @Volatile private var isConnectingComplete = false
+    @Volatile private var isStopping = false
+    @Volatile private var reconnectAttempt = 0
 
     // ------------------------------------------------
     override fun onCreate() {
@@ -123,11 +125,14 @@ class ReceiptSignalRService : Service() {
         if (!shipmentNo.isNullOrBlank() && shipmentNo != currentShipmentNo) {
 
             val old = joinedShipmentNo
+            val oldComplete = joinedCompleteShipmentNo
 
             currentShipmentNo = shipmentNo
             joinedShipmentNo = null
+            joinedCompleteShipmentNo = null
 
             if (old != null) leaveGroup(old)
+            if (oldComplete != null) leaveCompleteGroup(oldComplete)
 
             if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
                 joinGroup(shipmentNo)
@@ -136,8 +141,15 @@ class ReceiptSignalRService : Service() {
                 connect()
             }
 
+            if (completeHub?.connectionState == HubConnectionState.CONNECTED) {
+                joinCompleteGroup(shipmentNo)
+            } else {
+                startCompleteHub()
+            }
+
         } else {
             if (hubConnection == null) connect()
+            if (completeHub == null) startCompleteHub()
         }
 
         // tied to the open screen -> do not restart on its own
@@ -145,7 +157,7 @@ class ReceiptSignalRService : Service() {
     }
 
     // ================================================
-    //  RECEIPT HUB
+    //  RECEIPT BALE HUB
     // ================================================
     private fun connect() {
 
@@ -158,11 +170,9 @@ class ReceiptSignalRService : Service() {
             .create(ReceiptHubConfig.HUB_URL)
             .build()
 
-        // detect dead connections quickly (mobile networks drop silently)
         hub.keepAliveInterval = 10_000L
         hub.serverTimeout = 30_000L
 
-        // server tells us a change happened
         hub.on(
             ReceiptHubConfig.EVENT_CHANGED,
             { changeId: Long, shipmentNo: String ->
@@ -178,7 +188,6 @@ class ReceiptSignalRService : Service() {
         )
 
         hub.onClosed { error ->
-            // an old hub closing must not touch the new one
             if (hubConnection !== hub) return@onClosed
 
             Log.w(TAG, "Hub closed", error)
@@ -199,7 +208,6 @@ class ReceiptSignalRService : Service() {
             try {
                 hub.start().blockingAwait()
 
-                // service moved on / stopped while we were connecting
                 if (hubConnection !== hub || isStopping) {
                     try { hub.stop() } catch (_: Exception) {}
                     return@launch
@@ -236,9 +244,7 @@ class ReceiptSignalRService : Service() {
                         joinedShipmentNo = shipmentNo
                         Log.d(TAG, "Joined group $shipmentNo")
                     },
-                    { error ->
-                        Log.e(TAG, "Join rejected by server for $shipmentNo", error)
-                    }
+                    { error -> Log.e(TAG, "Join rejected by server for $shipmentNo", error) }
                 )
         } catch (e: Exception) {
             Log.e(TAG, "Join failed", e)
@@ -254,11 +260,116 @@ class ReceiptSignalRService : Service() {
         }
     }
 
+    // ================================================
+    //  COMPLETION HUB
+    // ================================================
+    private fun startCompleteHub() {
+
+        if (isStopping || isConnectingComplete || completeHub != null) return
+        if (!ReceiptCompleteHubConfig.enabled) return
+
+        isConnectingComplete = true
+
+        val hub = HubConnectionBuilder
+            .create(ReceiptCompleteHubConfig.HUB_URL)
+            .build()
+
+        hub.keepAliveInterval = 10_000L
+        hub.serverTimeout = 30_000L
+
+        // the server sends an OBJECT { ShipmentNo, ... }, not a string (same as dispatch)
+        hub.on(
+            ReceiptCompleteHubConfig.EVENT_COMPLETED,
+            { raw: JsonElement ->
+
+                Log.d(TAG, "Completed RAW: $raw")
+
+                val completed = try {
+                    raw.asJsonObject.entrySet()
+                        .firstOrNull { it.key.equals("shipmentNo", ignoreCase = true) }
+                        ?.value?.asString?.trim()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Completed payload could not be read", e)
+                    null
+                }
+
+                Log.d(TAG, "Completed signal: shipment=$completed current=$currentShipmentNo")
+
+                if (!completed.isNullOrEmpty() && completed == currentShipmentNo?.trim()) {
+                    SyncManager.onReceiptShipmentCompleted(applicationContext, completed)
+                }
+            },
+            JsonElement::class.java
+        )
+
+        hub.onClosed { error ->
+            if (completeHub !== hub) return@onClosed
+
+            Log.w(TAG, "Complete hub closed", error)
+
+            completeHub = null
+            joinedCompleteShipmentNo = null
+            isConnectingComplete = false
+
+            if (!isStopping) scheduleReconnect()
+        }
+
+        completeHub = hub
+
+        scope.launch {
+            try {
+                hub.start().blockingAwait()
+
+                if (completeHub !== hub || isStopping) {
+                    try { hub.stop() } catch (_: Exception) {}
+                    return@launch
+                }
+
+                isConnectingComplete = false
+
+                currentShipmentNo?.let { joinCompleteGroup(it) }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Complete hub connect failed", e)
+
+                if (completeHub === hub) completeHub = null
+                isConnectingComplete = false
+
+                if (!isStopping) scheduleReconnect()
+            }
+        }
+    }
+
+    private fun joinCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub
+                ?.invoke(ReceiptCompleteHubConfig.METHOD_JOIN, shipmentNo)
+                ?.subscribe(
+                    {
+                        joinedCompleteShipmentNo = shipmentNo
+                        Log.d(TAG, "Joined complete group $shipmentNo")
+                    },
+                    { error -> Log.e(TAG, "Complete join rejected by server for $shipmentNo", error) }
+                )
+        } catch (e: Exception) {
+            Log.e(TAG, "Complete join failed", e)
+        }
+    }
+
+    private fun leaveCompleteGroup(shipmentNo: String) {
+        try {
+            completeHub?.send(ReceiptCompleteHubConfig.METHOD_LEAVE, shipmentNo)
+            Log.d(TAG, "Left complete group $shipmentNo")
+        } catch (e: Exception) {
+            Log.e(TAG, "Complete leave failed", e)
+        }
+    }
+
     // ------------------------------------------------
     private fun scheduleReconnect() {
 
         if (isStopping || currentShipmentNo == null) return
-        if (reconnectJob?.isActive == true) return   // one pending retry at a time
+        if (reconnectJob?.isActive == true) return
 
         reconnectJob = scope.launch {
 
@@ -271,6 +382,7 @@ class ReceiptSignalRService : Service() {
             if (isStopping || currentShipmentNo == null) return@launch
 
             if (hubConnection == null) connect()
+            if (completeHub == null) startCompleteHub()
         }
     }
 
@@ -285,9 +397,10 @@ class ReceiptSignalRService : Service() {
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             override fun onAvailable(network: Network) {
-                if (hubConnection == null) {
+                if (hubConnection == null || completeHub == null) {
                     reconnectAttempt = 0
-                    connect()
+                    if (hubConnection == null) connect()
+                    if (completeHub == null) startCompleteHub()
                 }
             }
 
@@ -306,22 +419,23 @@ class ReceiptSignalRService : Service() {
         isStopping = true
         reconnectJob?.cancel()
 
-        currentShipmentNo?.let { leaveGroup(it) }
+        currentShipmentNo?.let {
+            leaveGroup(it)
+            leaveCompleteGroup(it)
+        }
 
         try {
             networkCallback?.let {
                 (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
                     .unregisterNetworkCallback(it)
             }
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
 
-        try {
-            hubConnection?.stop()
-        } catch (_: Exception) {
-        }
+        try { hubConnection?.stop() } catch (_: Exception) {}
+        try { completeHub?.stop() } catch (_: Exception) {}
 
         hubConnection = null
+        completeHub = null
         scope.cancel()
 
         super.onDestroy()
@@ -333,11 +447,7 @@ class ReceiptSignalRService : Service() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_ID,
-                    "Dispatch live sync",
-                    NotificationManager.IMPORTANCE_LOW
-                )
+                NotificationChannel(CHANNEL_ID, "Dispatch live sync", NotificationManager.IMPORTANCE_LOW)
             )
         }
     }
@@ -354,11 +464,7 @@ class ReceiptSignalRService : Service() {
         val notification = buildNotification(text)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }

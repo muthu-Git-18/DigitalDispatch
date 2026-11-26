@@ -242,4 +242,17 @@ object SyncManager {
             }
         }
     }
+
+
+    fun onReceiptShipmentCompleted(context: Context, shipmentNo: String) {
+        scope.launch {
+            try {
+                val repo = ReceiptRepository(ApiClient.instance, AppDatabase.getInstance(context.applicationContext))
+                repo.removeReceiptShipmentLocally(shipmentNo)
+                SyncEvents.receiptShipmentCompleted.tryEmit(shipmentNo)
+            } catch (e: Exception) {
+                android.util.Log.e("ReceiptSignalR", "Receipt completion cleanup failed: $shipmentNo", e)
+            }
+        }
+    }
 }

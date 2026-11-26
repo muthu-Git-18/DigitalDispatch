@@ -40,7 +40,9 @@ import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
 import com.united.digitaldispatch.sync.NetworkMonitor
 import com.united.digitaldispatch.sync.ReceiptSignalRService        // NEW
+import com.united.digitaldispatch.sync.SyncEvents
 import com.united.digitaldispatch.sync.SyncManager                  // NEW
+import com.united.digitaldispatch.utils.CompletionDialog
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -99,6 +101,9 @@ class ReceiptDetails : AppCompatActivity() {
     // NEW: live sync must start only AFTER the bales are downloaded, otherwise a change
     // could be applied to a row that does not exist yet and the bookmark would move past it
     private var liveSyncStarted = false
+
+    // the dialog must show only once, even if the event arrives twice
+    private var completionShown = false
 
     private val viewModel: ReceiptViewModel by viewModels {
         ReceiptViewModelFactory(
@@ -312,8 +317,35 @@ class ReceiptDetails : AppCompatActivity() {
                         }
                     }
                 }
+
+                // receipt completed on ANOTHER device (SignalR)
+                launch {
+                    SyncEvents.receiptShipmentCompleted.collect { completed ->
+                        if (completed == shipmentNo) showCompletedElsewhere()
+                    }
+                }
             }
         }
+    }
+
+    private fun showCompletedElsewhere() {
+        if (completionShown || isFinishing) return
+        completionShown = true
+
+        CompletionDialog(
+            activity = this,
+            title = "Receipt Completed",
+            message = "This receipt was completed on another device.",
+            detail = shipmentNo
+        ) { goBackToReceiptList() }.show()
+    }
+
+    private fun goBackToReceiptList() {
+        startActivity(
+            Intent(this, Receipt::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
+        finish()
     }
 
     private fun refreshCounts() {

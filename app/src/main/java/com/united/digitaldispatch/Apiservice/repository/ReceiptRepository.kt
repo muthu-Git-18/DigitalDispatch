@@ -3,6 +3,9 @@ package com.united.digitaldispatch.Apiservice.repository
 import androidx.room.withTransaction
 import com.united.digitaldispatch.Apiservice.network.ApiService
 import com.united.digitaldispatch.Dispatch.models.UploadSummary
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteData
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteRequest
+import com.united.digitaldispatch.Receipt.models.ReceiptCompleteResponse
 import com.united.digitaldispatch.Receipt.models.ReceiptHeaderDto
 import com.united.digitaldispatch.Receipt.models.ReceiptUploadRecord
 import com.united.digitaldispatch.Receipt.models.ReceiptUploadRequest
@@ -426,4 +429,70 @@ class ReceiptRepository(
 
     fun observeReceiptDetails(shipmentNo: String): Flow<List<ReceiptDetailEntity>> =
         detailDao.observeByShipment(shipmentNo)
+
+
+    // ---------------- COMPLETE RECEIPT ----------------
+
+    suspend fun completeReceipt(shipmentNo: String): Result<ReceiptCompleteData> =
+        withContext(Dispatchers.IO) {
+            try {
+                // every received bale must be on the server first
+                val pending = detailDao.countUnsyncedByShipment(shipmentNo)
+                if (pending > 0) {
+                    throw Exception("$pending bale(s) not uploaded yet. Connect to the network and try again.")
+                }
+
+                val header = dao.getByShipmentNo(shipmentNo)
+                    ?: throw Exception("Receipt header not found on this device")
+
+                val request = ReceiptCompleteRequest(
+                    shipmentNo = shipmentNo,
+                    senderOrgnCode = header.senderOrgnCode.orEmpty(),
+                    receiverOrgnCode = header.receiverOrgnCode.orEmpty(),
+                    senderDate = header.senderDate.orEmpty(),
+                    sentBy = header.sentBy.orEmpty(),
+                    deviceRcvBalesCount = detailDao.receivedCount(shipmentNo)
+                )
+
+                val response = api.completeReceipt(request)
+
+                // success and failure (409) both come back in the same JSON shape
+                val body = response.body() ?: parseReceiptCompleteError(response.errorBody()?.string())
+                val data = body?.data
+
+                if (!response.isSuccessful || data == null || !data.isSuccess) {
+                    throw Exception(
+                        data?.output?.takeIf { it.isNotBlank() }
+                            ?: body?.message?.takeIf { it.isNotBlank() }
+                            ?: "Complete receipt failed: ${response.code()}"
+                    )
+                }
+
+                // server accepted -> finished on this device too
+                removeReceiptShipmentLocally(shipmentNo)
+
+                Result.success(data)
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.e("ReceiptRepository", "Complete receipt failed", e)
+                Result.failure(e)
+            }
+        }
+
+    private fun parseReceiptCompleteError(raw: String?): ReceiptCompleteResponse? =
+        try { com.google.gson.Gson().fromJson(raw, ReceiptCompleteResponse::class.java) }
+        catch (_: Exception) { null }
+
+    /** Used by both "I completed it" and "another device completed it". */
+    suspend fun removeReceiptShipmentLocally(shipmentNo: String) {
+        withContext(Dispatchers.IO) {
+            db.withTransaction {
+                detailDao.deleteByShipment(shipmentNo)
+                db.dispatchSyncStateDao().deleteByShipment(receiptStateKey(shipmentNo))
+                dao.deleteByShipmentNo(shipmentNo)
+            }
+        }
+    }
 }

@@ -93,4 +93,11 @@ interface ReceiptDetailDao {
     // ReceiptDetailDao
     @Query("SELECT * FROM receipt_detail WHERE shipmentNo = :shipmentNo ORDER BY id")
     fun observeByShipment(shipmentNo: String): Flow<List<ReceiptDetailEntity>>
+
+    // received bales of this shipment that are not on the server yet
+    @Query("SELECT COUNT(*) FROM receipt_detail WHERE shipmentNo = :shipmentNo AND status = 'RCV' AND syncStatus IN ('PENDING','FAILED')")
+    suspend fun countUnsyncedByShipment(shipmentNo: String): Int
+
+    @Query("DELETE FROM receipt_detail WHERE shipmentNo = :shipmentNo")
+    suspend fun deleteByShipment(shipmentNo: String)
 }

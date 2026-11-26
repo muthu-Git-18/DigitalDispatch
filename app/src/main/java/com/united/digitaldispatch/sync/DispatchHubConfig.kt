@@ -89,3 +89,17 @@ object ReceiptHubConfig {
     val enabled: Boolean get() = HUB_URL.isNotBlank()
 
 }
+
+
+object ReceiptCompleteHubConfig {
+
+    val HUB_URL: String = "$HUB_BASE_URL/receiptCompleteHub"   // TODO confirm hub path with backend
+
+    /** server -> app: a receipt was completed (object with ShipmentNo) */
+    const val EVENT_COMPLETED = "ReceiptCompleted"             // TODO confirm event name with backend
+
+    const val METHOD_JOIN = "JoinShipmentGroup"                // TODO confirm
+    const val METHOD_LEAVE = "LeaveShipmentGroup"              // TODO confirm
+
+    val enabled: Boolean get() = HUB_URL.isNotBlank()
+}

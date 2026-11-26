@@ -43,4 +43,7 @@ interface ReceiptHeaderDao {
     @Query("UPDATE receipt_headers SET recevWeighType = :type WHERE shipmentNo = :shipmentNo AND (recevWeighType IS NULL OR recevWeighType = '')")
     suspend fun setWeighTypeIfBlank(shipmentNo: String, type: String)
 
+
+    @Query("DELETE FROM receipt_headers WHERE shipmentNo = :shipmentNo")
+    suspend fun deleteByShipmentNo(shipmentNo: String)
 }

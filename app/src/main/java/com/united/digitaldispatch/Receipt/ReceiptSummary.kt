@@ -1,5 +1,6 @@
 package com.united.digitaldispatch.Receipt
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.united.digitaldispatch.Apiservice.network.ApiClient
 import com.united.digitaldispatch.Apiservice.repository.ReceiptRepository
+import com.united.digitaldispatch.Apiservice.viewmodel.ReceiptCompleteState
 import com.united.digitaldispatch.Apiservice.viewmodel.ReceiptViewModel
 import com.united.digitaldispatch.Apiservice.viewmodel.ReceiptViewModelFactory
 import com.united.digitaldispatch.R
@@ -21,17 +23,16 @@ import com.united.digitaldispatch.Receipt.Adaptor.ReceiptSummaryAdapter
 import com.united.digitaldispatch.Receipt.Adaptor.ReceiptSummaryCalc
 import com.united.digitaldispatch.data.local.AppDatabase
 import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
+import com.united.digitaldispatch.sync.SyncEvents
 import com.united.digitaldispatch.utils.CompleteConfirmDialog
+import com.united.digitaldispatch.utils.CompletionDialog
 import com.united.digitaldispatch.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Receipt Summary (grade-wise totals of one shipment) + Receipt Complete.
- * Step 1: UI + local data only. Complete calls are added once the API / SignalR parts are shared.
- */
+/** Receipt Summary (grade-wise totals of one shipment) + Receipt Complete. */
 class ReceiptSummary : AppCompatActivity() {
 
     private val viewModel: ReceiptViewModel by viewModels {
@@ -56,11 +57,13 @@ class ReceiptSummary : AppCompatActivity() {
     private var shipmentNo = ""
     private var orgType = ""
 
+    // my own completion and the SignalR event can both arrive: show the dialog once
+    private var completionShown = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receipt_summary)
 
-        // same key the details screen uses to open this screen
         shipmentNo = intent.getStringExtra(Receipt.EXTRA_SHIPMENT_NO).orEmpty()
         orgType = SessionManager(this).getModuleType().orEmpty()
         Log.d("ReceiptSummary", "shipmentNo=[$shipmentNo]")
@@ -100,9 +103,59 @@ class ReceiptSummary : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.details.collect { bales -> render(bales) }
+
+                launch {
+                    viewModel.details.collect { bales -> render(bales) }
+                }
+
+                // my own complete call
+                launch {
+                    viewModel.completeState.collect { state ->
+                        when (state) {
+                            is ReceiptCompleteState.Loading -> txtComplete.isEnabled = false
+                            is ReceiptCompleteState.Success -> {
+                                txtComplete.isEnabled = true
+                                viewModel.resetCompleteState()
+                                showCompleted()
+                            }
+                            is ReceiptCompleteState.Error -> {
+                                txtComplete.isEnabled = true
+                                Toast.makeText(this@ReceiptSummary, state.message, Toast.LENGTH_LONG).show()
+                                viewModel.resetCompleteState()
+                            }
+                            else -> txtComplete.isEnabled = true
+                        }
+                    }
+                }
+
+                // completed on ANOTHER device (SignalR)
+                launch {
+                    SyncEvents.receiptShipmentCompleted.collect { completed ->
+                        if (completed == shipmentNo) showCompleted()
+                    }
+                }
             }
         }
+    }
+
+    private fun showCompleted() {
+        if (completionShown || isFinishing) return
+        completionShown = true
+
+        CompletionDialog(
+            activity = this,
+            title = "Receipt Completed",
+            message = "Receipt Completed Successfully.",
+            detail = shipmentNo
+        ) { goBackToReceiptList() }.show()
+    }
+
+    private fun goBackToReceiptList() {
+        startActivity(
+            Intent(this, Receipt::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
+        finish()
     }
 
     private fun render(bales: List<ReceiptDetailEntity>) {
@@ -128,7 +181,6 @@ class ReceiptSummary : AppCompatActivity() {
             Toast.makeText(this, "No bales to complete", Toast.LENGTH_SHORT).show()
             return
         }
-        // old rule: "Please Do Receipt for all Bales !!!"
         if (received < total) {
             Toast.makeText(this, "Please do receipt for all bales", Toast.LENGTH_LONG).show()
             return
@@ -144,8 +196,7 @@ class ReceiptSummary : AppCompatActivity() {
                 "Qty" to txtTotQty.text.toString()
             )
         ) {
-            // TODO (next step): header post + complete API + SignalR completion event
-            // viewModel.completeReceipt(shipmentNo, ...)
+            viewModel.completeReceipt(shipmentNo)
         }.show()
     }
 }
