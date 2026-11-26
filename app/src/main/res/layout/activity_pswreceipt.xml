@@ -140,7 +140,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORG : P72"
+                    android:text="ORG :"
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -168,7 +168,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date : 07-09-2026"
+                    android:text="Date :"
                     android:textColor="#DCB765"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -310,6 +310,17 @@
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="20dp"
+            android:text="No PSW receipts pending.\nPlease try again later."
+            android:textColor="#5A4630"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 
@@ -350,23 +361,6 @@
             android:textStyle="bold" />
 
         <!-- Create Header -->
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_createHeader"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/dashboard_create_button"
-            android:backgroundTint="@null"
-            android:elevation="6dp"
-            android:text="Create Header"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            android:visibility="invisible"
-            android:textStyle="bold" />
 
         <!-- Back -->
 

@@ -18,6 +18,8 @@ import com.united.digitaldispatch.Receipt.models.ReceiptBaleListResponse
 import com.united.digitaldispatch.Receipt.models.ReceiptHeaderListResponse
 import com.united.digitaldispatch.Receipt.models.ReceiptUploadRequest
 import com.united.digitaldispatch.Receipt.models.ReceiptUploadResponse
+import com.united.digitaldispatch.PSWReceipt.models.PswReceiptHeaderListResponse
+import com.united.digitaldispatch.PSWReceipt.models.PswReceiptBaleListResponse
 import okhttp3.ResponseBody
 
 
@@ -149,5 +151,17 @@ interface ApiService {
         @Query("fromChangeId") fromChangeId: Long
     ): Response<ResponseBody>
 
+//////////////////////////////// Receipt Over ---- PSW Receipt Starts Here /////////////////////////
+
+    // PSW RECEIPT - HEADER LIST
+    @GET("PSW_Receipt/PSW_Receipt-headers")
+    suspend fun getPswReceiptHeaders(
+        @Query("recOrgnCode") recOrgnCode: String
+    ): Response<PswReceiptHeaderListResponse>
+
+    @GET("PSW_Receipt/PSW_Receipt-bales")
+    suspend fun getPswReceiptBales(
+        @Query("shipmentNo") shipmentNo: String
+    ): Response<PswReceiptBaleListResponse>
 
 }

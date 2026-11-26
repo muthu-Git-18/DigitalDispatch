@@ -3,6 +3,8 @@ package com.united.digitaldispatch.data.local
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
+import com.united.digitaldispatch.data.local.dao.PswReceiptHeaderDao
+import com.united.digitaldispatch.data.local.entity.PswReceiptHeaderEntity
 import androidx.room.RoomDatabase
 import com.united.digitaldispatch.Dispatch.models.BaleDetail
 import com.united.digitaldispatch.PSWDispatch.PSWDispatchDetails
@@ -30,6 +32,8 @@ import com.united.digitaldispatch.data.local.entity.PSWDispatchDetailEntity
 import com.united.digitaldispatch.data.local.entity.PswDispatchHeaderEntity
 import com.united.digitaldispatch.data.local.entity.ReceiptDetailEntity
 import com.united.digitaldispatch.data.local.entity.ReceiptHeaderEntity
+import com.united.digitaldispatch.data.local.dao.PswReceiptDetailDao
+import com.united.digitaldispatch.data.local.entity.PswReceiptDetailEntity
 
 @Database(
     entities = [OrganizationEntity::class,
@@ -44,7 +48,9 @@ import com.united.digitaldispatch.data.local.entity.ReceiptHeaderEntity
                 DispatchSyncState::class,
                 PSWDispatchDetailEntity::class,
                 ReceiptHeaderEntity::class,
-                ReceiptDetailEntity::class
+                ReceiptDetailEntity::class,
+                PswReceiptHeaderEntity::class,
+                PswReceiptDetailEntity::class
                ],
     version = 4,
     exportSchema = false
@@ -72,6 +78,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun receiptHeaderDao(): ReceiptHeaderDao
 
     abstract fun receiptDetailDao(): ReceiptDetailDao
+
+    abstract fun pswReceiptHeaderDao(): PswReceiptHeaderDao
+
+    abstract fun pswReceiptDetailDao(): PswReceiptDetailDao
 
     companion object {
         @Volatile

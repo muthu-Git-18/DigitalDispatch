@@ -332,7 +332,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/grade"
+                    android:id="@+id/txt_grade"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#2E353A"
@@ -412,6 +412,13 @@
 
             </LinearLayout>
 
+
+            <LinearLayout
+                android:id="@+id/ll_weightContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -451,6 +458,7 @@
                     android:textSize="13sp" />
 
             </FrameLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -480,11 +488,11 @@
 
 
             <LinearLayout
+                android:id="@+id/ll_weightedBales"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="5dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
@@ -517,6 +525,19 @@
             android:layout_weight="1"
             android:gravity="bottom|end"
             android:paddingTop="8dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_save"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/dashboard_proceed_button1"
+                android:backgroundTint="@null"
+                android:text="Save"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_clear"
